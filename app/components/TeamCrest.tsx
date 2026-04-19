@@ -84,7 +84,7 @@ export function TeamCrest({
   if (showLogo) {
     return (
       <img
-        src={logoUrl}
+        src={logoUrl ?? undefined}
         alt={`${name} crest`}
         className={cn(dims, "object-contain drop-shadow-sm", className)}
         onError={() => {
