@@ -1,6 +1,13 @@
-# Predicty Foot
+<p align="center">
+  <img src="public/icon.png" alt="Logo" width="200">
+</p>
 
-Predicty Foot is a Next.js 16 app that combines live bookmaker odds with AI-generated football predictions. It focuses on Europe’s top leagues and presents averaged head-to-head odds, match insights, and value-driven betting analysis in a clean dark UI.
+<h1 align="center">Predicty Foot</h1>
+
+<p align="center">
+   <strong>Predicty Foot is a Next.js 16 app that combines live bookmaker odds with AI-generated football predictions.</strong><br>
+   <em>It focuses on Europe’s top leagues and presents averaged head-to-head odds, match insights, and value-driven betting analysis in a clean dark UI.</em>
+</p>
 
 ## Features
 
@@ -104,7 +111,3 @@ Before deploying, make sure these environment variables are configured in your h
 - [The Odds API Docs](https://the-odds-api.com/liveapi/guides/v4/)
 - [Google AI Docs](https://ai.google.dev/gemini-api/docs)
 - [Next.js Deployment Docs](https://nextjs.org/docs/app/building-your-application/deploying)
-
-## License
-
-This project does not currently declare a license.
