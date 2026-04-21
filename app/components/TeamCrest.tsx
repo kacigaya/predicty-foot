@@ -81,7 +81,7 @@ export function TeamCrest({
     );
   }
 
-  if (showLogo) {
+  if (showLogo && logoUrl) {
     return (
       <img
         src={logoUrl ?? undefined}

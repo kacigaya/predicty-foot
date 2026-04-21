@@ -3,13 +3,7 @@
 import { useState, useTransition } from "react";
 import { format } from "date-fns";
 import { toast } from "sonner";
-import {
-  Loader2,
-  Target,
-  BarChart3,
-  Info,
-  ChevronRight,
-} from "lucide-react";
+import { Loader2, Target, Info, ChevronRight } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -71,60 +65,55 @@ export function PredictionModal({
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="sm:max-w-3xl">
           <DialogHeader>
-            <DialogTitle>Match Analysis</DialogTitle>
             <DialogDescription>
               {event.sport_title} · {format(new Date(event.commence_time), "EEE d MMM yyyy · HH:mm")}
             </DialogDescription>
+            <DialogTitle>
+              The <em>matter</em> at hand.
+            </DialogTitle>
           </DialogHeader>
 
-          {/* Teams face-off */}
-          <div className="flex items-center justify-center gap-4 py-4">
-            <div className="flex flex-col items-center gap-2 flex-1">
-              <TeamCrest name={event.home_team} size="lg" />
-              <p className="text-center text-sm font-semibold text-white">
-                {event.home_team}
-              </p>
-              <p className="text-xs text-[#7c8494]">
-                {formatOdds(avg.home)} · {(implied.home * 100).toFixed(0)}%
-              </p>
-            </div>
-            <div className="flex flex-col items-center gap-1 text-[#4a5060] px-2">
-              <span className="text-xs font-bold uppercase tracking-widest">VS</span>
-              <span className="text-[10px]">
+          {/* Teams face-off — editorial */}
+          <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-4 py-6 border-b border-[#2a2a25]">
+            <TeamPanel
+              name={event.home_team}
+              odds={formatOdds(avg.home)}
+              prob={implied.home}
+              side="left"
+            />
+            <div className="flex flex-col items-center gap-2 px-2">
+              <span className="font-display text-4xl italic text-[#4a4a44]">/</span>
+              <span className="font-mono text-[9px] uppercase tracking-[0.2em] text-[#6a6a63]">
                 Draw {formatOdds(avg.draw)}
               </span>
             </div>
-            <div className="flex flex-col items-center gap-2 flex-1">
-              <TeamCrest name={event.away_team} size="lg" />
-              <p className="text-center text-sm font-semibold text-white">
-                {event.away_team}
-              </p>
-              <p className="text-xs text-[#7c8494]">
-                {formatOdds(avg.away)} · {(implied.away * 100).toFixed(0)}%
-              </p>
-            </div>
+            <TeamPanel
+              name={event.away_team}
+              odds={formatOdds(avg.away)}
+              prob={implied.away}
+              side="right"
+            />
           </div>
 
           {!prediction && !isPending && (
-            <div className="space-y-4">
-              <div className="rounded-lg border border-[#252d3a] bg-[#1e2430] p-4 text-sm text-[#7c8494]">
-                <p className="flex items-start gap-2">
-                  <Info className="mt-0.5 size-4 shrink-0 text-sky-400" />
-                  <span>
-                    Generate a prediction combining live market consensus from{" "}
-                    <strong className="text-[#e4e8ee]">{event.bookmakers.length}</strong> bookmakers
-                    with AI match analysis.
-                  </span>
-                </p>
+            <div className="space-y-5 pt-5">
+              <div className="border border-[#2a2a25] bg-[#0a0a09] p-4">
+                <div className="flex items-start gap-3">
+                  <Info className="mt-0.5 size-4 shrink-0 text-[#7dc4ff]" />
+                  <p className="text-sm leading-relaxed text-[#c7c2b4]">
+                    A reading combining live market consensus from{" "}
+                    <span className="font-mono text-[#d8ff3e]">{event.bookmakers.length}</span> bookmakers with Gemini match analysis.
+                  </p>
+                </div>
               </div>
               <Button onClick={onGenerate} size="lg" className="w-full">
-                Generate Prediction
+                Commission Prediction
                 <ChevronRight className="size-4" />
               </Button>
               <div>
-                <h4 className="mb-2 text-xs font-semibold uppercase tracking-wider text-[#7c8494]">
-                  All bookmaker odds
-                </h4>
+                <p className="mb-3 font-mono text-[10px] uppercase tracking-[0.2em] text-[#6a6a63]">
+                  § Market ledger — all bookmakers
+                </p>
                 <OddsTable event={event} />
               </div>
             </div>
@@ -141,8 +130,11 @@ export function PredictionModal({
           )}
 
           {error && (
-            <div className="rounded-lg border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-300">
-              {error}
+            <div className="border border-[#ff5b36]/30 bg-[#ff5b36]/5 p-4">
+              <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#ff5b36] mb-1">
+                Error
+              </p>
+              <p className="text-sm text-[#f4efe2]">{error}</p>
             </div>
           )}
         </DialogContent>
@@ -151,15 +143,48 @@ export function PredictionModal({
   );
 }
 
+function TeamPanel({
+  name,
+  odds,
+  prob,
+  side,
+}: {
+  name: string;
+  odds: string;
+  prob: number;
+  side: "left" | "right";
+}) {
+  return (
+    <div
+      className={`flex flex-col items-center gap-3 ${
+        side === "left" ? "sm:items-end" : "sm:items-start"
+      }`}
+    >
+      <TeamCrest name={name} size="lg" />
+      <p className="text-center font-display text-2xl italic text-[#f4efe2] leading-tight">
+        {name}
+      </p>
+      <div className="flex items-baseline gap-2">
+        <span className="font-mono text-lg text-[#d8ff3e] tabular-nums">{odds}</span>
+        <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#6a6a63]">
+          {(prob * 100).toFixed(0)}%
+        </span>
+      </div>
+    </div>
+  );
+}
+
 function PredictionSkeleton() {
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 pt-6">
       <div className="flex items-center justify-center gap-3 py-6">
-        <Loader2 className="size-5 animate-spin text-amber-500" />
-        <span className="text-sm text-[#7c8494]">Analysing the match…</span>
+        <Loader2 className="size-5 animate-spin text-[#d8ff3e]" />
+        <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#7b7a70]">
+          Reading the match…
+        </span>
       </div>
-      <div className="h-24 animate-pulse rounded-lg bg-[#1e2430]" />
-      <div className="h-24 animate-pulse rounded-lg bg-[#1e2430]" />
+      <div className="h-24 animate-pulse bg-[#1c1c19]" />
+      <div className="h-24 animate-pulse bg-[#1c1c19]" />
     </div>
   );
 }
@@ -183,81 +208,84 @@ function PredictionView({
       : "warning";
 
   return (
-    <div className="space-y-4">
-      {/* Result card */}
-      <div className="rounded-lg border border-amber-600/20 bg-amber-500/5 p-5">
-        <div className="flex items-center justify-between mb-3">
-          <Badge variant={confidenceTone} className="gap-1">
-            {prediction.confidence}% confidence
-          </Badge>
+    <div className="space-y-6 pt-6">
+      {/* Verdict — headline treatment */}
+      <div className="relative border-l-2 border-[#d8ff3e] pl-6 py-2">
+        <div className="flex items-center gap-2 mb-3">
+          <Badge variant={confidenceTone}>{prediction.confidence}% conviction</Badge>
           {prediction.confidence >= 75 && (
-            <Badge variant="success" className="gap-1">
-              High conviction
-            </Badge>
+            <Badge variant="success">High ·</Badge>
           )}
         </div>
-        <div>
-          <p className="text-[11px] uppercase tracking-wider text-[#7c8494]">
-            Predicted result
-          </p>
-          <p className="text-xl font-bold text-white mt-0.5">
-            {prediction.winner === "draw"
-              ? "Draw"
-              : `${prediction.winnerTeam} win`}
-          </p>
-          <p className="text-2xl font-black tabular-nums text-amber-400 mt-1">
-            {event.home_team.split(" ")[0]} {prediction.score.home} – {prediction.score.away}{" "}
-            {event.away_team.split(" ")[0]}
-          </p>
-        </div>
+        <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#6a6a63]">
+          The Verdict
+        </p>
+        <p className="mt-1 font-display text-3xl italic text-[#f4efe2]">
+          {prediction.winner === "draw"
+            ? "A share of the spoils."
+            : `${prediction.winnerTeam} take it.`}
+        </p>
+        <p className="mt-3 font-mono text-5xl tabular-nums text-[#d8ff3e]">
+          {prediction.score.home}<span className="text-[#4a4a44] mx-3">—</span>{prediction.score.away}
+        </p>
+        <p className="mt-2 font-mono text-[10px] uppercase tracking-[0.2em] text-[#6a6a63]">
+          {event.home_team.split(" ")[0]} · {event.away_team.split(" ")[0]}
+        </p>
       </div>
 
       {/* Probabilities */}
-      <div className="grid gap-3 sm:grid-cols-3">
-        <ProbRow
-          label="Home"
-          team={event.home_team}
-          ai={prediction.aiProbabilities.home}
-          market={implied.home}
-        />
-        <ProbRow
-          label="Draw"
-          team="Draw"
-          ai={prediction.aiProbabilities.draw}
-          market={implied.draw}
-        />
-        <ProbRow
-          label="Away"
-          team={event.away_team}
-          ai={prediction.aiProbabilities.away}
-          market={implied.away}
-        />
+      <div>
+        <p className="mb-3 font-mono text-[10px] uppercase tracking-[0.2em] text-[#6a6a63]">
+          § Probability — AI vs Market
+        </p>
+        <div className="grid gap-px bg-[#2a2a25] border border-[#2a2a25] sm:grid-cols-3">
+          <ProbRow
+            label="Home"
+            team={event.home_team}
+            ai={prediction.aiProbabilities.home}
+            market={implied.home}
+          />
+          <ProbRow
+            label="Draw"
+            team="Draw"
+            ai={prediction.aiProbabilities.draw}
+            market={implied.draw}
+          />
+          <ProbRow
+            label="Away"
+            team={event.away_team}
+            ai={prediction.aiProbabilities.away}
+            market={implied.away}
+          />
+        </div>
       </div>
 
       {/* Reasoning */}
-      <div className="rounded-lg border border-[#252d3a] bg-[#1e2430] p-4">
-        <h4 className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-[#7c8494]">
-          <BarChart3 className="size-3.5" /> Reasoning
-        </h4>
-        <p className="text-sm leading-relaxed text-[#e4e8ee]">{prediction.reasoning}</p>
+      <div>
+        <p className="mb-3 font-mono text-[10px] uppercase tracking-[0.2em] text-[#6a6a63]">
+          § Reasoning
+        </p>
+        <p className="font-display text-xl italic leading-relaxed text-[#c7c2b4] first-letter:font-display first-letter:text-5xl first-letter:float-left first-letter:mr-2 first-letter:mt-1 first-letter:text-[#d8ff3e] first-letter:not-italic">
+          {prediction.reasoning}
+        </p>
       </div>
 
       {/* Key factors */}
       {prediction.keyFactors.length > 0 && (
-        <div className="rounded-lg border border-[#252d3a] bg-[#1e2430] p-4">
-          <h4 className="mb-3 text-xs font-semibold uppercase tracking-wider text-[#7c8494]">
-            Key factors
-          </h4>
-          <ul className="grid gap-2 sm:grid-cols-2">
+        <div>
+          <p className="mb-3 font-mono text-[10px] uppercase tracking-[0.2em] text-[#6a6a63]">
+            § Key factors
+          </p>
+          <ul className="grid gap-px bg-[#2a2a25] border border-[#2a2a25] sm:grid-cols-2">
             {prediction.keyFactors.map((f, i) => (
               <li
                 key={i}
-                className="flex items-start gap-2 rounded-md bg-[#0e1117] p-2 text-xs text-[#e4e8ee]"
+                className="flex items-start gap-3 bg-[#0a0a09] p-4 text-sm text-[#f4efe2]"
               >
-                <span className="mt-0.5 flex size-4 shrink-0 items-center justify-center rounded text-[10px] font-bold text-amber-500 bg-amber-500/10">
-                  {i + 1}
+                <span className="font-mono text-xs tabular-nums text-[#d8ff3e]">
+                  {String(i + 1).padStart(2, "0")}
                 </span>
-                {f}
+                <span className="leading-relaxed">{f}</span>
               </li>
             ))}
           </ul>
@@ -265,25 +293,30 @@ function PredictionView({
       )}
 
       {/* Value bet */}
-      <div className="rounded-lg border border-amber-600/20 bg-amber-500/5 p-4">
-        <h4 className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-amber-400">
-          <Target className="size-3.5" /> Suggested value bet
-        </h4>
-        <p className="text-sm font-semibold text-white">
+      <div className="border border-[#d8ff3e]/30 bg-[#d8ff3e]/[0.04] p-5">
+        <div className="flex items-center gap-2 mb-3">
+          <Target className="size-3.5 text-[#d8ff3e]" />
+          <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#d8ff3e]">
+            The play
+          </p>
+        </div>
+        <p className="font-display text-2xl italic text-[#f4efe2]">
           {prediction.suggestedBet.market} — {prediction.suggestedBet.pick}
         </p>
         {prediction.suggestedBet.rationale && (
-          <p className="mt-1 text-xs text-[#7c8494]">{prediction.suggestedBet.rationale}</p>
+          <p className="mt-2 text-sm leading-relaxed text-[#7b7a70]">
+            {prediction.suggestedBet.rationale}
+          </p>
         )}
       </div>
 
       {/* Footer */}
-      <div className="flex flex-wrap items-center justify-between gap-2 text-[11px] text-[#4a5060]">
-        <span>
-          Generated {format(new Date(prediction.generatedAt), "HH:mm:ss")}
+      <div className="flex flex-wrap items-center justify-between gap-2 border-t border-[#2a2a25] pt-4">
+        <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#4a4a44]">
+          Filed {format(new Date(prediction.generatedAt), "HH:mm:ss")}
         </span>
         <Button variant="secondary" size="sm" onClick={onRegenerate}>
-          Regenerate
+          Recompose
         </Button>
       </div>
     </div>
@@ -303,23 +336,25 @@ function ProbRow({
 }) {
   const edge = ai - market;
   const edgeTone =
-    edge > 0.03 ? "text-green-400" : edge < -0.03 ? "text-red-400" : "text-[#4a5060]";
+    edge > 0.03 ? "text-[#d8ff3e]" : edge < -0.03 ? "text-[#ff5b36]" : "text-[#4a4a44]";
 
   return (
-    <div className="rounded-lg border border-[#252d3a] bg-[#0e1117] p-3">
-      <div className="flex items-center justify-between text-[11px]">
-        <span className="font-semibold text-[#e4e8ee]">{label}</span>
-        <span className={edgeTone}>
+    <div className="bg-[#0a0a09] p-4">
+      <div className="flex items-center justify-between">
+        <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#f4efe2]">
+          {label}
+        </span>
+        <span className={`font-mono text-[10px] tabular-nums ${edgeTone}`}>
           {edge > 0 ? "+" : ""}
           {(edge * 100).toFixed(1)}%
         </span>
       </div>
-      <p className="mt-1 truncate text-xs text-[#4a5060]" title={team}>
+      <p className="mt-1 truncate text-xs text-[#6a6a63]" title={team}>
         {team}
       </p>
-      <div className="mt-2 space-y-1.5">
-        <ProbBar label="AI" value={ai} tone="amber" />
-        <ProbBar label="Market" value={market} tone="zinc" />
+      <div className="mt-3 space-y-2">
+        <ProbBar label="AI" value={ai} tone="accent" />
+        <ProbBar label="Mkt" value={market} tone="mute" />
       </div>
     </div>
   );
@@ -332,22 +367,22 @@ function ProbBar({
 }: {
   label: string;
   value: number;
-  tone: "amber" | "zinc";
+  tone: "accent" | "mute";
 }) {
   const pct = Math.max(0, Math.min(100, value * 100));
-  const color = tone === "amber" ? "bg-amber-500" : "bg-[#4a5060]";
+  const color = tone === "accent" ? "bg-[#d8ff3e]" : "bg-[#4a4a44]";
   return (
     <div className="flex items-center gap-2">
-      <span className="w-12 text-[10px] uppercase tracking-wider text-[#4a5060]">
+      <span className="w-8 font-mono text-[9px] uppercase tracking-[0.2em] text-[#4a4a44]">
         {label}
       </span>
-      <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-[#1e2430]">
+      <div className="h-[3px] flex-1 overflow-hidden bg-[#1c1c19]">
         <div
           className={`h-full ${color} transition-all`}
           style={{ width: `${pct}%` }}
         />
       </div>
-      <span className="w-10 text-right text-[10px] tabular-nums text-[#7c8494]">
+      <span className="w-10 text-right font-mono text-[10px] tabular-nums text-[#7b7a70]">
         {pct.toFixed(0)}%
       </span>
     </div>

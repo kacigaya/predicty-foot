@@ -3,16 +3,16 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/app/lib/utils";
 
 const badgeVariants = cva(
-  "inline-flex items-center rounded-md border px-2 py-0.5 text-[11px] font-medium",
+  "inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.18em] px-2 py-1 border",
   {
     variants: {
       variant: {
-        default: "border-amber-600/30 bg-amber-500/10 text-amber-400",
-        muted: "border-[#252d3a] bg-[#1e2430] text-[#7c8494]",
-        warning: "border-orange-600/30 bg-orange-500/10 text-orange-400",
-        danger: "border-red-600/30 bg-red-500/10 text-red-400",
-        info: "border-sky-600/30 bg-sky-500/10 text-sky-400",
-        success: "border-green-600/30 bg-green-500/10 text-green-400",
+        default: "border-[#d8ff3e]/40 bg-[#d8ff3e]/10 text-[#d8ff3e]",
+        muted: "border-[#2a2a25] bg-[#1c1c19] text-[#7b7a70]",
+        warning: "border-[#ff5b36]/40 bg-[#ff5b36]/10 text-[#ff5b36]",
+        danger: "border-[#ff5b36]/40 bg-[#ff5b36]/10 text-[#ff5b36]",
+        info: "border-[#7dc4ff]/40 bg-[#7dc4ff]/10 text-[#7dc4ff]",
+        success: "border-[#d8ff3e]/40 bg-[#d8ff3e]/10 text-[#d8ff3e]",
       },
     },
     defaultVariants: { variant: "default" },

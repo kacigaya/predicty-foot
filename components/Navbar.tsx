@@ -2,30 +2,37 @@ import Link from "next/link";
 
 export function Navbar() {
   return (
-    <header className="sticky top-0 z-40 w-full border-b border-[#252d3a] bg-[#0e1117]/95 backdrop-blur-sm">
-      <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6">
-        <Link href="/" className="flex items-center gap-2.5 group">
-          <div className="flex size-8 items-center justify-center rounded-lg bg-amber-500 text-black">
-            <svg viewBox="0 0 24 24" fill="none" className="size-4" aria-hidden>
-              <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2" />
-              <polygon
-                points="12,7 15.5,10 14,14.5 10,14.5 8.5,10"
-                fill="currentColor"
-                fillOpacity="0.6"
-              />
-            </svg>
-          </div>
-          <div className="leading-tight">
-            <p className="text-sm font-bold tracking-tight text-white">
-              Predicty<span className="text-amber-400 ml-0.5">Foot</span>
-            </p>
-          </div>
+    <header className="sticky top-0 z-40 w-full border-b border-[#2a2a25] bg-[#0a0a09]/85 backdrop-blur-md">
+      {/* Top meta bar */}
+      <div className="border-b border-[#2a2a25]/60">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-1.5 sm:px-6">
+          <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#6a6a63]">
+            Vol.01 · Edition Live
+          </p>
+          <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#6a6a63]">
+            Europe · 2026 Season
+          </p>
+        </div>
+      </div>
+
+      <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6">
+        <Link href="/" className="flex items-baseline gap-2 group">
+          <span className="font-display text-2xl italic text-[#f4efe2] tracking-tight leading-none">
+            Predicty
+          </span>
+          <span className="font-display text-2xl text-[#d8ff3e] leading-none">
+            Foot
+          </span>
+          <span
+            aria-hidden
+            className="ml-1 h-1.5 w-1.5 rounded-full bg-[#d8ff3e] shadow-[0_0_10px_#d8ff3e] animate-pulse"
+          />
         </Link>
 
-        <nav className="hidden items-center gap-1 text-sm sm:flex">
+        <nav className="hidden items-center gap-8 sm:flex">
           <Link
             href="/"
-            className="rounded-md px-3 py-1.5 text-[#7c8494] hover:bg-[#1e2430] hover:text-white transition-colors"
+            className="font-mono text-[11px] uppercase tracking-[0.18em] text-[#f4efe2] hover:text-[#d8ff3e] transition-colors"
           >
             Matches
           </Link>
@@ -33,9 +40,17 @@ export function Navbar() {
             href="https://the-odds-api.com/liveapi/guides/v4/"
             target="_blank"
             rel="noopener noreferrer"
-            className="rounded-md px-3 py-1.5 text-[#7c8494] hover:bg-[#1e2430] hover:text-white transition-colors"
+            className="font-mono text-[11px] uppercase tracking-[0.18em] text-[#7b7a70] hover:text-[#f4efe2] transition-colors"
           >
-            Odds API
+            Odds&nbsp;API
+          </a>
+          <a
+            href="https://ai.google.dev"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-mono text-[11px] uppercase tracking-[0.18em] text-[#7b7a70] hover:text-[#f4efe2] transition-colors"
+          >
+            Gemini
           </a>
         </nav>
       </div>

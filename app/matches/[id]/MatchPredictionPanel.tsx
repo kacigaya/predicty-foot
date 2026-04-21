@@ -44,89 +44,101 @@ export function MatchPredictionPanel({
   const implied = impliedProbabilities(avg);
 
   return (
-    <div className="rounded-xl border border-[#252d3a] bg-[#1e2430] p-5">
+    <div className="border border-[#2a2a25] bg-[#131311] p-6">
       {confettiKey > 0 && <Confetti trigger={confettiKey} />}
 
-      <div className="flex items-center justify-between gap-4">
+      <div className="flex items-start justify-between gap-4 border-b border-[#2a2a25] pb-5">
         <div>
-          <h3 className="text-sm font-semibold text-white">AI Prediction</h3>
-          <p className="text-xs text-[#7c8494]">
-            Fuses live market consensus with AI match analysis.
+          <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#d8ff3e]">
+            § Gemini reading
+          </p>
+          <p className="mt-1 font-display text-2xl italic text-[#f4efe2]">
+            Commission a prediction.
           </p>
         </div>
         <Button onClick={onGenerate} disabled={isPending} size="default">
           {isPending ? (
-            <Loader2 className="size-4 animate-spin" />
+            <Loader2 className="size-3.5 animate-spin" />
           ) : (
-            <ChevronRight className="size-4" />
+            <ChevronRight className="size-3.5" />
           )}
-          {prediction ? "Regenerate" : "Generate"}
+          {prediction ? "Recompose" : "Generate"}
         </Button>
       </div>
 
       {isPending && (
-        <p className="mt-4 text-sm text-[#7c8494]">
-          Analysing form, H2H, and {event.bookmakers.length} bookmakers…
+        <p className="mt-5 font-mono text-[10px] uppercase tracking-[0.2em] text-[#7b7a70]">
+          Reading form · H2H · {event.bookmakers.length} bookmakers…
         </p>
       )}
 
       {error && !isPending && (
-        <p className="mt-4 rounded-lg border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-300">
-          {error}
-        </p>
+        <div className="mt-5 border border-[#ff5b36]/30 bg-[#ff5b36]/5 p-4">
+          <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#ff5b36]">
+            Error
+          </p>
+          <p className="mt-1 text-sm text-[#f4efe2]">{error}</p>
+        </div>
       )}
 
       {prediction && !isPending && (
-        <div className="mt-5 space-y-4">
-          <div className="rounded-lg border border-amber-600/20 bg-amber-500/5 p-4">
-            <p className="text-[10px] uppercase tracking-wider text-[#7c8494]">Predicted result</p>
-            <p className="mt-1 text-lg font-bold text-white">
-              {prediction.winner === "draw" ? "Draw" : `${prediction.winnerTeam} win`}
+        <div className="mt-6 space-y-6">
+          <div className="border-l-2 border-[#d8ff3e] pl-5 py-1">
+            <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#6a6a63]">
+              The Verdict · {prediction.confidence}% conviction
             </p>
-            <p className="text-3xl font-black tabular-nums text-amber-400">
-              {prediction.score.home} – {prediction.score.away}
+            <p className="mt-1 font-display text-2xl italic text-[#f4efe2]">
+              {prediction.winner === "draw" ? "A share of the spoils." : `${prediction.winnerTeam} take it.`}
             </p>
-            <p className="mt-2 text-xs text-[#7c8494]">
-              Confidence: <span className="font-semibold text-white">{prediction.confidence}%</span>
+            <p className="mt-3 font-mono text-4xl tabular-nums text-[#d8ff3e]">
+              {prediction.score.home}
+              <span className="mx-3 text-[#4a4a44]">—</span>
+              {prediction.score.away}
             </p>
           </div>
 
-          <div className="grid gap-2 sm:grid-cols-3">
+          <div className="grid gap-px bg-[#2a2a25] border border-[#2a2a25] sm:grid-cols-3">
             <ProbMini label="Home" ai={prediction.aiProbabilities.home} market={implied.home} />
             <ProbMini label="Draw" ai={prediction.aiProbabilities.draw} market={implied.draw} />
             <ProbMini label="Away" ai={prediction.aiProbabilities.away} market={implied.away} />
           </div>
 
-          <div className="rounded-lg border border-[#252d3a] bg-[#0e1117] p-3 text-sm leading-relaxed text-[#e4e8ee]">
+          <p className="font-display text-lg italic leading-relaxed text-[#c7c2b4]">
             {prediction.reasoning}
-          </div>
+          </p>
 
           {prediction.keyFactors.length > 0 && (
-            <ul className="grid gap-1.5 sm:grid-cols-2">
+            <ul className="grid gap-px bg-[#2a2a25] border border-[#2a2a25] sm:grid-cols-2">
               {prediction.keyFactors.map((f, i) => (
                 <li
                   key={i}
-                  className="flex items-start gap-2 rounded-md bg-[#0e1117] p-2 text-xs text-[#e4e8ee]"
+                  className="flex items-start gap-3 bg-[#0a0a09] p-4 text-sm text-[#f4efe2]"
                 >
-                  <span className="mt-0.5 size-1.5 rounded-full bg-amber-500 shrink-0" />
-                  {f}
+                  <span className="font-mono text-xs tabular-nums text-[#d8ff3e]">
+                    {String(i + 1).padStart(2, "0")}
+                  </span>
+                  <span className="leading-relaxed">{f}</span>
                 </li>
               ))}
             </ul>
           )}
 
-          <div className="rounded-lg border border-amber-600/20 bg-amber-500/5 p-3">
-            <p className="text-[10px] uppercase tracking-wider text-amber-400">Suggested bet</p>
-            <p className="text-sm font-semibold text-white">
+          <div className="border border-[#d8ff3e]/30 bg-[#d8ff3e]/[0.04] p-4">
+            <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#d8ff3e]">
+              The play
+            </p>
+            <p className="mt-1 font-display text-xl italic text-[#f4efe2]">
               {prediction.suggestedBet.market} — {prediction.suggestedBet.pick}
             </p>
             {prediction.suggestedBet.rationale && (
-              <p className="mt-1 text-xs text-[#7c8494]">{prediction.suggestedBet.rationale}</p>
+              <p className="mt-2 text-sm leading-relaxed text-[#7b7a70]">
+                {prediction.suggestedBet.rationale}
+              </p>
             )}
           </div>
 
-          <p className="text-[11px] text-[#4a5060]">
-            Generated {format(new Date(prediction.generatedAt), "HH:mm:ss")}
+          <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#4a4a44]">
+            Filed {format(new Date(prediction.generatedAt), "HH:mm:ss")}
           </p>
         </div>
       )}
@@ -137,21 +149,25 @@ export function MatchPredictionPanel({
 function ProbMini({ label, ai, market }: { label: string; ai: number; market: number }) {
   const edge = ai - market;
   const tone =
-    edge > 0.03 ? "text-green-400" : edge < -0.03 ? "text-red-400" : "text-[#4a5060]";
+    edge > 0.03 ? "text-[#d8ff3e]" : edge < -0.03 ? "text-[#ff5b36]" : "text-[#4a4a44]";
   return (
-    <div className="rounded-lg border border-[#252d3a] bg-[#0e1117] p-2.5">
+    <div className="bg-[#0a0a09] p-4">
       <div className="flex items-baseline justify-between">
-        <span className="text-[10px] font-semibold uppercase tracking-wider text-[#7c8494]">
+        <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#f4efe2]">
           {label}
         </span>
-        <span className={`text-[10px] ${tone}`}>
+        <span className={`font-mono text-[10px] tabular-nums ${tone}`}>
           {edge > 0 ? "+" : ""}
           {(edge * 100).toFixed(1)}%
         </span>
       </div>
-      <div className="mt-1.5 flex items-end justify-between text-xs">
-        <span className="text-amber-400">AI {(ai * 100).toFixed(0)}%</span>
-        <span className="text-[#4a5060]">Mkt {(market * 100).toFixed(0)}%</span>
+      <div className="mt-2 flex items-end justify-between">
+        <span className="font-mono text-lg tabular-nums text-[#d8ff3e]">
+          {(ai * 100).toFixed(0)}%
+        </span>
+        <span className="font-mono text-xs tabular-nums text-[#4a4a44]">
+          mkt {(market * 100).toFixed(0)}%
+        </span>
       </div>
     </div>
   );

@@ -1,30 +1,53 @@
 export function Footer() {
   return (
-    <footer className="border-t border-[#252d3a] mt-16">
-      <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6">
-        <div className="flex flex-col items-center justify-between gap-3 text-xs text-[#7c8494] sm:flex-row">
-          <p>
-            &copy; {new Date().getFullYear()} Predicty Foot &middot; Odds from{" "}
+    <footer className="border-t border-[#2a2a25] mt-24">
+      <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
+        <div className="grid gap-8 sm:grid-cols-3">
+          <div>
+            <p className="font-display text-3xl italic text-[#f4efe2] leading-none">
+              Predicty<span className="text-[#d8ff3e] not-italic">Foot</span>
+            </p>
+            <p className="mt-3 font-mono text-[10px] uppercase tracking-[0.2em] text-[#6a6a63]">
+              Where numbers meet intuition
+            </p>
+          </div>
+          <div className="space-y-2">
+            <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#6a6a63]">
+              Data
+            </p>
             <a
               href="https://the-odds-api.com"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-[#e4e8ee] hover:text-amber-400 transition-colors"
+              className="block text-sm text-[#f4efe2] hover:text-[#d8ff3e] transition-colors"
             >
-              The Odds API
-            </a>{" "}
-            &middot; Predictions by{" "}
+              The Odds API →
+            </a>
             <a
               href="https://ai.google.dev"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-[#e4e8ee] hover:text-amber-400 transition-colors"
+              className="block text-sm text-[#f4efe2] hover:text-[#d8ff3e] transition-colors"
             >
-              Google Gemini
+              Google Gemini →
             </a>
+          </div>
+          <div className="space-y-2">
+            <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#6a6a63]">
+              Notice
+            </p>
+            <p className="text-xs leading-relaxed text-[#7b7a70]">
+              For entertainment only. Predictions are probabilistic, never guaranteed. Please gamble responsibly.
+            </p>
+          </div>
+        </div>
+
+        <div className="mt-10 flex items-center justify-between border-t border-[#2a2a25] pt-5">
+          <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#4a4a44]">
+            © {new Date().getFullYear()} · No. {new Date().getMonth() + 1}
           </p>
-          <p className="text-[#4a5060]">
-            For entertainment. Please gamble responsibly.
+          <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#4a4a44]">
+            Made in the margin
           </p>
         </div>
       </div>

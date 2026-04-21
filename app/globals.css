@@ -2,22 +2,27 @@
 @import "tw-animate-css";
 
 @theme inline {
-  --font-heading: var(--font-bricolage);
-  --font-sans: var(--font-dm-sans);
-  --color-background: #0e1117;
-  --color-foreground: #e4e8ee;
-  --color-accent: #e5a83b;
-  --color-accent-hover: #f0c04e;
-  --color-surface: #161b22;
-  --color-elevated: #1e2430;
-  --color-border: #252d3a;
-  --color-muted: #7c8494;
-  --color-dim: #4a5060;
+  --font-display: var(--font-instrument-serif);
+  --font-sans: var(--font-geist);
+  --font-mono: var(--font-jetbrains);
+
+  --color-background: #0a0a09;
+  --color-foreground: #f4efe2;
+  --color-paper: #f4efe2;
+  --color-ink: #0a0a09;
+  --color-accent: #d8ff3e;
+  --color-accent-hover: #e4ff66;
+  --color-vermilion: #ff5b36;
+  --color-surface: #131311;
+  --color-elevated: #1c1c19;
+  --color-line: #2a2a25;
+  --color-muted: #7b7a70;
+  --color-dim: #4a4a44;
 }
 
 :root {
-  --background: #0e1117;
-  --foreground: #e4e8ee;
+  --background: #0a0a09;
+  --foreground: #f4efe2;
   color-scheme: dark;
 }
 
@@ -26,10 +31,43 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans), system-ui, sans-serif;
+  font-feature-settings: "ss01", "cv11";
+}
+
+/* Grain overlay — filters through everything */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 100;
+  opacity: 0.06;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml;utf8,<svg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.96  0 0 0 0 0.94  0 0 0 0 0.88  0 0 0 0.7 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+}
+
+/* Vignette — softens edges of the page */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 99;
+  background: radial-gradient(ellipse at center, transparent 40%, rgba(0, 0, 0, 0.35) 100%);
 }
 
 h1, h2, h3, h4, h5, h6 {
-  font-family: var(--font-heading), var(--font-sans), system-ui, sans-serif;
+  font-family: var(--font-display), serif;
+  font-weight: 400;
+  letter-spacing: -0.02em;
+}
+
+.font-display {
+  font-family: var(--font-display), serif;
+}
+
+.font-mono {
+  font-family: var(--font-mono), ui-monospace, monospace;
 }
 
 .scrollbar-hide::-webkit-scrollbar {
@@ -43,4 +81,33 @@ h1, h2, h3, h4, h5, h6 {
 * {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* Ticker animation */
+@keyframes ticker {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+.animate-ticker {
+  animation: ticker 60s linear infinite;
+}
+
+/* Editorial rule — hairline with tick */
+.rule-tick {
+  position: relative;
+}
+.rule-tick::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1px;
+  height: 8px;
+  background: currentColor;
+}
+
+/* Selection */
+::selection {
+  background: #d8ff3e;
+  color: #0a0a09;
 }

@@ -1,18 +1,26 @@
 import type { Metadata, Viewport } from "next";
-import { Bricolage_Grotesque, DM_Sans } from "next/font/google";
+import { Instrument_Serif, Geist, JetBrains_Mono } from "next/font/google";
 import { Toaster } from "sonner";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import "./globals.css";
 
-const bricolage = Bricolage_Grotesque({
-  variable: "--font-bricolage",
+const instrumentSerif = Instrument_Serif({
+  variable: "--font-instrument-serif",
+  subsets: ["latin"],
+  weight: ["400"],
+  style: ["normal", "italic"],
+  display: "swap",
+});
+
+const geist = Geist({
+  variable: "--font-geist",
   subsets: ["latin"],
   display: "swap",
 });
 
-const dmSans = DM_Sans({
-  variable: "--font-dm-sans",
+const jetbrains = JetBrains_Mono({
+  variable: "--font-jetbrains",
   subsets: ["latin"],
   display: "swap",
 });
@@ -25,7 +33,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0e1117",
+  themeColor: "#0a0a09",
 };
 
 export default function RootLayout({
@@ -34,10 +42,10 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${bricolage.variable} ${dmSans.variable} h-full antialiased dark`}
+      className={`${instrumentSerif.variable} ${geist.variable} ${jetbrains.variable} h-full antialiased dark`}
       style={{ colorScheme: "dark" }}
     >
-      <body className="min-h-full flex flex-col bg-[#0e1117] text-[#e4e8ee] selection:bg-amber-500/25">
+      <body className="min-h-full flex flex-col bg-[#0a0a09] text-[#f4efe2] selection:bg-[#d8ff3e] selection:text-[#0a0a09]">
         <Navbar />
         <main className="flex-1">{children}</main>
         <Footer />
@@ -46,9 +54,10 @@ export default function RootLayout({
           position="bottom-right"
           toastOptions={{
             style: {
-              background: "#161b22",
-              border: "1px solid #252d3a",
-              color: "#e4e8ee",
+              background: "#131311",
+              border: "1px solid #2a2a25",
+              color: "#f4efe2",
+              fontFamily: "var(--font-geist)",
             },
           }}
         />

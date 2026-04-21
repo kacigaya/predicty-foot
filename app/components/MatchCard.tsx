@@ -2,9 +2,6 @@
 
 import { useMemo, useState } from "react";
 import { formatDistanceToNowStrict, format } from "date-fns";
-import { Calendar, Clock, ChevronRight } from "lucide-react";
-import { Card, CardContent } from "@/app/components/ui/card";
-import { Button } from "@/app/components/ui/button";
 import { TeamCrest } from "@/app/components/TeamCrest";
 import { PredictionModal } from "@/app/components/PredictionModal";
 import {
@@ -14,7 +11,7 @@ import {
   type OddsEvent,
 } from "@/app/lib/odds";
 
-export function MatchCard({ event }: { event: OddsEvent }) {
+export function MatchCard({ event, index }: { event: OddsEvent; index: number }) {
   const [open, setOpen] = useState(false);
 
   const avg = useMemo(() => averageH2HOdds(event), [event]);
@@ -28,77 +25,94 @@ export function MatchCard({ event }: { event: OddsEvent }) {
       ? "away"
       : "draw";
 
+  const num = String(index + 1).padStart(2, "0");
+
   return (
     <>
-      <Card className="group relative overflow-hidden transition-colors hover:border-[#30363d]">
-        {/* Accent stripe on left */}
-        <div className="absolute inset-y-0 left-0 w-0.5 bg-amber-500/60 opacity-0 group-hover:opacity-100 transition-opacity" />
+      <button
+        onClick={() => setOpen(true)}
+        className="group relative text-left bg-[#0a0a09] p-6 transition-colors hover:bg-[#131311] focus:outline-none focus-visible:bg-[#131311]"
+      >
+        {/* Index number watermark */}
+        <span
+          aria-hidden
+          className="pointer-events-none absolute right-4 top-4 font-display text-6xl italic text-[#1c1c19] group-hover:text-[#2a2a25] transition-colors"
+        >
+          {num}
+        </span>
 
-        <CardContent className="p-5 space-y-4">
-          {/* Date & countdown */}
-          <div className="flex items-center justify-between text-[11px] text-[#7c8494]">
-            <div className="flex items-center gap-1.5">
-              <Calendar className="size-3" />
-              <span>{format(kickoff, "EEE d MMM · HH:mm")}</span>
-            </div>
-            <div className="flex items-center gap-1 text-amber-500">
-              <Clock className="size-3" />
-              <span>{formatDistanceToNowStrict(kickoff, { addSuffix: true })}</span>
-            </div>
+        {/* Meta row */}
+        <div className="relative flex items-center justify-between font-mono text-[10px] uppercase tracking-[0.2em] text-[#6a6a63] mb-6">
+          <span>{format(kickoff, "EEE d MMM · HH:mm")}</span>
+          <span className="text-[#d8ff3e]">
+            {formatDistanceToNowStrict(kickoff, { addSuffix: true })}
+          </span>
+        </div>
+
+        {/* Teams — stacked editorial */}
+        <div className="relative space-y-3 mb-6">
+          <TeamRow
+            name={event.home_team}
+            label="Home"
+            favored={favored === "home"}
+          />
+          <div className="flex items-center gap-3">
+            <span className="h-px flex-1 bg-[#2a2a25]" />
+            <span className="font-display text-xs italic text-[#4a4a44]">versus</span>
+            <span className="h-px flex-1 bg-[#2a2a25]" />
           </div>
+          <TeamRow
+            name={event.away_team}
+            label="Away"
+            favored={favored === "away"}
+          />
+        </div>
 
-          {/* Teams */}
-          <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3">
-            <div className="flex flex-col items-center gap-2 text-center">
-              <TeamCrest name={event.home_team} size="md" />
-              <p className="text-sm font-semibold text-white line-clamp-2 leading-tight">
-                {event.home_team}
-              </p>
-              {favored === "home" && (
-                <span className="text-[10px] font-medium text-amber-500 uppercase tracking-wide">
-                  Favored
-                </span>
-              )}
-            </div>
+        {/* Odds — huge tabular */}
+        <div className="relative grid grid-cols-3 border-t border-[#2a2a25]">
+          <OddCell label="1" value={formatOdds(avg.home)} highlight={favored === "home"} />
+          <OddCell label="X" value={formatOdds(avg.draw)} highlight={favored === "draw"} border />
+          <OddCell label="2" value={formatOdds(avg.away)} highlight={favored === "away"} />
+        </div>
 
-            <div className="flex flex-col items-center justify-center text-[#4a5060]">
-              <span className="text-[10px] font-bold uppercase tracking-widest">vs</span>
-            </div>
-
-            <div className="flex flex-col items-center gap-2 text-center">
-              <TeamCrest name={event.away_team} size="md" />
-              <p className="text-sm font-semibold text-white line-clamp-2 leading-tight">
-                {event.away_team}
-              </p>
-              {favored === "away" && (
-                <span className="text-[10px] font-medium text-amber-500 uppercase tracking-wide">
-                  Favored
-                </span>
-              )}
-            </div>
-          </div>
-
-          {/* Odds */}
-          <div className="grid grid-cols-3 gap-px overflow-hidden rounded-lg border border-[#252d3a] bg-[#252d3a]">
-            <OddCell label="1" value={formatOdds(avg.home)} highlight={favored === "home"} />
-            <OddCell label="X" value={formatOdds(avg.draw)} highlight={favored === "draw"} />
-            <OddCell label="2" value={formatOdds(avg.away)} highlight={favored === "away"} />
-          </div>
-
-          <Button
-            onClick={() => setOpen(true)}
-            variant="secondary"
-            className="w-full group/btn"
-            size="default"
-          >
-            Get Prediction
-            <ChevronRight className="size-3.5 transition-transform group-hover/btn:translate-x-0.5" />
-          </Button>
-        </CardContent>
-      </Card>
+        {/* CTA hint */}
+        <div className="relative mt-5 flex items-center justify-between font-mono text-[10px] uppercase tracking-[0.2em]">
+          <span className="text-[#6a6a63]">Read the analysis</span>
+          <span className="flex items-center gap-1 text-[#d8ff3e] transition-transform group-hover:translate-x-1">
+            → Open
+          </span>
+        </div>
+      </button>
 
       <PredictionModal event={event} open={open} onOpenChange={setOpen} />
     </>
+  );
+}
+
+function TeamRow({
+  name,
+  label,
+  favored,
+}: {
+  name: string;
+  label: string;
+  favored: boolean;
+}) {
+  return (
+    <div className="flex items-center gap-3">
+      <TeamCrest name={name} size="sm" />
+      <div className="min-w-0 flex-1">
+        <p className="font-mono text-[9px] uppercase tracking-[0.2em] text-[#4a4a44]">
+          {label}
+          {favored && (
+            <span className="ml-2 text-[#d8ff3e]">• favored</span>
+          )}
+        </p>
+        <p className="font-display text-xl leading-tight text-[#f4efe2] truncate">
+          {name}
+        </p>
+      </div>
+    </div>
   );
 }
 
@@ -106,23 +120,25 @@ function OddCell({
   label,
   value,
   highlight,
+  border,
 }: {
   label: string;
   value: string;
   highlight?: boolean;
+  border?: boolean;
 }) {
   return (
     <div
-      className={`flex flex-col items-center justify-center py-2.5 transition-colors ${
-        highlight ? "bg-amber-500/8" : "bg-[#0e1117]"
-      }`}
+      className={`flex flex-col items-center justify-center py-4 ${
+        border ? "border-x border-[#2a2a25]" : ""
+      } ${highlight ? "bg-[#d8ff3e]/[0.06]" : ""}`}
     >
-      <span className="text-[10px] font-medium text-[#4a5060] uppercase tracking-wider">
+      <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#4a4a44]">
         {label}
       </span>
       <span
-        className={`text-sm font-bold tabular-nums ${
-          highlight ? "text-amber-400" : "text-[#e4e8ee]"
+        className={`mt-1 font-mono text-2xl tabular-nums ${
+          highlight ? "text-[#d8ff3e]" : "text-[#f4efe2]"
         }`}
       >
         {value}

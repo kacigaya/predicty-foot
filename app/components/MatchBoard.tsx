@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useTransition } from "react";
 import { formatDistanceToNowStrict } from "date-fns";
-import { RefreshCw, AlertCircle, Clock } from "lucide-react";
+import { RefreshCw, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 import { LeagueSelector } from "@/app/components/LeagueSelector";
 import { MatchCard } from "@/app/components/MatchCard";
@@ -65,34 +65,48 @@ export function MatchBoard({
   const currentLeague = getLeague(league);
 
   return (
-    <section className="mx-auto w-full max-w-7xl px-4 py-10 sm:px-6">
-      <div className="flex flex-col gap-4 mb-6 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h2 className="text-2xl font-bold tracking-tight text-white sm:text-3xl">
-            Upcoming matches
-          </h2>
-          <p className="mt-1 text-sm text-[#7c8494]">
-            {currentLeague?.flag} {currentLeague?.name} · averaged H2H across bookmakers
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="flex items-center gap-1.5 rounded-md border border-[#252d3a] bg-[#161b22] px-3 py-1.5 text-[11px] text-[#7c8494]">
-            <Clock className="size-3" />
-            <span>Updated {updatedLabel}</span>
+    <section className="mx-auto w-full max-w-7xl px-4 py-16 sm:px-6">
+      {/* Section header — editorial */}
+      <div className="grid gap-6 sm:grid-cols-12 sm:gap-8 mb-10">
+        <div className="sm:col-span-8">
+          <div className="flex items-center gap-3 mb-4">
+            <span className="h-px w-10 bg-[#d8ff3e]" />
+            <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-[#d8ff3e]">
+              § 01 — The Fixture List
+            </p>
           </div>
-          <Button
-            size="sm"
-            variant="secondary"
-            onClick={() => load(league)}
-            disabled={isPending}
-          >
-            <RefreshCw className={isPending ? "size-3 animate-spin" : "size-3"} />
-            Refresh
-          </Button>
+          <h2 className="font-display text-5xl leading-none tracking-tight text-[#f4efe2] sm:text-6xl">
+            This week&apos;s<br />
+            <span className="italic text-[#7b7a70]">upcoming</span>
+          </h2>
+        </div>
+        <div className="sm:col-span-4 flex flex-col justify-end gap-3">
+          <div className="flex items-center justify-between border-t border-[#2a2a25] pt-3">
+            <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#6a6a63]">
+              {currentLeague?.flag} {currentLeague?.name}
+            </p>
+            <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#4a4a44]">
+              H2H avg
+            </span>
+          </div>
+          <div className="flex items-center justify-between">
+            <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#6a6a63]">
+              Updated {updatedLabel}
+            </p>
+            <Button
+              size="sm"
+              variant="secondary"
+              onClick={() => load(league)}
+              disabled={isPending}
+            >
+              <RefreshCw className={isPending ? "size-3 animate-spin" : "size-3"} />
+              Refresh
+            </Button>
+          </div>
         </div>
       </div>
 
-      <div className="mb-8">
+      <div className="mb-10">
         <LeagueSelector value={league} onChange={setLeague} />
       </div>
 
@@ -103,9 +117,9 @@ export function MatchBoard({
       ) : events.length === 0 ? (
         <EmptyState leagueName={currentLeague?.name ?? "this league"} />
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {events.map((event) => (
-            <MatchCard key={event.id} event={event} />
+        <div className="grid gap-px bg-[#2a2a25] border border-[#2a2a25] sm:grid-cols-2 lg:grid-cols-3">
+          {events.map((event, i) => (
+            <MatchCard key={event.id} event={event} index={i} />
           ))}
         </div>
       )}
@@ -115,9 +129,9 @@ export function MatchBoard({
 
 function GridSkeleton() {
   return (
-    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+    <div className="grid gap-px bg-[#2a2a25] border border-[#2a2a25] sm:grid-cols-2 lg:grid-cols-3">
       {Array.from({ length: 6 }).map((_, i) => (
-        <Skeleton key={i} className="h-72 rounded-xl" />
+        <Skeleton key={i} className="h-80 rounded-none bg-[#131311]" />
       ))}
     </div>
   );
@@ -125,9 +139,12 @@ function GridSkeleton() {
 
 function EmptyState({ leagueName }: { leagueName: string }) {
   return (
-    <div className="rounded-xl border border-[#252d3a] bg-[#161b22] p-12 text-center">
-      <p className="text-sm text-[#7c8494]">
-        No upcoming matches for {leagueName}. Try another league or come back later.
+    <div className="border border-[#2a2a25] bg-[#131311] p-16 text-center">
+      <p className="font-display text-3xl italic text-[#7b7a70]">
+        Nothing on the slate.
+      </p>
+      <p className="mt-3 font-mono text-[10px] uppercase tracking-[0.2em] text-[#6a6a63]">
+        No fixtures for {leagueName} — try another league.
       </p>
     </div>
   );
@@ -141,11 +158,16 @@ function ErrorState({
   onRetry: () => void;
 }) {
   return (
-    <div className="flex flex-col items-center gap-3 rounded-xl border border-red-500/20 bg-red-500/5 p-8 text-center">
-      <AlertCircle className="size-8 text-red-400" />
-      <p className="max-w-md text-sm text-red-300">{message}</p>
+    <div className="flex flex-col items-start gap-4 border border-[#ff5b36]/30 bg-[#ff5b36]/5 p-8">
+      <div className="flex items-center gap-3">
+        <AlertCircle className="size-5 text-[#ff5b36]" />
+        <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#ff5b36]">
+          Feed interrupted
+        </p>
+      </div>
+      <p className="font-display text-2xl italic text-[#f4efe2]">{message}</p>
       <Button size="sm" variant="secondary" onClick={onRetry}>
-        <RefreshCw className="size-3" /> Try again
+        <RefreshCw className="size-3" /> Retry
       </Button>
     </div>
   );

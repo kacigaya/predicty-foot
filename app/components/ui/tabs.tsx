@@ -13,7 +13,7 @@ export const TabsList = React.forwardRef<
   <TabsPrimitive.List
     ref={ref}
     className={cn(
-      "inline-flex items-center gap-1 rounded-lg border border-[#252d3a] bg-[#161b22] p-1 overflow-x-auto scrollbar-hide",
+      "inline-flex items-center gap-6 border-b border-[#2a2a25] overflow-x-auto scrollbar-hide w-full",
       className
     )}
     {...props}
@@ -28,7 +28,10 @@ export const TabsTrigger = React.forwardRef<
   <TabsPrimitive.Trigger
     ref={ref}
     className={cn(
-      "inline-flex items-center gap-1.5 whitespace-nowrap rounded-md px-3 py-1.5 text-xs font-medium text-[#7c8494] transition-colors hover:text-[#e4e8ee] focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-amber-500 data-[state=active]:text-black data-[state=active]:font-semibold",
+      "relative inline-flex items-center gap-2 whitespace-nowrap py-3 font-mono text-[11px] uppercase tracking-[0.18em] text-[#7b7a70] transition-colors hover:text-[#f4efe2] focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50",
+      "data-[state=active]:text-[#f4efe2]",
+      "after:absolute after:left-0 after:right-0 after:-bottom-px after:h-px after:bg-transparent after:transition-all",
+      "data-[state=active]:after:bg-[#d8ff3e] data-[state=active]:after:h-[2px]",
       className
     )}
     {...props}

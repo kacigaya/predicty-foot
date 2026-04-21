@@ -1,8 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { format } from "date-fns";
-import { ArrowLeft, Calendar, ChevronRight } from "lucide-react";
-import { Card, CardContent } from "@/app/components/ui/card";
+import { ArrowLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/app/components/ui/button";
 import { TeamCrest } from "@/app/components/TeamCrest";
 import { OddsTable } from "@/app/components/OddsTable";
@@ -38,73 +37,84 @@ export default async function MatchPage({
   const kickoff = new Date(event.commence_time);
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-10 sm:px-6">
+    <div className="mx-auto max-w-5xl px-4 py-14 sm:px-6">
       <Link
         href="/"
-        className="mb-6 inline-flex items-center gap-1 text-sm text-[#7c8494] hover:text-amber-400 transition-colors"
+        className="mb-10 inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.2em] text-[#7b7a70] hover:text-[#d8ff3e] transition-colors"
       >
-        <ArrowLeft className="size-3.5" />
-        Back to matches
+        <ArrowLeft className="size-3" />
+        Back to fixtures
       </Link>
 
-      <Card className="overflow-hidden">
-        <div className="border-b border-[#252d3a] p-6">
-          <div className="flex items-center justify-between text-xs text-[#7c8494]">
-            <span className="inline-flex items-center gap-1.5 rounded-md border border-[#252d3a] bg-[#1e2430] px-2.5 py-1">
-              {league?.flag} {league?.name ?? event.sport_title}
+      {/* Editorial masthead */}
+      <div className="border-b border-[#2a2a25] pb-10">
+        <div className="flex items-center justify-between mb-6">
+          <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-[#d8ff3e]">
+            {league?.flag} {league?.name ?? event.sport_title}
+          </p>
+          <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#6a6a63]">
+            {format(kickoff, "EEE d MMM yyyy · HH:mm")}
+          </p>
+        </div>
+
+        <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-6">
+          <div className="flex flex-col items-center gap-4 text-center">
+            <TeamCrest name={event.home_team} size="lg" />
+            <p className="font-display text-3xl italic text-[#f4efe2] leading-tight">
+              {event.home_team}
+            </p>
+            <div className="flex items-baseline gap-2">
+              <span className="font-mono text-2xl text-[#d8ff3e] tabular-nums">
+                {formatOdds(avg.home)}
+              </span>
+              <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#6a6a63]">
+                {(implied.home * 100).toFixed(0)}%
+              </span>
+            </div>
+          </div>
+          <div className="flex flex-col items-center gap-1 px-3">
+            <span className="font-display text-6xl italic text-[#4a4a44] leading-none">
+              /
             </span>
-            <span className="inline-flex items-center gap-1.5">
-              <Calendar className="size-3" />
-              {format(kickoff, "EEE d MMM yyyy · HH:mm")}
+            <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#6a6a63]">
+              Draw {formatOdds(avg.draw)}
             </span>
           </div>
-
-          <div className="mt-6 grid grid-cols-[1fr_auto_1fr] items-center gap-4">
-            <div className="flex flex-col items-center gap-3 text-center">
-              <TeamCrest name={event.home_team} size="lg" />
-              <p className="text-base font-semibold text-white">{event.home_team}</p>
-              <p className="text-xs text-[#7c8494]">
-                {formatOdds(avg.home)} · {(implied.home * 100).toFixed(0)}% implied
-              </p>
-            </div>
-            <div className="text-center">
-              <p className="text-xl font-black text-[#4a5060]">VS</p>
-              <p className="mt-1 text-[10px] uppercase tracking-widest text-[#4a5060]">
-                Draw {formatOdds(avg.draw)}
-              </p>
-            </div>
-            <div className="flex flex-col items-center gap-3 text-center">
-              <TeamCrest name={event.away_team} size="lg" />
-              <p className="text-base font-semibold text-white">{event.away_team}</p>
-              <p className="text-xs text-[#7c8494]">
-                {formatOdds(avg.away)} · {(implied.away * 100).toFixed(0)}% implied
-              </p>
+          <div className="flex flex-col items-center gap-4 text-center">
+            <TeamCrest name={event.away_team} size="lg" />
+            <p className="font-display text-3xl italic text-[#f4efe2] leading-tight">
+              {event.away_team}
+            </p>
+            <div className="flex items-baseline gap-2">
+              <span className="font-mono text-2xl text-[#d8ff3e] tabular-nums">
+                {formatOdds(avg.away)}
+              </span>
+              <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#6a6a63]">
+                {(implied.away * 100).toFixed(0)}%
+              </span>
             </div>
           </div>
         </div>
+      </div>
 
-        <CardContent className="space-y-8 p-6">
-          <MatchPredictionPanel eventId={event.id} sportKey={sportKey} event={event} />
+      <div className="space-y-10 py-10">
+        <MatchPredictionPanel eventId={event.id} sportKey={sportKey} event={event} />
 
-          <div>
-            <h3 className="mb-3 text-sm font-semibold text-white">
-              All bookmaker odds
-            </h3>
-            <OddsTable event={event} />
-            <p className="mt-2 text-[11px] text-[#4a5060]">
-              {event.bookmakers.length} bookmakers · best price highlighted
-            </p>
-          </div>
+        <div>
+          <p className="mb-4 font-mono text-[10px] uppercase tracking-[0.2em] text-[#6a6a63]">
+            § Market ledger — {event.bookmakers.length} bookmakers
+          </p>
+          <OddsTable event={event} />
+        </div>
 
-          <div className="flex justify-end">
-            <Button variant="secondary" asChild>
-              <Link href="/">
-                Browse more matches <ChevronRight className="size-4" />
-              </Link>
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+        <div className="flex justify-end">
+          <Button variant="secondary" asChild>
+            <Link href="/">
+              More fixtures <ChevronRight className="size-4" />
+            </Link>
+          </Button>
+        </div>
+      </div>
     </div>
   );
 }
