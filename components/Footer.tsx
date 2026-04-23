@@ -11,26 +11,44 @@ export function Footer() {
               Where numbers meet intuition
             </p>
           </div>
-          <div className="space-y-2">
-            <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#6a6a63]">
-              Data
-            </p>
-            <a
-              href="https://the-odds-api.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="block text-sm text-[#f4efe2] hover:text-[#d8ff3e] transition-colors"
-            >
-              The Odds API →
-            </a>
-            <a
-              href="https://ai.google.dev"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="block text-sm text-[#f4efe2] hover:text-[#d8ff3e] transition-colors"
-            >
-              Google Gemini →
-            </a>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#6a6a63]">
+                Data
+              </p>
+              <a
+                href="https://the-odds-api.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block text-sm text-[#f4efe2] hover:text-[#d8ff3e] transition-colors"
+              >
+                The Odds API →
+              </a>
+              <a
+                href="https://ai.google.dev"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block text-sm text-[#f4efe2] hover:text-[#d8ff3e] transition-colors"
+              >
+                Google Gemini →
+              </a>
+            </div>
+            <div className="space-y-2">
+              <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#6a6a63]">
+                Project
+              </p>
+              <a
+                href="https://github.com/kacigaya"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block text-sm text-[#f4efe2] hover:text-[#d8ff3e] transition-colors"
+              >
+                Github @kacigaya →
+              </a>
+              <p className="text-[10px] uppercase tracking-[0.1em] text-[#4a4a44]">
+                Open Source project
+              </p>
+            </div>
           </div>
           <div className="space-y-2">
             <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#6a6a63]">

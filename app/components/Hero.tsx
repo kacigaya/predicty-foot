@@ -9,14 +9,6 @@ export function Hero() {
       />
 
       <div className="relative mx-auto max-w-7xl px-4 pt-20 pb-16 sm:px-6 sm:pt-28 sm:pb-20">
-        {/* Category tag */}
-        <div className="mb-10 flex items-center gap-4">
-          <span className="h-px w-12 bg-[#d8ff3e]" />
-          <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-[#d8ff3e]">
-            The Saturday Briefing · Issue 042
-          </p>
-        </div>
-
         {/* Mast headline */}
         <h1 className="font-display text-[56px] leading-[0.95] tracking-tight text-[#f4efe2] sm:text-[88px] lg:text-[128px]">
           Odds, read like<br />
@@ -33,18 +25,10 @@ export function Hero() {
           </span>
         </h1>
 
-        <div className="mt-12 grid gap-12 sm:grid-cols-12 sm:gap-8">
-          <div className="sm:col-span-5 sm:col-start-1">
-            <p className="text-lg leading-relaxed text-[#c7c2b4] sm:text-xl">
-              Live market consensus from Europe&apos;s top flights, fused with Gemini&apos;s match reading. Scorelines, conviction, value — served cold.
-            </p>
-          </div>
-
-          <div className="sm:col-span-6 sm:col-start-7 grid grid-cols-3 gap-6 border-t border-[#2a2a25] pt-6">
-            <Stat index="01" label="Feed" value="Live" />
-            <Stat index="02" label="Lens" value="Gemini" />
-            <Stat index="03" label="Angle" value="Value" />
-          </div>
+        <div className="mt-12 max-w-2xl">
+          <p className="text-lg leading-relaxed text-[#c7c2b4] sm:text-xl">
+            Live market consensus from Europe&apos;s top flights, fused with Gemini&apos;s match reading. Scorelines, conviction, value — served cold.
+          </p>
         </div>
       </div>
 
@@ -66,25 +50,6 @@ export function Hero() {
         </div>
       </div>
     </section>
-  );
-}
-
-function Stat({
-  index,
-  label,
-  value,
-}: {
-  index: string;
-  label: string;
-  value: string;
-}) {
-  return (
-    <div>
-      <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#4a4a44]">
-        {index} / {label}
-      </p>
-      <p className="mt-1 font-display text-2xl text-[#f4efe2]">{value}</p>
-    </div>
   );
 }
 

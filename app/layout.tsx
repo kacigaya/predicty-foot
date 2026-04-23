@@ -59,6 +59,8 @@ export default async function RootLayout({
             style: {
               background: "#131311",
               border: "1px solid #2a2a25",
+              borderLeft: "2px solid #d8ff3e",
+              borderRadius: "0px",
               color: "#f4efe2",
               fontFamily: "var(--font-geist)",
             },

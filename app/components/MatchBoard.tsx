@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState, useTransition } from "react";
+import { useEffect, useState, useTransition, useCallback } from "react";
 import { formatDistanceToNowStrict } from "date-fns";
-import { RefreshCw, AlertCircle } from "lucide-react";
+import { RefreshCw, AlertCircle, ChevronDown } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/app/lib/utils";
 import { LeagueSelector } from "@/app/components/LeagueSelector";
@@ -28,6 +28,9 @@ export function MatchBoard({
   const [fetchedAt, setFetchedAt] = useState(initialFetchedAt);
   const [updatedLabel, setUpdatedLabel] = useState("just now");
   const [isPending, startTransition] = useTransition();
+  const [visibleCount, setVisibleCount] = useState(6);
+
+  const BATCH_SIZE = 6;
 
   useEffect(() => {
     const updateLabel = () => {
@@ -44,6 +47,7 @@ export function MatchBoard({
   }, [fetchedAt]);
 
   const load = (key: string) => {
+    setVisibleCount(BATCH_SIZE);
     startTransition(async () => {
       const result = await getOddsAction(key);
       if (!result.ok) {
@@ -58,10 +62,19 @@ export function MatchBoard({
     });
   };
 
-  useEffect(() => {
-    if (league === DEFAULT_LEAGUE_KEY) return;
-    load(league);
-  }, [league]);
+  const changeLeague = (key: string) => {
+    setLeague(key);
+    if (key !== DEFAULT_LEAGUE_KEY) {
+      load(key);
+    }
+  };
+
+  const showMore = useCallback(() => {
+    setVisibleCount((prev) => prev + BATCH_SIZE);
+  }, []);
+
+  const visibleEvents = events.slice(0, visibleCount);
+  const hasMore = visibleCount < events.length;
 
   const currentLeague = getLeague(league);
 
@@ -108,7 +121,7 @@ export function MatchBoard({
       </div>
 
       <div className="mb-10">
-        <LeagueSelector value={league} onChange={setLeague} />
+        <LeagueSelector value={league} onChange={changeLeague} />
       </div>
 
       {error ? (
@@ -118,21 +131,32 @@ export function MatchBoard({
       ) : events.length === 0 ? (
         <EmptyState leagueName={currentLeague?.name ?? "this league"} />
       ) : (
-        <div className="grid gap-px bg-[#2a2a25] border border-[#2a2a25] sm:grid-cols-2 lg:grid-cols-3">
-          {events.map((event, i) => (
-            <MatchCard key={event.id} event={event} index={i} />
-          ))}
-          {/* Fill remaining slots to avoid background bleed */}
-          {events.length % 3 !== 0 && (
-            <div className={cn(
-              "bg-[#0a0a09] hidden lg:block",
-              events.length % 3 === 1 ? "col-span-2" : "col-span-1"
-            )} />
+        <>
+          <div className="grid gap-px bg-[#2a2a25] border border-[#2a2a25] sm:grid-cols-2 lg:grid-cols-3">
+            {visibleEvents.map((event, i) => (
+              <MatchCard key={event.id} event={event} index={i} />
+            ))}
+            {/* Fill remaining slots to avoid background bleed */}
+            {visibleEvents.length % 3 !== 0 && (
+              <div className={cn(
+                "bg-[#0a0a09] hidden lg:block",
+                visibleEvents.length % 3 === 1 ? "col-span-2" : "col-span-1"
+              )} />
+            )}
+            {visibleEvents.length % 2 !== 0 && (
+              <div className="bg-[#0a0a09] hidden sm:block lg:hidden" />
+            )}
+          </div>
+
+          {hasMore && (
+            <div className="flex justify-center mt-8">
+              <Button variant="secondary" size="lg" onClick={showMore}>
+                <ChevronDown className="size-4" />
+                Show more ({events.length - visibleCount} remaining)
+              </Button>
+            </div>
           )}
-          {events.length % 2 !== 0 && (
-            <div className="bg-[#0a0a09] hidden sm:block lg:hidden" />
-          )}
-        </div>
+        </>
       )}
     </section>
   );
