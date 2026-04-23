@@ -4,6 +4,7 @@ import { useEffect, useState, useTransition } from "react";
 import { formatDistanceToNowStrict } from "date-fns";
 import { RefreshCw, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
+import { cn } from "@/app/lib/utils";
 import { LeagueSelector } from "@/app/components/LeagueSelector";
 import { MatchCard } from "@/app/components/MatchCard";
 import { Skeleton } from "@/app/components/ui/skeleton";
@@ -121,6 +122,16 @@ export function MatchBoard({
           {events.map((event, i) => (
             <MatchCard key={event.id} event={event} index={i} />
           ))}
+          {/* Fill remaining slots to avoid background bleed */}
+          {events.length % 3 !== 0 && (
+            <div className={cn(
+              "bg-[#0a0a09] hidden lg:block",
+              events.length % 3 === 1 ? "col-span-2" : "col-span-1"
+            )} />
+          )}
+          {events.length % 2 !== 0 && (
+            <div className="bg-[#0a0a09] hidden sm:block lg:hidden" />
+          )}
         </div>
       )}
     </section>

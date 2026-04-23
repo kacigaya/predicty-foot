@@ -99,7 +99,7 @@ export function PredictionModal({
             <div className="space-y-5 pt-5">
               <div className="border border-[#2a2a25] bg-[#0a0a09] p-4">
                 <div className="flex items-start gap-3">
-                  <Info className="mt-0.5 size-4 shrink-0 text-[#7dc4ff]" />
+                  <Info className="mt-0.5 size-4 shrink-0 text-[#d8ff3e]" />
                   <p className="text-sm leading-relaxed text-[#c7c2b4]">
                     A reading combining live market consensus from{" "}
                     <span className="font-mono text-[#d8ff3e]">{event.bookmakers.length}</span> bookmakers with Gemini match analysis.
@@ -110,7 +110,7 @@ export function PredictionModal({
                 Commission Prediction
                 <ChevronRight className="size-4" />
               </Button>
-              <div>
+              <div className="border-t border-[#2a2a25] pt-6">
                 <p className="mb-3 font-mono text-[10px] uppercase tracking-[0.2em] text-[#6a6a63]">
                   § Market ledger — all bookmakers
                 </p>

@@ -34,21 +34,24 @@ export const DialogContent = React.forwardRef<
     <DialogPrimitive.Content
       ref={ref}
       className={cn(
-        "fixed left-1/2 top-1/2 z-50 w-[95vw] max-w-2xl -translate-x-1/2 -translate-y-1/2 border border-[#2a2a25] bg-[#131311] p-7 shadow-[0_40px_80px_rgba(0,0,0,0.5)]",
-        "max-h-[90vh] overflow-y-auto",
+        "fixed left-1/2 top-1/2 z-50 w-[95vw] max-w-2xl -translate-x-1/2 -translate-y-1/2 border border-[#2a2a25] bg-[#131311] shadow-[0_40px_80px_rgba(0,0,0,0.5)]",
+        "max-h-[90vh] overflow-hidden flex flex-col",
         "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95",
         className
       )}
       {...props}
     >
       {/* Corner ticks — editorial frame */}
-      <span aria-hidden className="absolute left-0 top-0 h-3 w-3 border-l border-t border-[#d8ff3e]" />
-      <span aria-hidden className="absolute right-0 top-0 h-3 w-3 border-r border-t border-[#d8ff3e]" />
-      <span aria-hidden className="absolute left-0 bottom-0 h-3 w-3 border-l border-b border-[#d8ff3e]" />
-      <span aria-hidden className="absolute right-0 bottom-0 h-3 w-3 border-r border-b border-[#d8ff3e]" />
+      <span aria-hidden className="absolute left-0 top-0 h-3 w-3 border-l border-t border-[#d8ff3e] z-10" />
+      <span aria-hidden className="absolute right-0 top-0 h-3 w-3 border-r border-t border-[#d8ff3e] z-10" />
+      <span aria-hidden className="absolute left-0 bottom-0 h-3 w-3 border-l border-b border-[#d8ff3e] z-10" />
+      <span aria-hidden className="absolute right-0 bottom-0 h-3 w-3 border-r border-b border-[#d8ff3e] z-10" />
 
-      {children}
-      <DialogPrimitive.Close className="absolute right-5 top-5 p-1 text-[#7b7a70] hover:text-[#d8ff3e] transition-colors focus:outline-none">
+      <div className="overflow-y-auto p-7 flex-1">
+        {children}
+      </div>
+
+      <DialogPrimitive.Close className="absolute right-5 top-5 p-1 text-[#7b7a70] hover:text-[#d8ff3e] transition-colors focus:outline-none z-20">
         <X className="size-4" />
         <span className="sr-only">Close</span>
       </DialogPrimitive.Close>

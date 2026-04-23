@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Instrument_Serif, Geist, JetBrains_Mono } from "next/font/google";
+import { connection } from "next/server";
 import { Toaster } from "sonner";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
@@ -36,9 +37,11 @@ export const viewport: Viewport = {
   themeColor: "#0a0a09",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
+  await connection();
+
   return (
     <html
       lang="en"
