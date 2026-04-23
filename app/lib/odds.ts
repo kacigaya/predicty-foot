@@ -57,7 +57,16 @@ function assertApiKey(): string {
 }
 
 const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
+const MAX_CACHE_ENTRIES = 32;
 const oddsCache = new Map<string, { data: OddsEvent[]; ts: number }>();
+
+function pruneOddsCache(): void {
+  if (oddsCache.size <= MAX_CACHE_ENTRIES) return;
+  const entries = [...oddsCache.entries()].sort((a, b) => a[1].ts - b[1].ts);
+  for (const [key] of entries.slice(0, oddsCache.size - MAX_CACHE_ENTRIES)) {
+    oddsCache.delete(key);
+  }
+}
 
 export async function fetchOdds(
   sportKey: string,
@@ -93,6 +102,7 @@ export async function fetchOdds(
 
   const events = (await res.json()) as OddsEvent[];
   oddsCache.set(sportKey, { data: events, ts: Date.now() });
+  pruneOddsCache();
   return events;
 }
 

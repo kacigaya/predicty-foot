@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useState } from "react";
 import { cn, teamInitials, teamColor } from "@/app/lib/utils";
 
@@ -67,6 +68,12 @@ export function TeamCrest({
     lg: "size-14",
   }[size];
 
+  const pixelSize = {
+    sm: 28,
+    md: 40,
+    lg: 56,
+  }[size];
+
   const showLogo = Boolean(logoUrl);
 
   if (loading) {
@@ -83,15 +90,16 @@ export function TeamCrest({
 
   if (showLogo && logoUrl) {
     return (
-      <img
-        src={logoUrl ?? undefined}
+      <Image
+        src={logoUrl}
         alt={`${name} crest`}
+        width={pixelSize}
+        height={pixelSize}
         className={cn(dims, "object-contain drop-shadow-sm", className)}
         onError={() => {
           logoCache.set(name, { url: null, ts: Date.now() });
           setResolved({ name, done: true, url: null });
         }}
-        loading="lazy"
       />
     );
   }

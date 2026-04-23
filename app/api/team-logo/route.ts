@@ -1,11 +1,21 @@
 import { NextRequest, NextResponse } from "next/server";
+import { createInMemoryRateLimiter } from "@/app/lib/rate-limit";
 
 type CacheEntry = { url: string | null; ts: number };
+
 const cache = new Map<string, CacheEntry>();
+
 const POSITIVE_TTL_MS = 24 * 60 * 60 * 1000;
 const NEGATIVE_TTL_MS = 60 * 1000;
 const POSITIVE_CACHE_CONTROL = "public, max-age=86400, s-maxage=86400";
 const NEGATIVE_CACHE_CONTROL = "public, max-age=60, s-maxage=60";
+const MAX_NAME_LENGTH = 80;
+const MAX_CACHE_ENTRIES = 500;
+
+const teamLogoRateLimiter = createInMemoryRateLimiter({
+  windowMs: 60 * 1000,
+  maxRequests: 60,
+});
 
 const ALIASES: Record<string, string> = {
   "Paris Saint Germain": "Paris SG",
@@ -178,8 +188,38 @@ function cacheControlFor(url: string | null): string {
   return url ? POSITIVE_CACHE_CONTROL : NEGATIVE_CACHE_CONTROL;
 }
 
+function validateTeamName(name: string): boolean {
+  return (
+    name.length > 0 &&
+    name.length <= MAX_NAME_LENGTH &&
+    /^[\p{L}\p{N} .,'’()\-/]+$/u.test(name)
+  );
+}
+
+function pruneOldestCacheEntries(): void {
+  if (cache.size <= MAX_CACHE_ENTRIES) return;
+  const entries = [...cache.entries()].sort((a, b) => a[1].ts - b[1].ts);
+  for (const [key] of entries.slice(0, cache.size - MAX_CACHE_ENTRIES)) {
+    cache.delete(key);
+  }
+}
+
 function staticBadgeFor(name: string): string | null {
   return STATIC_BADGES[normalizeTeamName(name)] ?? null;
+}
+
+function isAllowedBadgeUrl(value: string): boolean {
+  try {
+    const url = new URL(value);
+    return (
+      url.protocol === "https:" &&
+      ["www.thesportsdb.com", "r2.thesportsdb.com", "upload.wikimedia.org"].includes(
+        url.hostname,
+      )
+    );
+  } catch {
+    return false;
+  }
 }
 
 function candidatesFor(name: string): string[] {
@@ -200,7 +240,8 @@ async function searchOnce(query: string): Promise<string | null> {
   const data = await res.json();
   const teams: Array<Record<string, string>> = data?.teams ?? [];
   const soccer = teams.find((t) => t.strSport === "Soccer");
-  return soccer?.strBadge ?? null;
+  const badge = soccer?.strBadge ?? null;
+  return badge && isAllowedBadgeUrl(badge) ? badge : null;
 }
 
 async function resolveBadge(name: string): Promise<string | null> {
@@ -229,10 +270,20 @@ async function resolveBadge(name: string): Promise<string | null> {
 }
 
 export async function GET(req: NextRequest) {
+  if (teamLogoRateLimiter.check(req)) {
+    return NextResponse.json(
+      { url: null, error: "Too many requests." },
+      { status: 429, headers: { "Cache-Control": NEGATIVE_CACHE_CONTROL } },
+    );
+  }
+
   const rawName = req.nextUrl.searchParams.get("name");
   const name = rawName?.trim() ?? "";
-  if (!name) {
-    return NextResponse.json({ url: null }, { status: 400 });
+  if (!validateTeamName(name)) {
+    return NextResponse.json(
+      { url: null, error: "Invalid team name." },
+      { status: 400, headers: { "Cache-Control": NEGATIVE_CACHE_CONTROL } },
+    );
   }
 
   const cacheKey = normalizeTeamName(name);
@@ -250,9 +301,10 @@ export async function GET(req: NextRequest) {
     }
   }
 
-  const badge =
-    (await resolveBadge(name)) ?? staticBadgeFor(name) ?? null;
+  const badge = (await resolveBadge(name)) ?? staticBadgeFor(name) ?? null;
   cache.set(cacheKey, { url: badge, ts: now });
+  pruneOldestCacheEntries();
+
   return NextResponse.json(
     { url: badge },
     { headers: { "Cache-Control": cacheControlFor(badge) } },
