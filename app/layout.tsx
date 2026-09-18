@@ -1,9 +1,9 @@
 import type { Metadata, Viewport } from "next";
 import { Instrument_Serif, Geist, JetBrains_Mono } from "next/font/google";
 import { connection } from "next/server";
-import { Toaster } from "sonner";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
+import { SITE_DESCRIPTION, SITE_NAME, SITE_URL } from "@/app/site";
 import "./globals.css";
 
 const instrumentSerif = Instrument_Serif({
@@ -27,10 +27,28 @@ const jetbrains = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Predicty Foot — Soccer Predictions",
-  description:
-    "Live bookmaker odds fused with AI analysis. Scorelines, confidence, and value bets for Europe's top leagues.",
-  keywords: ["football", "soccer", "predictions", "odds", "betting"],
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: SITE_NAME,
+    template: `%s · ${SITE_NAME}`,
+  },
+  description: SITE_DESCRIPTION,
+  alternates: { canonical: "/" },
+  openGraph: {
+    type: "website",
+    siteName: SITE_NAME,
+    title: SITE_NAME,
+    description: SITE_DESCRIPTION,
+    url: "/",
+    images: [{ url: "/icon.png", width: 1694, height: 1694, alt: `${SITE_NAME} logo` }],
+  },
+  twitter: {
+    card: "summary",
+    title: SITE_NAME,
+    description: SITE_DESCRIPTION,
+    images: ["/icon.png"],
+  },
+  icons: { apple: "/icon.png" },
 };
 
 export const viewport: Viewport = {
@@ -46,26 +64,11 @@ export default async function RootLayout({
     <html
       lang="en"
       className={`${instrumentSerif.variable} ${geist.variable} ${jetbrains.variable} h-full antialiased dark`}
-      style={{ colorScheme: "dark" }}
     >
-      <body className="min-h-full flex flex-col bg-[#0a0a09] text-[#f4efe2] selection:bg-[#d8ff3e] selection:text-[#0a0a09]">
+      <body className="flex min-h-full flex-col bg-background text-foreground">
         <Navbar />
         <main className="flex-1">{children}</main>
         <Footer />
-        <Toaster
-          theme="dark"
-          position="bottom-right"
-          toastOptions={{
-            style: {
-              background: "#131311",
-              border: "1px solid #2a2a25",
-              borderLeft: "2px solid #d8ff3e",
-              borderRadius: "0px",
-              color: "#f4efe2",
-              fontFamily: "var(--font-geist)",
-            },
-          }}
-        />
       </body>
     </html>
   );

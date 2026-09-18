@@ -13,13 +13,3 @@ export function teamInitials(name: string): string {
     .map((w) => w[0]?.toUpperCase() ?? "")
     .join("");
 }
-
-// Deterministic vibrant color from team name
-export function teamColor(name: string): string {
-  let hash = 0;
-  for (let i = 0; i < name.length; i++) {
-    hash = (hash * 31 + name.charCodeAt(i)) >>> 0;
-  }
-  const hue = hash % 360;
-  return `hsl(${hue} 70% 45%)`;
-}

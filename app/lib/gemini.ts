@@ -38,7 +38,7 @@ function summarizeBookmakers(event: OddsEvent): string {
     const h2h = bm.markets.find((m) => m.key === "h2h");
     if (!h2h) continue;
     const parts = h2h.outcomes.map((o) => `${o.name}: ${o.price.toFixed(2)}`);
-    rows.push(`- ${bm.title} — ${parts.join(" | ")}`);
+    rows.push(`- ${bm.title}: ${parts.join(" | ")}`);
   }
   return rows.join("\n") || "No bookmaker data available.";
 }

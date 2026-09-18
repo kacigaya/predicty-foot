@@ -1,9 +1,12 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
+import Link from "next/link";
 import { format } from "date-fns";
 import { TeamCrest } from "@/app/components/TeamCrest";
 import { PredictionModal } from "@/app/components/PredictionModal";
+import { Button } from "@/app/components/ui/button";
+import { cn } from "@/app/lib/utils";
 import {
   averageH2HOdds,
   formatOdds,
@@ -11,9 +14,7 @@ import {
   type OddsEvent,
 } from "@/app/lib/odds";
 
-export function MatchCard({ event }: { event: OddsEvent; index: number }) {
-  const [open, setOpen] = useState(false);
-
+export function MatchCard({ event }: { event: OddsEvent }) {
   const avg = useMemo(() => averageH2HOdds(event), [event]);
   const implied = useMemo(() => impliedProbabilities(avg), [avg]);
   const kickoff = new Date(event.commence_time);
@@ -26,37 +27,36 @@ export function MatchCard({ event }: { event: OddsEvent; index: number }) {
       : "draw";
 
   return (
-    <>
-      <button
-        onClick={() => setOpen(true)}
-        className="group relative text-left bg-[#0a0a09] p-5 transition-colors hover:bg-[#131311] focus:outline-none focus-visible:bg-[#131311]"
+    <article className="flex flex-1 flex-col rounded-sm border border-line bg-surface p-5">
+      <time
+        dateTime={event.commence_time}
+        className="mb-4 font-mono text-xs uppercase tabular-nums text-muted"
       >
-        {/* Meta */}
-        <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#6a6a63] mb-4">
-          {format(kickoff, "EEE d MMM · HH:mm")}
-        </p>
+        {format(kickoff, "EEE d MMM, HH:mm")}
+      </time>
 
-        {/* Teams */}
-        <div className="space-y-2 mb-4">
-          <TeamRow name={event.home_team} favored={favored === "home"} />
-          <TeamRow name={event.away_team} favored={favored === "away"} />
-        </div>
+      <div className="mb-4 space-y-2">
+        <TeamRow name={event.home_team} favored={favored === "home"} />
+        <TeamRow name={event.away_team} favored={favored === "away"} />
+      </div>
 
-        {/* Odds */}
-        <div className="grid grid-cols-3 border-t border-[#2a2a25] pt-3">
-          <OddCell label="1" value={formatOdds(avg.home)} highlight={favored === "home"} />
-          <OddCell label="X" value={formatOdds(avg.draw)} highlight={favored === "draw"} />
-          <OddCell label="2" value={formatOdds(avg.away)} highlight={favored === "away"} />
-        </div>
+      <dl className="grid grid-cols-3 border-t border-line pt-3">
+        <OddCell label="1" title="Home win" value={formatOdds(avg.home)} highlight={favored === "home"} />
+        <OddCell label="X" title="Draw" value={formatOdds(avg.draw)} highlight={favored === "draw"} />
+        <OddCell label="2" title="Away win" value={formatOdds(avg.away)} highlight={favored === "away"} />
+      </dl>
 
-        {/* CTA */}
-        <p className="mt-3 font-mono text-[10px] uppercase tracking-[0.2em] text-[#4a4a44] group-hover:text-[#d8ff3e] transition-colors text-right">
-          →
-        </p>
-      </button>
-
-      <PredictionModal event={event} open={open} onOpenChange={setOpen} />
-    </>
+      <div className="mt-4 flex items-center justify-between gap-2">
+        <PredictionModal event={event}>
+          <Button size="sm">Predict</Button>
+        </PredictionModal>
+        <Button size="sm" variant="ghost" asChild>
+          <Link href={`/matches/${encodeURIComponent(event.id)}?sport=${encodeURIComponent(event.sport_key)}`}>
+            Details
+          </Link>
+        </Button>
+      </div>
+    </article>
   );
 }
 
@@ -64,11 +64,13 @@ function TeamRow({ name, favored }: { name: string; favored: boolean }) {
   return (
     <div className="flex items-center gap-2.5">
       <TeamCrest name={name} size="sm" />
-      <p className="font-display text-lg leading-tight text-[#f4efe2] truncate flex-1">
+      <p className="flex-1 truncate text-base leading-tight text-foreground" title={name}>
         {name}
       </p>
       {favored && (
-        <span className="size-1.5 rounded-full bg-[#d8ff3e] shrink-0" />
+        <span className="size-1.5 shrink-0 rounded-full bg-accent">
+          <span className="sr-only">Market favourite</span>
+        </span>
       )}
     </div>
   );
@@ -76,25 +78,30 @@ function TeamRow({ name, favored }: { name: string; favored: boolean }) {
 
 function OddCell({
   label,
+  title,
   value,
   highlight,
 }: {
   label: string;
+  title: string;
   value: string;
   highlight?: boolean;
 }) {
   return (
     <div className="flex flex-col items-center py-2">
-      <span className="font-mono text-[9px] uppercase tracking-[0.2em] text-[#4a4a44]">
-        {label}
-      </span>
-      <span
-        className={`font-mono text-xl tabular-nums ${
-          highlight ? "text-[#d8ff3e]" : "text-[#f4efe2]"
-        }`}
+      <dt className="font-mono text-xs uppercase text-muted">
+        <abbr title={title} className="no-underline">
+          {label}
+        </abbr>
+      </dt>
+      <dd
+        className={cn(
+          "font-mono text-xl tabular-nums",
+          highlight ? "text-accent" : "text-foreground"
+        )}
       >
         {value}
-      </span>
+      </dd>
     </div>
   );
 }

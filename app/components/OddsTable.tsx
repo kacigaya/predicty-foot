@@ -1,54 +1,56 @@
 import { format } from "date-fns";
+import { cn } from "@/app/lib/utils";
 import { formatOdds, type OddsEvent } from "@/app/lib/odds";
 
 export function OddsTable({ event }: { event: OddsEvent }) {
   if (event.bookmakers.length === 0) {
     return (
-      <div className="border border-[#2a2a25] bg-[#0a0a09] p-6 text-center font-mono text-[10px] uppercase tracking-[0.2em] text-[#7b7a70]">
+      <p className="border border-line bg-background p-6 text-center font-mono text-xs uppercase text-muted">
         No bookmaker odds available.
-      </div>
+      </p>
     );
   }
 
+  // Best price per outcome across bookmakers; a bettor compares down a column.
+  const rows = event.bookmakers.flatMap((bm) => {
+    const h2h = bm.markets.find((m) => m.key === "h2h");
+    if (!h2h) return [];
+    const price = (name: string) => h2h.outcomes.find((o) => o.name === name)?.price;
+    return [{ bm, home: price(event.home_team), draw: price("Draw"), away: price(event.away_team) }];
+  });
+  const best = {
+    home: Math.max(0, ...rows.map((r) => r.home ?? 0)),
+    draw: Math.max(0, ...rows.map((r) => r.draw ?? 0)),
+    away: Math.max(0, ...rows.map((r) => r.away ?? 0)),
+  };
+
   return (
-    <div className="overflow-hidden border border-[#2a2a25]">
+    <div className="overflow-x-auto border border-line">
       <table className="w-full text-sm">
+        <caption className="sr-only">Head-to-head odds by bookmaker</caption>
         <thead>
-          <tr className="border-b border-[#2a2a25] bg-[#1c1c19] font-mono text-[10px] uppercase tracking-[0.2em] text-[#6a6a63]">
-            <th className="px-4 py-3 text-left font-normal">Bookmaker</th>
-            <th className="px-4 py-3 text-right font-normal">1</th>
-            <th className="px-4 py-3 text-right font-normal">X</th>
-            <th className="px-4 py-3 text-right font-normal">2</th>
-            <th className="px-4 py-3 text-right font-normal">Upd.</th>
+          <tr className="border-b border-line bg-elevated font-mono text-xs uppercase text-muted">
+            <th scope="col" className="px-4 py-3 text-left font-normal">Bookmaker</th>
+            <th scope="col" className="px-4 py-3 text-right font-normal"><abbr title="Home win" className="no-underline">1</abbr></th>
+            <th scope="col" className="px-4 py-3 text-right font-normal"><abbr title="Draw" className="no-underline">X</abbr></th>
+            <th scope="col" className="px-4 py-3 text-right font-normal"><abbr title="Away win" className="no-underline">2</abbr></th>
+            <th scope="col" className="px-4 py-3 text-right font-normal">Updated</th>
           </tr>
         </thead>
         <tbody>
-          {event.bookmakers.map((bm) => {
-            const h2h = bm.markets.find((m) => m.key === "h2h");
-            if (!h2h) return null;
-            const home = h2h.outcomes.find((o) => o.name === event.home_team)?.price;
-            const away = h2h.outcomes.find((o) => o.name === event.away_team)?.price;
-            const draw = h2h.outcomes.find((o) => o.name === "Draw")?.price;
-
-            const best = Math.max(home ?? 0, draw ?? 0, away ?? 0);
-
-            return (
-              <tr
-                key={bm.key}
-                className="border-b border-[#2a2a25]/50 last:border-0 bg-[#0a0a09] hover:bg-[#131311] transition-colors"
-              >
-                <td className="px-4 py-3 font-display text-base italic text-[#f4efe2]">
-                  {bm.title}
-                </td>
-                <td className={cellClass(home, best)}>{formatOdds(home)}</td>
-                <td className={cellClass(draw, best)}>{formatOdds(draw)}</td>
-                <td className={cellClass(away, best)}>{formatOdds(away)}</td>
-                <td className="px-4 py-3 text-right font-mono text-[10px] text-[#4a4a44]">
-                  {format(new Date(bm.last_update), "HH:mm")}
-                </td>
-              </tr>
-            );
-          })}
+          {rows.map(({ bm, home, draw, away }) => (
+              <tr key={bm.key} className="border-b border-line/50 bg-background last:border-0">
+              <th scope="row" className="px-4 py-3 text-left font-normal text-foreground">
+                {bm.title}
+              </th>
+              <td className={cellClass(home, best.home)}>{formatOdds(home)}</td>
+              <td className={cellClass(draw, best.draw)}>{formatOdds(draw)}</td>
+              <td className={cellClass(away, best.away)}>{formatOdds(away)}</td>
+              <td className="px-4 py-3 text-right font-mono text-xs tabular-nums text-muted">
+                <time dateTime={bm.last_update}>{format(new Date(bm.last_update), "HH:mm")}</time>
+              </td>
+            </tr>
+          ))}
         </tbody>
       </table>
     </div>
@@ -56,9 +58,9 @@ export function OddsTable({ event }: { event: OddsEvent }) {
 }
 
 function cellClass(value: number | undefined, best: number): string {
-  const base = "px-4 py-3 text-right font-mono tabular-nums";
-  if (value != null && value === best && best > 0) {
-    return `${base} text-[#d8ff3e] font-semibold`;
-  }
-  return `${base} text-[#f4efe2]`;
+  const isBest = value != null && value === best && best > 0;
+  return cn(
+    "px-4 py-3 text-right font-mono tabular-nums",
+    isBest ? "font-semibold text-accent" : "text-foreground"
+  );
 }

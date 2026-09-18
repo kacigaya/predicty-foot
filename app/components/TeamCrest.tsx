@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import { cn, teamInitials, teamColor } from "@/app/lib/utils";
+import { cn, teamInitials } from "@/app/lib/utils";
 
 type LogoCacheEntry = { url: string | null; ts: number };
 type LogoResultState = { name: string; done: boolean; url: string | null };
@@ -79,9 +79,10 @@ export function TeamCrest({
   if (loading) {
     return (
       <div
+        aria-hidden
         className={cn(
           dims,
-          "rounded-full bg-[#1e2430] animate-pulse",
+          "animate-pulse rounded-full bg-elevated motion-reduce:animate-none",
           className,
         )}
       />
@@ -95,7 +96,7 @@ export function TeamCrest({
         alt={`${name} crest`}
         width={pixelSize}
         height={pixelSize}
-        className={cn(dims, "object-contain drop-shadow-sm", className)}
+        className={cn(dims, "object-contain", className)}
         onError={() => {
           logoCache.set(name, { url: null, ts: Date.now() });
           setResolved({ name, done: true, url: null });
@@ -109,14 +110,14 @@ export function TeamCrest({
 
   return (
     <div
+      role="img"
+      aria-label={`${name} crest`}
       className={cn(
-        "flex items-center justify-center rounded-full font-bold text-white/90",
+        "flex items-center justify-center rounded-full border border-line bg-elevated font-mono font-semibold text-foreground",
         dims,
         textSize,
         className,
       )}
-      style={{ background: teamColor(name) }}
-      aria-label={name}
     >
       {teamInitials(name)}
     </div>

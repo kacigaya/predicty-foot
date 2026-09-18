@@ -1,6 +1,12 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+/*
+ * Semantic tokens. Components use these names (bg-surface, text-muted,
+ * border-line, ...) rather than hex literals so the palette lives in one place.
+ * The app is dark-only by design: near-black background, one lime accent, and
+ * vermilion reserved for errors and negative deltas.
+ */
 @theme inline {
   --font-display: var(--font-instrument-serif);
   --font-sans: var(--font-geist);
@@ -8,58 +14,39 @@
 
   --color-background: #0a0a09;
   --color-foreground: #f4efe2;
-  --color-paper: #f4efe2;
-  --color-ink: #0a0a09;
-  --color-accent: #d8ff3e;
-  --color-accent-hover: #e4ff66;
-  --color-vermilion: #ff5b36;
   --color-surface: #131311;
   --color-elevated: #1c1c19;
   --color-line: #2a2a25;
-  --color-muted: #7b7a70;
-  --color-dim: #4a4a44;
+  --color-muted: #8f8e83;
+  --color-dim: #5c5b54;
+  --color-accent: #d8ff3e;
+  --color-accent-hover: #e4ff66;
+  --color-accent-foreground: #0a0a09;
+  --color-destructive: #ff5b36;
 }
 
 :root {
-  --background: #0a0a09;
-  --foreground: #f4efe2;
   color-scheme: dark;
 }
 
 html,
 body {
-  background: var(--background);
-  color: var(--foreground);
+  background: var(--color-background);
+  color: var(--color-foreground);
   font-family: var(--font-sans), system-ui, sans-serif;
   font-feature-settings: "ss01", "cv11";
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* Grain overlay — filters through everything */
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 100;
-  opacity: 0.06;
-  mix-blend-mode: overlay;
-  background-image: url("data:image/svg+xml;utf8,<svg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.96  0 0 0 0 0.94  0 0 0 0 0.88  0 0 0 0.7 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
-}
-
-/* Vignette — softens edges of the page */
-body::after {
-  content: "";
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 99;
-  background: radial-gradient(ellipse at center, transparent 40%, rgba(0, 0, 0, 0.35) 100%);
-}
-
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   font-family: var(--font-display), serif;
   font-weight: 400;
-  letter-spacing: -0.02em;
 }
 
 .font-display {
@@ -78,36 +65,50 @@ h1, h2, h3, h4, h5, h6 {
   scrollbar-width: none;
 }
 
-* {
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+/* Probability bars. A native <meter> so the fill needs no inline style. */
+.meter {
+  appearance: none;
+  -webkit-appearance: none;
+  display: block;
+  height: 4px;
+  border: 0;
+  background: var(--color-elevated);
+}
+.meter::-webkit-meter-bar {
+  height: 4px;
+  border: 0;
+  border-radius: 0;
+  background: var(--color-elevated);
+}
+.meter::-webkit-meter-optimum-value,
+.meter::-webkit-meter-suboptimum-value,
+.meter::-webkit-meter-even-less-good-value {
+  background: var(--color-accent);
+}
+.meter::-moz-meter-bar {
+  background: var(--color-accent);
+}
+.meter-muted::-webkit-meter-optimum-value,
+.meter-muted::-webkit-meter-suboptimum-value,
+.meter-muted::-webkit-meter-even-less-good-value {
+  background: var(--color-dim);
+}
+.meter-muted::-moz-meter-bar {
+  background: var(--color-dim);
 }
 
-/* Ticker animation */
-@keyframes ticker {
-  0% { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
-}
-.animate-ticker {
-  animation: ticker 60s linear infinite;
-}
-
-/* Editorial rule — hairline with tick */
-.rule-tick {
-  position: relative;
-}
-.rule-tick::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  top: 0;
-  width: 1px;
-  height: 8px;
-  background: currentColor;
-}
-
-/* Selection */
 ::selection {
-  background: #d8ff3e;
-  color: #0a0a09;
+  background: var(--color-accent);
+  color: var(--color-accent-foreground);
+}
+
+/* Motion is decorative everywhere in this app, so it can be dropped wholesale. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
