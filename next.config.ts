@@ -5,6 +5,8 @@ import { fileURLToPath } from "node:url";
 const projectRoot = path.dirname(fileURLToPath(import.meta.url));
 
 const nextConfig: NextConfig = {
+  // The Dockerfile's runner stage copies .next/standalone; keep this in sync.
+  output: "standalone",
   turbopack: {
     root: projectRoot,
   },

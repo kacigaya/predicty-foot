@@ -11,7 +11,10 @@ export function proxy(request: NextRequest) {
     "object-src 'none'",
     "form-action 'self'",
     `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'${isDev ? " 'unsafe-eval'" : ""}`,
-    `style-src 'self' 'nonce-${nonce}' 'unsafe-inline'`,
+    // No nonce here on purpose: a nonce makes browsers ignore 'unsafe-inline',
+    // and next/image, Radix and the loading skeleton all set style attributes,
+    // which cannot carry a nonce. Scripts keep the strict nonce policy.
+    "style-src 'self' 'unsafe-inline'",
     "img-src 'self' data: blob: https://www.thesportsdb.com https://r2.thesportsdb.com https://upload.wikimedia.org",
     "font-src 'self' https://fonts.gstatic.com",
     `connect-src 'self' https://api.the-odds-api.com https://www.thesportsdb.com https://generativelanguage.googleapis.com${isDev ? " ws: wss:" : ""}`,

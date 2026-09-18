@@ -38,7 +38,7 @@ export async function GET(request: NextRequest) {
       }
     );
   } catch (err) {
-    // Return safe error messages — never leak internal details
+    // Return safe error messages; never leak internal details
     const status = err instanceof OddsApiError ? err.status : 500;
     const safeMessage =
       err instanceof OddsApiError

@@ -1,113 +1,143 @@
 <p align="center">
-  <img src="public/icon.png" alt="Logo" width="200">
+  <img src="public/icon.png" alt="Predicty Foot logo" width="140">
 </p>
 
 <h1 align="center">Predicty Foot</h1>
 
 <p align="center">
-   <strong>Predicty Foot is a Next.js 16 app that combines live bookmaker odds with AI-generated football predictions.</strong><br>
-   <em>It focuses on Europe’s top leagues and presents averaged head-to-head odds, match insights, and value-driven betting analysis in a clean dark UI.</em>
+   <strong>Bookmaker odds and AI match predictions for Europe's top football leagues.</strong><br>
+   <em>Odds from The Odds API, averaged across bookmakers. Predictions from Google Gemini.</em>
 </p>
+
+<p align="center">
+  <a href="https://nextjs.org"><img alt="Next.js 16.2.4" src="https://shieldcn.dev/badge/Next.js-16.2.4-171717.svg?variant=secondary&amp;logo=nextdotjs"></a>
+  <a href="https://bun.sh"><img alt="Bun 1.3" src="https://shieldcn.dev/badge/Bun-1.3-fbf0df.svg?variant=secondary&amp;logo=bun&amp;logoColor=171717"></a>
+  <a href="https://tailwindcss.com"><img alt="Tailwind CSS 4" src="https://shieldcn.dev/badge/Tailwind_CSS-4-06b6d4.svg?variant=secondary&amp;logo=tailwindcss"></a>
+  <a href="https://github.com/kacigaya/predicty-foot/blob/main/LICENSE"><img alt="MIT License" src="https://shieldcn.dev/github/license/kacigaya/predicty-foot.svg?variant=secondary"></a>
+</p>
+
+Live at [pfoot.gayakaci.duckdns.org](https://pfoot.gayakaci.duckdns.org/).
 
 ## Features
 
-- Live odds from The Odds API
-- AI-generated match predictions powered by Google Gemini
-- League switcher for major European competitions
-- Match cards with bookmaker consensus and prediction details
-- Match detail page with deeper AI analysis
-- Toast notifications and polished loading states
+- Upcoming fixtures for eight competitions: Premier League, La Liga, Bundesliga, Serie A, Ligue 1, Champions League, Europa League, Eredivisie
+- Head-to-head odds averaged across every bookmaker The Odds API returns for the EU, UK and US regions, with implied win probabilities
+- A Gemini prediction per fixture: predicted result and score, confidence, AI vs market probabilities with the edge on each outcome, reasoning, key factors, and one suggested bet
+- Full bookmaker table per match with the best price per outcome highlighted
+- Match detail page at `/matches/[id]` with the same prediction panel
+- Team crests resolved through TheSportsDB with a static override table, cached for a day
+- Odds cached for five minutes in memory and revalidated every minute by Next.js, so a refresh rarely costs an API call
+- Per-route metadata, canonical URLs, and Open Graph tags
+- Dark theme only: near-black surfaces, one lime accent, Instrument Serif for headings, Geist for text, JetBrains Mono for numbers
 
-## Tech Stack
+## Tech stack
 
-- [Next.js](https://nextjs.org/) 16
-- [React](https://react.dev/) 19
-- [TypeScript](https://www.typescriptlang.org/)
-- [Tailwind CSS](https://tailwindcss.com/) 4
-- [Radix UI](https://www.radix-ui.com/)
-- [Sonner](https://sonner.emilkowal.ski/)
-- [date-fns](https://date-fns.org/)
-- [Lucide](https://lucide.dev/)
-- [Google Generative AI](https://ai.google.dev/)
-- [The Odds API](https://the-odds-api.com/)
+- Framework: Next.js 16 (Turbopack, App Router, server actions)
+- UI: React 19, Tailwind CSS 4, Radix primitives (dialog, tabs), Lucide icons
+- Styling: clsx, tailwind-merge, class-variance-authority, tw-animate-css
+- Data: The Odds API (fixtures and h2h odds), TheSportsDB (crests)
+- AI: `@google/generative-ai` with `gemini-3.1-flash-lite-preview`
+- Language: TypeScript
+- Runtime: Bun for install and build, Node 22 in the production image
 
-## Project Structure
-
-- `app/` — App Router pages, server actions, API routes, and app-specific components
-- `app/lib/` — Odds, leagues, Gemini, and utility helpers
-- `components/` — Shared layout components like the navbar and footer
-- `public/` — Static assets
-
-## Getting Started
+## Getting started
 
 ### Prerequisites
 
-- Node.js 18 or newer
-- An Odds API key
-- A Google Gemini API key
+- Bun
+- An [Odds API](https://the-odds-api.com/) key
+- A [Gemini API](https://ai.google.dev/) key
 
-### Environment Variables
+Both keys are read at request time. Without `ODDS_API_KEY` the fixture list shows
+an error state; without `GEMINI_API_KEY` the prediction button returns
+"Prediction service unavailable". The rest of the page still renders.
 
-Create a `.env.local` file in the project root:
+### Installation
+
+```bash
+bun install
+```
+
+Create `.env.local`:
 
 ```env
-ODDS_API_KEY=your_odds_api_key
-GEMINI_API_KEY=your_gemini_api_key
+ODDS_API_KEY=...
+GEMINI_API_KEY=...
 ```
 
-### Install dependencies
+### Development
 
 ```bash
-npm install
+bun dev
 ```
 
-### Run the development server
+Open [http://localhost:3000](http://localhost:3000).
+
+### Checks
 
 ```bash
-npm run dev
+bun run lint
+bunx tsc --noEmit
+bun run build
 ```
 
-Open [http://localhost:3000](http://localhost:3000) in your browser.
+There is no test suite. The build runs the TypeScript check.
 
-## Available Scripts
+### Project structure
 
-```bash
-npm run dev
-npm run build
-npm run start
-npm run lint
+```
+app/
+  page.tsx              # Home: hero and fixture board
+  layout.tsx            # Fonts, metadata defaults, navbar and footer
+  site.ts               # Canonical origin, site name, description
+  actions/              # Server actions: getOdds, generatePrediction
+  api/odds/             # JSON odds endpoint, rate limited
+  api/team-logo/        # Crest lookup with alias and static tables
+  components/           # Board, cards, prediction dialog and result
+  components/ui/        # Button, badge, dialog, tabs, skeleton
+  lib/                  # Odds client and maths, Gemini client, leagues, rate limit
+  matches/[id]/         # Match detail page and prediction panel
+components/             # Navbar and footer
+proxy.ts                # Per-request CSP nonce
+public/                 # Icon
+Dockerfile              # Bun build, Node standalone runner
 ```
 
-## How It Works
+## Security notes
 
-1. The homepage fetches upcoming odds for the default league.
-2. Odds are averaged across bookmakers to produce a consensus view.
-3. Users can switch leagues to inspect other competitions.
-4. A server action sends match data to Gemini for AI prediction generation.
-5. Match details are shown in a responsive card and modal-based interface.
-
-## API Notes
-
-### The Odds API
-
-Predicty Foot uses The Odds API to fetch live football odds. Data is cached server-side and revalidated periodically to reduce network usage.
-
-### Google Gemini
-
-AI predictions are generated on the server using match and odds context. If the Gemini key is missing or invalid, the app returns a friendly error state.
+- `proxy.ts` sends a per-request CSP. Scripts use a nonce with `strict-dynamic`;
+  styles allow `unsafe-inline` because `next/image` and Radix set `style`
+  attributes, which cannot carry a nonce. `unsafe-eval` is added in development
+  only.
+- Server actions and `/api/odds` validate the league key against the eight
+  configured competitions before calling the provider, and event ids against a
+  character allowlist.
+- Provider error bodies and the missing-key hint are logged server-side; the
+  browser gets a generic message.
+- `/api/odds` and `/api/team-logo` are rate limited per client IP, 60 requests
+  a minute, in memory. The limiter keys on the first `X-Forwarded-For` entry,
+  so the reverse proxy in front of the app must overwrite that header rather
+  than append to it.
+- Crest URLs are only accepted from `thesportsdb.com`, `r2.thesportsdb.com`
+  and `upload.wikimedia.org`, matching `images.remotePatterns` and the CSP
+  `img-src`.
 
 ## Deployment
 
-The app can be deployed to any platform that supports Next.js, including Vercel.
+The app needs a Node server: pages render per request, odds and predictions go
+through server actions, and both API keys must stay server-side. It cannot be
+exported statically, so GitHub Pages is out.
 
-Before deploying, make sure these environment variables are configured in your hosting provider:
+Production runs on Dokploy from the `Dockerfile` (`output: "standalone"` in
+`next.config.ts`; keep the two in sync). `ODDS_API_KEY` and `GEMINI_API_KEY`
+are runtime environment variables; nothing is needed at build time. Set
+`NEXT_PUBLIC_SITE_URL` at build time only if the canonical origin changes.
 
-- `ODDS_API_KEY`
-- `GEMINI_API_KEY`
+## Notice
 
-## Learn More
+For entertainment only. Predictions are probabilistic, never guaranteed. Gamble
+responsibly.
 
-- [Next.js Documentation](https://nextjs.org/docs)
-- [The Odds API Docs](https://the-odds-api.com/liveapi/guides/v4/)
-- [Google AI Docs](https://ai.google.dev/gemini-api/docs)
-- [Next.js Deployment Docs](https://nextjs.org/docs/app/building-your-application/deploying)
+## License
+
+MIT

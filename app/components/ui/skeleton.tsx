@@ -6,7 +6,8 @@ export function Skeleton({
 }: React.HTMLAttributes<HTMLDivElement>) {
   return (
     <div
-      className={cn("animate-pulse bg-[#1c1c19]", className)}
+      aria-hidden
+      className={cn("animate-pulse bg-elevated motion-reduce:animate-none", className)}
       {...props}
     />
   );

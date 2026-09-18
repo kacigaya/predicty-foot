@@ -1,72 +1,64 @@
+const linkClass =
+  "rounded-sm text-sm text-foreground transition-colors hover:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-background";
+
 export function Footer() {
   return (
-    <footer className="border-t border-[#2a2a25] mt-24">
-      <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
+    <footer className="mt-16 border-t border-line">
+      <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
         <div className="grid gap-8 sm:grid-cols-3">
           <div>
-            <p className="font-display text-3xl italic text-[#f4efe2] leading-none">
-              Predicty<span className="text-[#d8ff3e] not-italic">Foot</span>
+            <p className="font-display text-2xl leading-none text-foreground">
+              Predicty <span className="text-accent">Foot</span>
             </p>
-            <p className="mt-3 font-mono text-[10px] uppercase tracking-[0.2em] text-[#6a6a63]">
-              Where numbers meet intuition
+            <p className="mt-3 text-pretty text-xs leading-relaxed text-muted">
+              Averaged bookmaker odds with a Gemini prediction for each fixture.
             </p>
           </div>
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#6a6a63]">
-                Data
-              </p>
-              <a
-                href="https://the-odds-api.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="block text-sm text-[#f4efe2] hover:text-[#d8ff3e] transition-colors"
-              >
-                The Odds API →
-              </a>
-              <a
-                href="https://ai.google.dev"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="block text-sm text-[#f4efe2] hover:text-[#d8ff3e] transition-colors"
-              >
-                Google Gemini →
-              </a>
+          <div className="space-y-6">
+            <div>
+              <p className="mb-2 font-mono text-xs uppercase text-muted">Data</p>
+              <ul className="space-y-1.5">
+                <li>
+                  <a href="https://the-odds-api.com" target="_blank" rel="noopener noreferrer" className={linkClass}>
+                    The Odds API
+                  </a>
+                </li>
+                <li>
+                  <a href="https://ai.google.dev" target="_blank" rel="noopener noreferrer" className={linkClass}>
+                    Google Gemini
+                  </a>
+                </li>
+              </ul>
             </div>
-            <div className="space-y-2">
-              <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#6a6a63]">
-                Project
-              </p>
-              <a
-                href="https://github.com/kacigaya"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="block text-sm text-[#f4efe2] hover:text-[#d8ff3e] transition-colors"
-              >
-                Github @kacigaya →
-              </a>
-              <p className="text-[10px] uppercase tracking-[0.1em] text-[#4a4a44]">
-                Open Source project
-              </p>
+            <div>
+              <p className="mb-2 font-mono text-xs uppercase text-muted">Project</p>
+              <ul className="space-y-1.5">
+                <li>
+                  <a
+                    href="https://github.com/kacigaya/predicty-foot"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={linkClass}
+                  >
+                    Source on GitHub
+                  </a>
+                </li>
+              </ul>
             </div>
           </div>
-          <div className="space-y-2">
-            <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#6a6a63]">
-              Notice
-            </p>
-            <p className="text-xs leading-relaxed text-[#7b7a70]">
-              For entertainment only. Predictions are probabilistic, never guaranteed. Please gamble responsibly.
+          <div>
+            <p className="mb-2 font-mono text-xs uppercase text-muted">Notice</p>
+            <p className="text-pretty text-xs leading-relaxed text-muted">
+              For entertainment only. Predictions are probabilistic, never guaranteed. Gamble responsibly.
             </p>
           </div>
         </div>
 
-        <div className="mt-10 flex items-center justify-between border-t border-[#2a2a25] pt-5">
-          <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#4a4a44]">
-            © {new Date().getFullYear()} · No. {new Date().getMonth() + 1}
+        <div className="mt-10 flex flex-wrap items-center justify-between gap-2 border-t border-line pt-5">
+          <p className="font-mono text-xs uppercase text-muted">
+            © {new Date().getFullYear()} Gaya Kaci
           </p>
-          <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#4a4a44]">
-            Made in the margin
-          </p>
+          <p className="font-mono text-xs uppercase text-muted">MIT License</p>
         </div>
       </div>
     </footer>
