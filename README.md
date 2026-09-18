@@ -30,6 +30,30 @@ Live at [pfoot.gayakaci.duckdns.org](https://pfoot.gayakaci.duckdns.org/).
 - Per-route metadata, canonical URLs, and Open Graph tags
 - Dark theme only: near-black surfaces, one lime accent, Instrument Serif for headings, Geist for text, JetBrains Mono for numbers
 
+## Screenshots
+
+### Desktop
+
+![Home page with the hero and the Premier League fixture grid](public/screenshots/home-desktop.jpg)
+
+Home: league tabs, then one card per fixture with averaged 1 X 2 odds and the market favourite marked.
+
+![Prediction dialog for Brentford vs Chelsea](public/screenshots/prediction-desktop.jpg)
+
+Prediction dialog: confidence, predicted score, AI vs market probabilities with the edge per outcome, and the reasoning.
+
+![Match detail page for Brentford vs Chelsea](public/screenshots/match-desktop.jpg)
+
+Match page: crests, averaged odds and implied probabilities, the prediction panel, and every bookmaker's prices.
+
+### Mobile web
+
+| Home | Match |
+| --- | --- |
+| <img src="public/screenshots/home-mobile.jpg" alt="Fixture grid on a phone viewport" width="220"> | <img src="public/screenshots/match-mobile.jpg" alt="Match page on a phone viewport" width="220"> |
+
+Crests in these screenshots come from TheSportsDB and Wikimedia.
+
 ## Tech stack
 
 - Framework: Next.js 16 (Turbopack, App Router, server actions)
