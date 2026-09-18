@@ -14,7 +14,7 @@ bunx tsc --noEmit
 bun run build       # standalone output in .next/standalone
 ```
 
-Bun 1.3, Node 22. No test suite; the build runs the type check.
+Bun 1.4.0 in the Docker image (1.3.14 segfaults in `next build` there), Node 22. No test suite; the build runs the type check.
 
 ## Deployment
 

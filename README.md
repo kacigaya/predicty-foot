@@ -10,8 +10,8 @@
 </p>
 
 <p align="center">
-  <a href="https://nextjs.org"><img alt="Next.js 16.2.4" src="https://shieldcn.dev/badge/Next.js-16.2.4-171717.svg?variant=secondary&amp;logo=nextdotjs"></a>
-  <a href="https://bun.sh"><img alt="Bun 1.3" src="https://shieldcn.dev/badge/Bun-1.3-fbf0df.svg?variant=secondary&amp;logo=bun&amp;logoColor=171717"></a>
+  <a href="https://nextjs.org"><img alt="Next.js 16.3.3" src="https://shieldcn.dev/badge/Next.js-16.3.3-171717.svg?variant=secondary&amp;logo=nextdotjs"></a>
+  <a href="https://bun.sh"><img alt="Bun 1.4" src="https://shieldcn.dev/badge/Bun-1.4-fbf0df.svg?variant=secondary&amp;logo=bun&amp;logoColor=171717"></a>
   <a href="https://tailwindcss.com"><img alt="Tailwind CSS 4" src="https://shieldcn.dev/badge/Tailwind_CSS-4-06b6d4.svg?variant=secondary&amp;logo=tailwindcss"></a>
   <a href="https://github.com/kacigaya/predicty-foot/blob/main/LICENSE"><img alt="MIT License" src="https://shieldcn.dev/github/license/kacigaya/predicty-foot.svg?variant=secondary"></a>
 </p>
@@ -62,7 +62,7 @@ Crests in these screenshots come from TheSportsDB and Wikimedia.
 - Data: The Odds API (fixtures and h2h odds), TheSportsDB (crests)
 - AI: `@google/generative-ai` with `gemini-3.1-flash-lite-preview`
 - Language: TypeScript
-- Runtime: Bun for install and build, Node 22 in the production image
+- Runtime: Bun 1.4 for install and build, Node 22 in the production image
 
 ## Getting started
 
@@ -123,7 +123,7 @@ app/
   matches/[id]/         # Match detail page and prediction panel
 components/             # Navbar and footer
 proxy.ts                # Per-request CSP nonce
-public/                 # Icon
+public/                 # Icon and README screenshots
 Dockerfile              # Bun build, Node standalone runner
 ```
 
