@@ -10,7 +10,7 @@ export function Footer() {
         <div className="grid gap-8 sm:grid-cols-3">
           <div>
             <p className="font-heading text-base font-semibold tracking-tight text-foreground">
-              Predicty <span className="font-normal text-muted-foreground">Foot</span>
+              Predicty <span className="text-brand">Foot</span>
             </p>
             <p className="mt-2 max-w-xs text-pretty text-xs leading-relaxed text-muted-foreground">
               Averaged bookmaker odds combined with Gemini AI probabilistic match predictions.

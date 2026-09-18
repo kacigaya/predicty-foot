@@ -8,8 +8,12 @@ type LogoCacheEntry = { url: string | null; ts: number };
 type LogoResultState = { name: string; done: boolean; url: string | null };
 
 const logoCache = new Map<string, LogoCacheEntry>();
-const POSITIVE_TTL_MS = 24 * 60 * 60 * 1000;
-const NEGATIVE_TTL_MS = 60 * 1000;
+const inFlightRequests = new Map<string, Promise<string | null>>();
+
+const POSITIVE_TTL_MS = 7 * 24 * 60 * 60 * 1000; // 7 days (matches server)
+const NEGATIVE_TTL_MS = 60 * 1000; // 1 min
+const STORAGE_KEY = "predicty_foot_crests_v1";
+const MAX_STORAGE_ENTRIES = 250;
 
 function getFreshCachedLogo(name: string): { hit: boolean; url: string | null } {
   const entry = logoCache.get(name);
@@ -19,6 +23,69 @@ function getFreshCachedLogo(name: string): { hit: boolean; url: string | null } 
   if (Date.now() - entry.ts >= ttl) return { hit: false, url: null };
 
   return { hit: true, url: entry.url };
+}
+
+function getStoredLogo(name: string): LogoCacheEntry | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = window.localStorage.getItem(STORAGE_KEY);
+    if (!raw) return null;
+    const store = JSON.parse(raw);
+    const entry = store?.[name] as LogoCacheEntry | undefined;
+    if (!entry || typeof entry.ts !== "number") return null;
+
+    const ttl = entry.url ? POSITIVE_TTL_MS : NEGATIVE_TTL_MS;
+    if (Date.now() - entry.ts >= ttl) return null;
+    return entry;
+  } catch {
+    return null;
+  }
+}
+
+function saveLogoToStorage(name: string, entry: LogoCacheEntry): void {
+  if (typeof window === "undefined") return;
+  try {
+    const raw = window.localStorage.getItem(STORAGE_KEY);
+    const store: Record<string, LogoCacheEntry> = raw ? JSON.parse(raw) : {};
+    store[name] = entry;
+
+    const keys = Object.keys(store);
+    if (keys.length > MAX_STORAGE_ENTRIES) {
+      const sorted = keys.sort((a, b) => store[a].ts - store[b].ts);
+      for (const oldKey of sorted.slice(0, keys.length - MAX_STORAGE_ENTRIES)) {
+        delete store[oldKey];
+      }
+    }
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
+  } catch {
+    // Ignore storage write failures (quota or private mode)
+  }
+}
+
+async function fetchTeamLogo(name: string): Promise<string | null> {
+  const stored = getStoredLogo(name);
+  if (stored) {
+    return stored.url;
+  }
+
+  const existing = inFlightRequests.get(name);
+  if (existing) return existing;
+
+  const promise = (async () => {
+    try {
+      const res = await fetch(`/api/team-logo?name=${encodeURIComponent(name)}`);
+      if (!res.ok) throw new Error(`Team logo request failed: ${res.status}`);
+      const data: { url: string | null } = await res.json();
+      return data?.url ?? null;
+    } catch {
+      return null;
+    } finally {
+      inFlightRequests.delete(name);
+    }
+  })();
+
+  inFlightRequests.set(name, promise);
+  return promise;
 }
 
 export function TeamCrest({
@@ -41,19 +108,19 @@ export function TeamCrest({
 
     let cancelled = false;
 
-    fetch(`/api/team-logo?name=${encodeURIComponent(name)}`, { cache: "no-store" })
-      .then((r) => {
-        if (!r.ok) throw new Error(`Team logo request failed: ${r.status}`);
-        return r.json();
-      })
-      .then((data: { url: string | null }) => {
+    fetchTeamLogo(name)
+      .then((url) => {
         if (cancelled) return;
-        logoCache.set(name, { url: data.url, ts: Date.now() });
-        setResolved({ name, done: true, url: data.url });
+        const entry: LogoCacheEntry = { url, ts: Date.now() };
+        logoCache.set(name, entry);
+        saveLogoToStorage(name, entry);
+        setResolved({ name, done: true, url });
       })
       .catch(() => {
         if (cancelled) return;
-        logoCache.set(name, { url: null, ts: Date.now() });
+        const entry: LogoCacheEntry = { url: null, ts: Date.now() };
+        logoCache.set(name, entry);
+        saveLogoToStorage(name, entry);
         setResolved({ name, done: true, url: null });
       });
 
@@ -98,7 +165,9 @@ export function TeamCrest({
         height={pixelSize}
         className={cn(dims, "object-contain", className)}
         onError={() => {
-          logoCache.set(name, { url: null, ts: Date.now() });
+          const entry: LogoCacheEntry = { url: null, ts: Date.now() };
+          logoCache.set(name, entry);
+          saveLogoToStorage(name, entry);
           setResolved({ name, done: true, url: null });
         }}
       />

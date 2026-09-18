@@ -38,7 +38,15 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: "https",
+        hostname: "images.thesportsdb.com",
+      },
+      {
+        protocol: "https",
         hostname: "upload.wikimedia.org",
+      },
+      {
+        protocol: "https",
+        hostname: "thumb.wikimedia.org",
       },
     ],
   },
