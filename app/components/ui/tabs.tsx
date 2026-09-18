@@ -13,8 +13,8 @@ export const TabsList = React.forwardRef<
   <TabsPrimitive.List
     ref={ref}
     className={cn(
-      "scrollbar-hide flex w-full items-center gap-6 overflow-x-auto border-b border-line",
-      className
+      "scrollbar-hide inline-flex max-w-full items-center gap-1 overflow-x-auto rounded-xl border border-border bg-muted/40 p-1 text-muted-foreground",
+      className,
     )}
     {...props}
   />
@@ -28,12 +28,12 @@ export const TabsTrigger = React.forwardRef<
   <TabsPrimitive.Trigger
     ref={ref}
     className={cn(
-      "relative inline-flex cursor-pointer items-center gap-2 whitespace-nowrap py-3 font-mono text-xs uppercase text-muted transition-colors hover:text-foreground disabled:pointer-events-none disabled:opacity-50",
-      "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-accent",
-      "data-[state=active]:text-foreground",
-      "after:absolute after:inset-x-0 after:-bottom-px after:h-0.5 after:bg-transparent",
-      "data-[state=active]:after:bg-accent",
-      className
+      "inline-flex cursor-pointer items-center justify-center gap-1.5 whitespace-nowrap rounded-lg px-3 py-1.5 font-sans text-xs font-medium text-muted-foreground transition-all",
+      "hover:bg-accent/40 hover:text-foreground",
+      "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 focus-visible:ring-offset-background",
+      "disabled:pointer-events-none disabled:opacity-50",
+      "data-[state=active]:bg-card data-[state=active]:text-foreground data-[state=active]:shadow-xs",
+      className,
     )}
     {...props}
   />

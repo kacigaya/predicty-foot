@@ -1,37 +1,55 @@
 const linkClass =
-  "rounded-sm text-sm text-foreground transition-colors hover:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-background";
+  "rounded-sm text-xs text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
 
 export function Footer() {
+  const currentYear = new Date().getFullYear();
+
   return (
-    <footer className="mt-16 border-t border-line">
-      <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
+    <footer className="mt-auto border-t border-border bg-background py-10">
+      <div className="mx-auto max-w-6xl px-4 sm:px-6">
         <div className="grid gap-8 sm:grid-cols-3">
           <div>
-            <p className="font-display text-2xl leading-none text-foreground">
-              Predicty <span className="text-accent">Foot</span>
+            <p className="font-heading text-base font-semibold tracking-tight text-foreground">
+              Predicty <span className="font-normal text-muted-foreground">Foot</span>
             </p>
-            <p className="mt-3 text-pretty text-xs leading-relaxed text-muted">
-              Averaged bookmaker odds with a Gemini prediction for each fixture.
+            <p className="mt-2 max-w-xs text-pretty text-xs leading-relaxed text-muted-foreground">
+              Averaged bookmaker odds combined with Gemini AI probabilistic match predictions.
             </p>
           </div>
-          <div className="space-y-6">
+
+          <div className="space-y-4">
             <div>
-              <p className="mb-2 font-mono text-xs uppercase text-muted">Data</p>
+              <p className="mb-2 font-mono text-[11px] uppercase tracking-wider text-muted-foreground">
+                Data sources
+              </p>
               <ul className="space-y-1.5">
                 <li>
-                  <a href="https://the-odds-api.com" target="_blank" rel="noopener noreferrer" className={linkClass}>
+                  <a
+                    href="https://the-odds-api.com"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={linkClass}
+                  >
                     The Odds API
                   </a>
                 </li>
                 <li>
-                  <a href="https://ai.google.dev" target="_blank" rel="noopener noreferrer" className={linkClass}>
+                  <a
+                    href="https://ai.google.dev"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={linkClass}
+                  >
                     Google Gemini
                   </a>
                 </li>
               </ul>
             </div>
+
             <div>
-              <p className="mb-2 font-mono text-xs uppercase text-muted">Project</p>
+              <p className="mb-2 font-mono text-[11px] uppercase tracking-wider text-muted-foreground">
+                Project
+              </p>
               <ul className="space-y-1.5">
                 <li>
                   <a
@@ -46,19 +64,20 @@ export function Footer() {
               </ul>
             </div>
           </div>
+
           <div>
-            <p className="mb-2 font-mono text-xs uppercase text-muted">Notice</p>
-            <p className="text-pretty text-xs leading-relaxed text-muted">
-              For entertainment only. Predictions are probabilistic, never guaranteed. Gamble responsibly.
+            <p className="mb-2 font-mono text-[11px] uppercase tracking-wider text-muted-foreground">
+              Notice
+            </p>
+            <p className="text-pretty text-xs leading-relaxed text-muted-foreground">
+              For entertainment only. AI predictions are probabilistic estimations, never guarantees. Gamble responsibly.
             </p>
           </div>
         </div>
 
-        <div className="mt-10 flex flex-wrap items-center justify-between gap-2 border-t border-line pt-5">
-          <p className="font-mono text-xs uppercase text-muted">
-            © {new Date().getFullYear()} Gaya Kaci
-          </p>
-          <p className="font-mono text-xs uppercase text-muted">MIT License</p>
+        <div className="mt-8 flex flex-wrap items-center justify-between gap-2 border-t border-border/60 pt-5 font-mono text-xs text-muted-foreground">
+          <p>© {currentYear} Gaya Kaci</p>
+          <p>MIT License</p>
         </div>
       </div>
     </footer>

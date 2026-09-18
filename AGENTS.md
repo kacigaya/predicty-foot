@@ -29,12 +29,15 @@ Bun 1.4.0 in the Docker image (1.3.14 segfaults in `next build` there), Node 22.
 
 ## UI
 
-- Semantic color tokens live in `@theme inline` in `app/globals.css` (`background`,
-  `foreground`, `surface`, `elevated`, `line`, `muted`, `dim`, `accent`, `destructive`).
-  Use the token classes, not hex literals.
-- Dark only. One accent (lime); vermilion is for errors and negative deltas.
-- Fonts: Instrument Serif for headings and the wordmark, Geist for text, JetBrains Mono
-  for numbers and labels. Loaded through `next/font/google`, so builds need network.
+- Uses Gaya's Coss UI design system matching portfolio, webskrap/web, ghostpwn/web, and noskrap/web.
+- Semantic tokens live in `@theme inline` in `app/globals.css` (`background`, `foreground`,
+  `card`, `popover`, `primary`, `secondary`, `muted`, `muted-foreground`, `accent`,
+  `border`, `input`, `ring`, `destructive`, `warning`, `success`).
+- Fonts: `Inter` for headings and body (`font-sans`), `Geist Mono` for numbers, labels,
+  and odds (`font-mono`). Loaded through `next/font/google`.
+- Floating island navigation with `ThemeToggle`, `Badge`, and clean action buttons.
+- Cards use the signature Coss inset shadow highlights:
+  `dark:before:shadow-[0_-1px_--theme(--color-white/6%)]`.
 - `PredictionResult` is shared by the fixture dialog and the match page.
 - `PredictionModal` takes its trigger as `children` through `DialogTrigger`; that is what
   lets Radix return focus to the button on close.

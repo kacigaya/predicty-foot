@@ -82,7 +82,7 @@ export function TeamCrest({
         aria-hidden
         className={cn(
           dims,
-          "animate-pulse rounded-full bg-elevated motion-reduce:animate-none",
+          "animate-pulse rounded-full bg-muted motion-reduce:animate-none",
           className,
         )}
       />
@@ -113,7 +113,7 @@ export function TeamCrest({
       role="img"
       aria-label={`${name} crest`}
       className={cn(
-        "flex items-center justify-center rounded-full border border-line bg-elevated font-mono font-semibold text-foreground",
+        "flex items-center justify-center rounded-full border border-border bg-muted font-mono font-semibold text-foreground",
         dims,
         textSize,
         className,

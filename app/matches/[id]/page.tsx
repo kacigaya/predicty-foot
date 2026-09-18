@@ -5,6 +5,8 @@ import { format } from "date-fns";
 import { ArrowLeft } from "lucide-react";
 import { TeamCrest } from "@/app/components/TeamCrest";
 import { OddsTable } from "@/app/components/OddsTable";
+import { Button } from "@/app/components/ui/button";
+import { Badge } from "@/app/components/ui/badge";
 import { MatchPredictionPanel } from "@/app/matches/[id]/MatchPredictionPanel";
 import {
   averageH2HOdds,
@@ -61,21 +63,20 @@ export default async function MatchPage(props: Props) {
   const kickoff = new Date(event.commence_time);
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-12 sm:px-6">
-      <Link
-        href="/"
-        className="mb-8 inline-flex items-center gap-2 rounded-sm font-mono text-xs uppercase text-muted transition-colors hover:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-background"
-      >
-        <ArrowLeft aria-hidden className="size-3" />
-        All fixtures
-      </Link>
+    <div className="mx-auto max-w-5xl px-4 py-10 sm:px-6">
+      <Button variant="ghost" size="sm" asChild className="mb-8 -ml-2 text-muted-foreground hover:text-foreground">
+        <Link href="/">
+          <ArrowLeft aria-hidden className="size-3.5" />
+          All fixtures
+        </Link>
+      </Button>
 
-      <div className="border-b border-line pb-8">
+      <div className="border-b border-border pb-8">
         <div className="mb-6 flex flex-wrap items-center justify-between gap-2">
-          <p className="font-mono text-xs uppercase text-accent">
+          <Badge variant="outline">
             {league?.name ?? event.sport_title}
-          </p>
-          <time dateTime={event.commence_time} className="font-mono text-xs uppercase tabular-nums text-muted">
+          </Badge>
+          <time dateTime={event.commence_time} className="font-mono text-xs tabular-nums text-muted-foreground">
             {format(kickoff, "EEE d MMM yyyy, HH:mm")}
           </time>
         </div>
@@ -87,9 +88,9 @@ export default async function MatchPage(props: Props) {
         <div className="grid grid-cols-[1fr_auto_1fr] items-start gap-4 sm:gap-6">
           <TeamSummary name={event.home_team} odds={formatOdds(avg.home)} prob={implied.home} />
           <div className="flex flex-col items-center gap-1 self-center px-2">
-            <span className="font-mono text-xs uppercase text-muted">Draw</span>
-            <span className="font-mono text-xl tabular-nums text-foreground">{formatOdds(avg.draw)}</span>
-            <span className="font-mono text-xs tabular-nums text-muted">{(implied.draw * 100).toFixed(0)}%</span>
+            <span className="font-mono text-xs uppercase tracking-wider text-muted-foreground">Draw</span>
+            <span className="font-mono text-xl font-bold tabular-nums text-foreground">{formatOdds(avg.draw)}</span>
+            <span className="font-mono text-xs tabular-nums text-muted-foreground">{(implied.draw * 100).toFixed(0)}%</span>
           </div>
           <TeamSummary name={event.away_team} odds={formatOdds(avg.away)} prob={implied.away} />
         </div>
@@ -99,8 +100,8 @@ export default async function MatchPage(props: Props) {
         <MatchPredictionPanel sportKey={sportKey} event={event} />
 
         <section aria-labelledby="bookmakers-heading">
-          <h2 id="bookmakers-heading" className="mb-4 font-display text-2xl text-foreground">
-            All bookmakers <span className="font-mono text-sm tabular-nums text-muted">({event.bookmakers.length})</span>
+          <h2 id="bookmakers-heading" className="mb-4 font-heading text-xl font-bold tracking-tight text-foreground">
+            All bookmakers <span className="font-mono text-xs font-normal text-muted-foreground">({event.bookmakers.length})</span>
           </h2>
           <OddsTable event={event} />
         </section>
@@ -113,10 +114,10 @@ function TeamSummary({ name, odds, prob }: { name: OddsEvent["home_team"]; odds:
   return (
     <div className="flex flex-col items-center gap-3 text-center">
       <TeamCrest name={name} size="lg" />
-      <p className="text-balance font-display text-2xl leading-tight text-foreground sm:text-3xl">{name}</p>
+      <p className="text-balance font-heading text-xl font-bold leading-tight text-foreground sm:text-2xl">{name}</p>
       <div className="flex items-baseline gap-2">
-        <span className="font-mono text-2xl tabular-nums text-accent">{odds}</span>
-        <span className="font-mono text-xs tabular-nums text-muted">{(prob * 100).toFixed(0)}%</span>
+        <span className="font-mono text-xl sm:text-2xl font-bold tabular-nums text-foreground">{odds}</span>
+        <span className="font-mono text-xs tabular-nums text-muted-foreground">{(prob * 100).toFixed(0)}%</span>
       </div>
     </div>
   );

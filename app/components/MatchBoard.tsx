@@ -6,7 +6,7 @@ import { RefreshCw, AlertCircle } from "lucide-react";
 import { cn } from "@/app/lib/utils";
 import { LeagueSelector } from "@/app/components/LeagueSelector";
 import { MatchCard } from "@/app/components/MatchCard";
-import { Skeleton } from "@/app/components/ui/skeleton";
+import { Card, CardTitle, CardDescription } from "@/app/components/ui/card";
 import { Button } from "@/app/components/ui/button";
 import { getOddsAction } from "@/app/actions/getOdds";
 import { DEFAULT_LEAGUE_KEY, getLeague } from "@/app/lib/leagues";
@@ -67,24 +67,33 @@ export function MatchBoard({
   const currentLeague = getLeague(league);
 
   return (
-    <section className="mx-auto w-full max-w-6xl px-4 py-12 sm:px-6" aria-busy={isPending}>
+    <section
+      id="fixtures"
+      className="mx-auto w-full max-w-6xl px-4 py-12 sm:px-6"
+      aria-busy={isPending}
+    >
       <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
         <div>
-          <p className="mb-2 font-mono text-xs uppercase text-muted">
+          <p className="mb-1.5 font-mono text-xs uppercase tracking-wider text-muted-foreground">
             {currentLeague?.name ?? "League"}
           </p>
-          <h2 className="text-balance font-display text-4xl leading-none text-foreground sm:text-5xl">
+          <h2 className="text-balance font-heading text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
             Upcoming fixtures
           </h2>
         </div>
         <div className="flex items-center gap-4">
-          <p className="font-mono text-xs uppercase text-muted">
+          <p className="font-mono text-xs text-muted-foreground tabular-nums">
             Updated {updatedLabel}
           </p>
-          <Button size="sm" variant="secondary" onClick={() => load(league)} disabled={isPending}>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => load(league)}
+            disabled={isPending}
+          >
             <RefreshCw
               aria-hidden
-              className={cn(isPending && "animate-spin motion-reduce:animate-none")}
+              className={cn("size-3.5", isPending && "animate-spin motion-reduce:animate-none")}
             />
             Refresh
           </Button>
@@ -97,7 +106,10 @@ export function MatchBoard({
         ) : isPending ? (
           <GridSkeleton />
         ) : events.length === 0 ? (
-          <EmptyState leagueName={currentLeague?.name ?? "this league"} onRefresh={() => load(league)} />
+          <EmptyState
+            leagueName={currentLeague?.name ?? "this league"}
+            onRefresh={() => load(league)}
+          />
         ) : (
           <>
             <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -110,7 +122,11 @@ export function MatchBoard({
 
             {hasMore && (
               <div className="mt-8 flex justify-center">
-                <Button variant="secondary" size="lg" onClick={() => setVisibleCount((n) => n + BATCH_SIZE)}>
+                <Button
+                  variant="outline"
+                  size="default"
+                  onClick={() => setVisibleCount((n) => n + BATCH_SIZE)}
+                >
                   Show {Math.min(BATCH_SIZE, events.length - visibleCount)} more
                 </Button>
               </div>
@@ -128,38 +144,57 @@ function GridSkeleton() {
       <span className="sr-only">Loading fixtures</span>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {Array.from({ length: 6 }).map((_, i) => (
-          <Skeleton key={i} className="h-64 rounded-sm border border-line bg-surface" />
+          <Card key={i} className="h-64 animate-pulse p-5" />
         ))}
       </div>
     </div>
   );
 }
 
-function EmptyState({ leagueName, onRefresh }: { leagueName: string; onRefresh: () => void }) {
+function EmptyState({
+  leagueName,
+  onRefresh,
+}: {
+  leagueName: string;
+  onRefresh: () => void;
+}) {
   return (
-    <div className="flex flex-col items-start gap-4 border border-line bg-surface p-8">
-      <p className="font-display text-2xl text-foreground">No upcoming fixtures</p>
-      <p className="text-pretty text-sm text-muted">
+    <Card className="flex flex-col items-start gap-4 p-8">
+      <CardTitle as="h3" className="text-xl font-bold">
+        No upcoming fixtures
+      </CardTitle>
+      <CardDescription className="text-sm">
         The odds feed has nothing listed for {leagueName} right now. Pick another league above or
         check again later.
-      </p>
-      <Button size="sm" variant="secondary" onClick={onRefresh}>
-        <RefreshCw aria-hidden /> Refresh
+      </CardDescription>
+      <Button size="sm" variant="outline" onClick={onRefresh}>
+        <RefreshCw aria-hidden className="size-3.5" /> Refresh
       </Button>
-    </div>
+    </Card>
   );
 }
 
-function ErrorState({ message, onRetry }: { message: string; onRetry: () => void }) {
+function ErrorState({
+  message,
+  onRetry,
+}: {
+  message: string;
+  onRetry: () => void;
+}) {
   return (
-    <div role="alert" className="flex flex-col items-start gap-4 border border-destructive/40 bg-destructive/5 p-6">
+    <div
+      role="alert"
+      className="flex flex-col items-start gap-4 rounded-2xl border border-destructive/30 bg-destructive/10 p-6 text-foreground"
+    >
       <div className="flex items-center gap-2">
         <AlertCircle aria-hidden className="size-4 text-destructive" />
-        <p className="font-mono text-xs uppercase text-destructive">Could not load odds</p>
+        <p className="font-mono text-xs uppercase text-destructive font-medium">
+          Could not load odds
+        </p>
       </div>
-      <p className="text-pretty text-sm text-foreground">{message}</p>
-      <Button size="sm" variant="secondary" onClick={onRetry}>
-        <RefreshCw aria-hidden /> Retry
+      <p className="text-pretty text-sm text-foreground/90">{message}</p>
+      <Button size="sm" variant="outline" onClick={onRetry}>
+        <RefreshCw aria-hidden className="size-3.5" /> Retry
       </Button>
     </div>
   );

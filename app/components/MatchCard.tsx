@@ -5,6 +5,7 @@ import Link from "next/link";
 import { format } from "date-fns";
 import { TeamCrest } from "@/app/components/TeamCrest";
 import { PredictionModal } from "@/app/components/PredictionModal";
+import { Card } from "@/app/components/ui/card";
 import { Button } from "@/app/components/ui/button";
 import { cn } from "@/app/lib/utils";
 import {
@@ -27,36 +28,56 @@ export function MatchCard({ event }: { event: OddsEvent }) {
       : "draw";
 
   return (
-    <article className="flex flex-1 flex-col rounded-sm border border-line bg-surface p-5">
+    <Card
+      as="article"
+      className="flex flex-1 flex-col p-5 transition-all hover:border-foreground/25 hover:shadow-xs"
+    >
       <time
         dateTime={event.commence_time}
-        className="mb-4 font-mono text-xs uppercase tabular-nums text-muted"
+        className="mb-3 font-mono text-xs text-muted-foreground tabular-nums"
       >
         {format(kickoff, "EEE d MMM, HH:mm")}
       </time>
 
-      <div className="mb-4 space-y-2">
+      <div className="mb-4 space-y-2.5">
         <TeamRow name={event.home_team} favored={favored === "home"} />
         <TeamRow name={event.away_team} favored={favored === "away"} />
       </div>
 
-      <dl className="grid grid-cols-3 border-t border-line pt-3">
-        <OddCell label="1" title="Home win" value={formatOdds(avg.home)} highlight={favored === "home"} />
-        <OddCell label="X" title="Draw" value={formatOdds(avg.draw)} highlight={favored === "draw"} />
-        <OddCell label="2" title="Away win" value={formatOdds(avg.away)} highlight={favored === "away"} />
+      <dl className="grid grid-cols-3 rounded-xl border border-border/70 bg-muted/30 p-1.5">
+        <OddCell
+          label="1"
+          title="Home win"
+          value={formatOdds(avg.home)}
+          highlight={favored === "home"}
+        />
+        <OddCell
+          label="X"
+          title="Draw"
+          value={formatOdds(avg.draw)}
+          highlight={favored === "draw"}
+        />
+        <OddCell
+          label="2"
+          title="Away win"
+          value={formatOdds(avg.away)}
+          highlight={favored === "away"}
+        />
       </dl>
 
-      <div className="mt-4 flex items-center justify-between gap-2">
+      <div className="mt-4 flex items-center justify-between gap-2 pt-1">
         <PredictionModal event={event}>
           <Button size="sm">Predict</Button>
         </PredictionModal>
         <Button size="sm" variant="ghost" asChild>
-          <Link href={`/matches/${encodeURIComponent(event.id)}?sport=${encodeURIComponent(event.sport_key)}`}>
+          <Link
+            href={`/matches/${encodeURIComponent(event.id)}?sport=${encodeURIComponent(event.sport_key)}`}
+          >
             Details
           </Link>
         </Button>
       </div>
-    </article>
+    </Card>
   );
 }
 
@@ -64,11 +85,17 @@ function TeamRow({ name, favored }: { name: string; favored: boolean }) {
   return (
     <div className="flex items-center gap-2.5">
       <TeamCrest name={name} size="sm" />
-      <p className="flex-1 truncate text-base leading-tight text-foreground" title={name}>
+      <p
+        className="flex-1 truncate text-sm font-medium text-foreground leading-none"
+        title={name}
+      >
         {name}
       </p>
       {favored && (
-        <span className="size-1.5 shrink-0 rounded-full bg-accent">
+        <span
+          className="size-1.5 shrink-0 rounded-full bg-primary"
+          title="Market favourite"
+        >
           <span className="sr-only">Market favourite</span>
         </span>
       )}
@@ -88,16 +115,16 @@ function OddCell({
   highlight?: boolean;
 }) {
   return (
-    <div className="flex flex-col items-center py-2">
-      <dt className="font-mono text-xs uppercase text-muted">
+    <div className="flex flex-col items-center py-1.5 text-center">
+      <dt className="font-mono text-[11px] uppercase tracking-wide text-muted-foreground">
         <abbr title={title} className="no-underline">
           {label}
         </abbr>
       </dt>
       <dd
         className={cn(
-          "font-mono text-xl tabular-nums",
-          highlight ? "text-accent" : "text-foreground"
+          "font-mono text-base font-semibold tabular-nums mt-0.5",
+          highlight ? "text-foreground font-bold" : "text-muted-foreground",
         )}
       >
         {value}
