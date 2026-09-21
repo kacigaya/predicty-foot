@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="public/icon.png" alt="Predicty Foot logo" width="140">
+  <img src="public/icon.svg" alt="Predicty Foot logo" width="220">
 </p>
 
 <h1 align="center">Predicty Foot</h1>

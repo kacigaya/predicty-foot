@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <style>
+    .text {
+      font-family: Inter, system-ui, sans-serif;
+      font-weight: 700;
+      font-size: 84px;
+      letter-spacing: -0.025em;
+      fill: #262626;
+    }
+    .accent {
+      font-style: italic;
+      fill: #15803d;
+    }
+    @media (prefers-color-scheme: dark) {
+      .text { fill: #f5f5f5; }
+      .accent { fill: #d8ff3e; }
+    }
+  </style>
+  <text
+        x="256"
+        y="256"
+        dominant-baseline="middle"
+        text-anchor="middle"
+        class="text"
+    >
+    Predicty<tspan class="accent" dx="-0.04em">Foot</tspan>
+  </text>
+</svg>

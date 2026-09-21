@@ -9,6 +9,8 @@ import "./globals.css";
 const inter = Inter({
   variable: "--font-sans",
   subsets: ["latin"],
+  // Italic carries the accent word of the wordmark.
+  style: ["normal", "italic"],
   display: "swap",
 });
 
@@ -40,7 +42,6 @@ export const metadata: Metadata = {
     description: SITE_DESCRIPTION,
     images: ["/og.png"],
   },
-  icons: { apple: "/icon.png" },
 };
 
 export const viewport: Viewport = {

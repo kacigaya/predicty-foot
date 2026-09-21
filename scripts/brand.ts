@@ -1,28 +1,40 @@
-// Renders the brand assets from the typeface the navbar wordmark uses
-// (Inter Bold, tight tracking), so the logo is the type, not a drawn glyph.
-// Uses the satori/resvg renderer bundled with Next; no extra dependency.
+// Renders the raster brand assets from the navbar wordmark: "Predicty" in the
+// heading type (Inter Bold, tight tracking) with "Foot" italic in brand lime,
+// tucked into the preceding letter. Uses the satori/resvg renderer bundled
+// with Next; no extra dependency. `public/icon.svg` is the same wordmark as
+// hand-written SVG and is not touched here.
 //
 //   bun run brand
 //
-// Writes public/icon.png (square mark, also the apple icon), app/favicon.ico
-// (256px PNG-in-ICO) and public/og.png (1200x630 mark plus wordmark).
+// Writes app/favicon.ico (256px PNG-in-ICO) and app/apple-icon.png (180px),
+// both the "PF" monogram, and public/og.png (1200x630 wordmark banner).
 import { writeFile } from "node:fs/promises";
 import { createElement as h, type CSSProperties, type ReactElement } from "react";
 import { ImageResponse } from "next/dist/compiled/@vercel/og/index.node.js";
 
 const LIME = "#d8ff3e";
 const INK = "#0d0d0e";
+const FOREGROUND = "#f5f5f5";
 const FONT_CSS =
-  "https://fonts.googleapis.com/css2?family=Inter:wght@700&text=PredictyFoot";
+  "https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,700;1,700&text=PredictyFoot";
+
+type Font = { name: string; data: ArrayBuffer; weight: 700; style: "normal" | "italic" };
 
 // Google Fonts serves WOFF (satori cannot read woff2) to a pre-woff2 user agent.
-async function loadInterBold(): Promise<ArrayBuffer> {
+async function loadInterBold(): Promise<Font[]> {
   const css = await fetch(FONT_CSS, {
     headers: { "User-Agent": "Mozilla/5.0 (Windows NT 6.1; rv:12.0) Gecko/20100101 Firefox/12.0" },
   }).then((r) => r.text());
-  const url = css.match(/src: url\((https:[^)]+)\)/)?.[1];
-  if (!url) throw new Error("Inter Bold url not found in Google Fonts CSS");
-  return fetch(url).then((r) => r.arrayBuffer());
+  const faces = [...css.matchAll(/font-style: (normal|italic);[\s\S]*?src: url\((https:[^)]+)\)/g)];
+  if (faces.length !== 2) throw new Error("expected normal and italic Inter faces in Google Fonts CSS");
+  return Promise.all(
+    faces.map(async ([, style, url]) => ({
+      name: "Inter",
+      data: await fetch(url).then((r) => r.arrayBuffer()),
+      weight: 700 as const,
+      style: style as Font["style"],
+    })),
+  );
 }
 
 const type = (size: number): CSSProperties => ({
@@ -33,8 +45,25 @@ const type = (size: number): CSSProperties => ({
   lineHeight: 1,
 });
 
-// Circular mark: ink disc, inset lime ring, bold "P" in the wordmark type.
-function mark(size: number): ReactElement {
+const accent = (size: number, text: string): ReactElement =>
+  h(
+    "span",
+    { style: { display: "flex", fontStyle: "italic", color: LIME, marginLeft: -size * 0.04 } },
+    text,
+  );
+
+function wordmark(size: number): ReactElement {
+  return h(
+    "div",
+    { style: { display: "flex", color: FOREGROUND, ...type(size) } },
+    h("span", { style: { display: "flex" } }, "Predicty"),
+    accent(size, "Foot"),
+  );
+}
+
+// Square monogram for icons: initials in the wordmark treatment on ink.
+function monogram(size: number): ReactElement {
+  const fs = size * 0.6;
   return h(
     "div",
     {
@@ -44,19 +73,17 @@ function mark(size: number): ReactElement {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        borderRadius: "50%",
         backgroundColor: INK,
-        boxShadow: `inset 0 0 0 ${size * 0.045}px ${INK}, inset 0 0 0 ${size * 0.055}px ${LIME}`,
-        color: LIME,
-        ...type(size * 0.62),
+        color: FOREGROUND,
+        ...type(fs),
       },
     },
-    h("span", { style: { display: "flex", marginTop: -size * 0.035 } }, "P"),
+    h("span", { style: { display: "flex" } }, "P"),
+    accent(fs, "F"),
   );
 }
 
-// Open Graph card: mark plus the two-tone wordmark from the navbar.
-function card(): ReactElement {
+function banner(): ReactElement {
   return h(
     "div",
     {
@@ -66,28 +93,15 @@ function card(): ReactElement {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        gap: 56,
         backgroundColor: INK,
-        color: "#f5f5f5",
-        ...type(132),
       },
     },
-    mark(220),
-    h(
-      "div",
-      { style: { display: "flex", gap: 34 } },
-      h("span", { style: { display: "flex" } }, "Predicty"),
-      h("span", { style: { display: "flex", color: LIME } }, "Foot"),
-    ),
+    wordmark(150),
   );
 }
 
-async function render(node: ReactElement, width: number, height: number, font: ArrayBuffer) {
-  const res = new ImageResponse(node, {
-    width,
-    height,
-    fonts: [{ name: "Inter", data: font, weight: 700, style: "normal" }],
-  });
+async function render(node: ReactElement, width: number, height: number, fonts: Font[]) {
+  const res = new ImageResponse(node, { width, height, fonts });
   return Buffer.from(await res.arrayBuffer());
 }
 
@@ -108,8 +122,8 @@ function ico(png: Buffer, size: number): Buffer {
   return Buffer.concat([header, png]);
 }
 
-const font = await loadInterBold();
-await writeFile("public/icon.png", await render(mark(1024), 1024, 1024, font));
-await writeFile("app/favicon.ico", ico(await render(mark(256), 256, 256, font), 256));
-await writeFile("public/og.png", await render(card(), 1200, 630, font));
-console.log("wrote public/icon.png, app/favicon.ico, public/og.png");
+const fonts = await loadInterBold();
+await writeFile("app/favicon.ico", ico(await render(monogram(256), 256, 256, fonts), 256));
+await writeFile("app/apple-icon.png", await render(monogram(180), 180, 180, fonts));
+await writeFile("public/og.png", await render(banner(), 1200, 630, fonts));
+console.log("wrote app/favicon.ico, app/apple-icon.png, public/og.png");

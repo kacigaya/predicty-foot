@@ -35,10 +35,12 @@ Bun 1.4.0 in the Docker image (1.3.14 segfaults in `next build` there), Node 22.
   `border`, `input`, `ring`, `destructive`, `warning`, `success`).
 - Fonts: `Inter` for headings and body (`font-sans`), `Geist Mono` for numbers, labels,
   and odds (`font-mono`). Loaded through `next/font/google`.
-- Brand assets (`public/icon.png`, `app/favicon.ico`, `public/og.png`) are the wordmark
-  type: Inter Bold "P" in `--brand` lime on an ink disc. `bun run brand` regenerates them
-  from `scripts/brand.ts` (satori bundled with Next, font fetched from Google Fonts);
-  never hand-edit the PNGs.
+- Branding is the typographic wordmark from `Navbar`: "Predicty" in Inter Bold with
+  "Foot" italic in `--brand` lime, tucked `-ml-[0.04em]`, same treatment as pdfcmprs.
+  No image mark. `public/icon.svg` is the wordmark as SVG (README, light/dark aware).
+  `bun run brand` regenerates `app/favicon.ico`, `app/apple-icon.png` ("PF" monogram)
+  and `public/og.png` from `scripts/brand.ts` (satori bundled with Next, Inter fetched
+  from Google Fonts); never hand-edit the rasters.
 - Floating island navigation with `ThemeToggle`, `Badge`, and clean action buttons.
 - Cards use the signature Coss inset shadow highlights:
   `dark:before:shadow-[0_-1px_--theme(--color-white/6%)]`.

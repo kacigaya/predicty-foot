@@ -1,4 +1,3 @@
-import Image from "next/image";
 import Link from "next/link";
 import { Badge } from "@/app/components/ui/badge";
 import { Button } from "@/app/components/ui/button";
@@ -11,18 +10,11 @@ export function Navbar() {
         <div className="flex items-center gap-3">
           <Link
             href="/"
-            className="flex items-center gap-2.5 rounded-md text-foreground transition-opacity hover:opacity-85 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="rounded-md font-heading text-xl font-bold leading-none tracking-tight text-foreground transition-opacity hover:opacity-85 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:text-2xl"
           >
-            <Image
-              src="/icon.png"
-              alt="Predicty Foot"
-              width={32}
-              height={32}
-              className="size-8 rounded-full object-contain"
-              priority
-            />
-            <span className="font-heading text-lg sm:text-xl font-bold tracking-tight">
-              Predicty <span className="text-brand">Foot</span>
+            <span translate="no">
+              Predicty
+              <em className="-ml-[0.04em] italic text-brand">Foot</em>
             </span>
           </Link>
           <Badge variant="outline" size="sm" className="hidden sm:inline-flex">
