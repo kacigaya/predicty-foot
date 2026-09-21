@@ -32,13 +32,13 @@ export const metadata: Metadata = {
     title: SITE_NAME,
     description: SITE_DESCRIPTION,
     url: "/",
-    images: [{ url: "/icon.png", width: 1694, height: 1694, alt: `${SITE_NAME} logo` }],
+    images: [{ url: "/og.png", width: 1200, height: 630, alt: `${SITE_NAME} logo` }],
   },
   twitter: {
-    card: "summary",
+    card: "summary_large_image",
     title: SITE_NAME,
     description: SITE_DESCRIPTION,
-    images: ["/icon.png"],
+    images: ["/og.png"],
   },
   icons: { apple: "/icon.png" },
 };
