@@ -2,7 +2,7 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import type { OddsEvent } from "./odds";
 import { averageH2HOdds, impliedProbabilities } from "./odds";
 
-export const GEMINI_MODEL = "gemini-3.1-flash-lite-preview";
+export const GEMINI_MODEL = "gemini-3.1-flash-lite";
 
 export type AIPrediction = {
   winner: "home" | "draw" | "away";
