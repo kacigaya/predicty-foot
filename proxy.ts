@@ -12,7 +12,7 @@ export function proxy(request: NextRequest) {
     "form-action 'self'",
     `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'${isDev ? " 'unsafe-eval'" : ""}`,
     // No nonce here on purpose: a nonce makes browsers ignore 'unsafe-inline',
-    // and next/image, Radix and the loading skeleton all set style attributes,
+    // and next/image and Base UI (dialog, tabs indicator, scroll area) all set style attributes,
     // which cannot carry a nonce. Scripts keep the strict nonce policy.
     "style-src 'self' 'unsafe-inline'",
     "img-src 'self' data: blob: https://www.thesportsdb.com https://r2.thesportsdb.com https://images.thesportsdb.com https://upload.wikimedia.org https://thumb.wikimedia.org",

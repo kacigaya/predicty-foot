@@ -1,9 +1,8 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { Loader2 } from "lucide-react";
-import { Button } from "@/app/components/ui/button";
-import { Card } from "@/app/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import { PredictionResult } from "@/app/components/PredictionResult";
 import { generatePredictionAction } from "@/app/actions/generatePrediction";
 import type { AIPrediction } from "@/app/lib/gemini";
@@ -34,7 +33,7 @@ export function MatchPredictionPanel({
 
   return (
     <Card
-      as="section"
+      render={<section />}
       aria-labelledby="prediction-heading"
       aria-live="polite"
       aria-busy={isPending}
@@ -46,11 +45,10 @@ export function MatchPredictionPanel({
         </h2>
         <Button
           onClick={onGenerate}
-          disabled={isPending}
+          loading={isPending}
           size="sm"
           variant={prediction ? "outline" : "default"}
         >
-          {isPending && <Loader2 aria-hidden className="size-3.5 animate-spin motion-reduce:animate-none" />}
           {prediction ? "Regenerate" : "Generate"}
         </Button>
       </div>

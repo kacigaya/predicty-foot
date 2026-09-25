@@ -1,5 +1,5 @@
 import { format } from "date-fns";
-import { cn } from "@/app/lib/utils";
+import { cn } from "@/lib/utils";
 import { formatOdds, type OddsEvent } from "@/app/lib/odds";
 
 export function OddsTable({ event }: { event: OddsEvent }) {

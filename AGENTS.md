@@ -1,7 +1,7 @@
 # predicty-foot
 
 Football odds and Gemini predictions. Next.js 16 App Router, React 19, Tailwind 4,
-Radix dialog and tabs, Bun. Server actions call The Odds API and Gemini; both keys
+Coss UI on Base UI, Bun. Server actions call The Odds API and Gemini; both keys
 are runtime-only.
 
 ## Commands
@@ -29,7 +29,13 @@ Bun 1.4.0 in the Docker image (1.3.14 segfaults in `next build` there), Node 22.
 
 ## UI
 
-- Uses Gaya's Coss UI design system matching portfolio, webskrap/web, ghostpwn/web, and noskrap/web.
+- Uses Gaya's Coss UI design system matching muzik, pdfcmprs, portfolio, webskrap/web,
+  ghostpwn/web, and noskrap/web. Primitives are stock Coss components on `@base-ui/react`
+  in `components/ui` (`bunx shadcn@latest add @coss/<name>`); `cn` lives in `lib/utils.ts`.
+  Compose with `render={<Link />}`, never `asChild`.
+- Theme follows the OS until toggled (button or `d`); the choice is stored under
+  `THEME_STORAGE_KEY` from `app/site.ts`. An inline script in the root layout, carrying
+  the CSP nonce, applies it before first paint.
 - Semantic tokens live in `@theme inline` in `app/globals.css` (`background`, `foreground`,
   `card`, `popover`, `primary`, `secondary`, `muted`, `muted-foreground`, `accent`,
   `border`, `input`, `ring`, `destructive`, `warning`, `success`).
@@ -46,7 +52,7 @@ Bun 1.4.0 in the Docker image (1.3.14 segfaults in `next build` there), Node 22.
   `dark:before:shadow-[0_-1px_--theme(--color-white/6%)]`.
 - `PredictionResult` is shared by the fixture dialog and the match page.
 - `PredictionModal` takes its trigger as `children` through `DialogTrigger`; that is what
-  lets Radix return focus to the button on close.
+  lets Base UI return focus to the button on close.
 - Probability bars are native `<meter>` elements styled in `globals.css`, so no inline
   `style` attributes are needed.
 
@@ -54,7 +60,7 @@ Bun 1.4.0 in the Docker image (1.3.14 segfaults in `next build` there), Node 22.
 
 - `proxy.ts` sets a per-request CSP. `script-src` uses a nonce with `strict-dynamic`;
   `style-src` deliberately has no nonce (it would disable `unsafe-inline`, and
-  `next/image` and Radix set `style` attributes).
+  `next/image` and Base UI set `style` attributes).
 - `getOddsAction`, `generatePredictionAction` and `/api/odds` validate the league key
   against `LEAGUES` before calling the provider. Keep that when adding leagues.
 - Provider error text is logged, never returned to the browser.

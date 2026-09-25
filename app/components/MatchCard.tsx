@@ -5,9 +5,9 @@ import Link from "next/link";
 import { format } from "date-fns";
 import { TeamCrest } from "@/app/components/TeamCrest";
 import { PredictionModal } from "@/app/components/PredictionModal";
-import { Card } from "@/app/components/ui/card";
-import { Button } from "@/app/components/ui/button";
-import { cn } from "@/app/lib/utils";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import {
   averageH2HOdds,
   formatOdds,
@@ -29,8 +29,8 @@ export function MatchCard({ event }: { event: OddsEvent }) {
 
   return (
     <Card
-      as="article"
-      className="flex flex-1 flex-col p-5 transition-all hover:border-foreground/25 hover:shadow-xs"
+      render={<article />}
+      className="flex flex-1 flex-col p-5 transition-[border-color,box-shadow] hover:border-foreground/25 hover:shadow-xs"
     >
       <time
         dateTime={event.commence_time}
@@ -69,12 +69,16 @@ export function MatchCard({ event }: { event: OddsEvent }) {
         <PredictionModal event={event}>
           <Button size="sm">Predict</Button>
         </PredictionModal>
-        <Button size="sm" variant="ghost" asChild>
-          <Link
-            href={`/matches/${encodeURIComponent(event.id)}?sport=${encodeURIComponent(event.sport_key)}`}
-          >
-            Details
-          </Link>
+        <Button
+          size="sm"
+          variant="ghost"
+          render={
+            <Link
+              href={`/matches/${encodeURIComponent(event.id)}?sport=${encodeURIComponent(event.sport_key)}`}
+            />
+          }
+        >
+          Details
         </Button>
       </div>
     </Card>

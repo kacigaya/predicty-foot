@@ -3,11 +3,12 @@
 import { useEffect, useState, useTransition } from "react";
 import { formatDistanceToNowStrict } from "date-fns";
 import { RefreshCw, AlertCircle } from "lucide-react";
-import { cn } from "@/app/lib/utils";
+import { cn } from "@/lib/utils";
 import { LeagueSelector } from "@/app/components/LeagueSelector";
 import { MatchCard } from "@/app/components/MatchCard";
-import { Card, CardTitle, CardDescription } from "@/app/components/ui/card";
-import { Button } from "@/app/components/ui/button";
+import { Card, CardTitle, CardDescription } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { getOddsAction } from "@/app/actions/getOdds";
 import { DEFAULT_LEAGUE_KEY, getLeague } from "@/app/lib/leagues";
 import type { OddsEvent } from "@/app/lib/odds";
@@ -69,7 +70,7 @@ export function MatchBoard({
   return (
     <section
       id="fixtures"
-      className="mx-auto w-full max-w-6xl px-4 py-12 sm:px-6"
+      className="mx-auto w-full max-w-6xl scroll-mt-24 px-4 pb-16 sm:px-6"
       aria-busy={isPending}
     >
       <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
@@ -144,7 +145,7 @@ function GridSkeleton() {
       <span className="sr-only">Loading fixtures</span>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {Array.from({ length: 6 }).map((_, i) => (
-          <Card key={i} className="h-64 animate-pulse p-5" />
+          <Skeleton key={i} className="h-64 rounded-2xl" />
         ))}
       </div>
     </div>
@@ -160,7 +161,7 @@ function EmptyState({
 }) {
   return (
     <Card className="flex flex-col items-start gap-4 p-8">
-      <CardTitle as="h3" className="text-xl font-bold">
+      <CardTitle render={<h3 />} className="text-xl font-bold">
         No upcoming fixtures
       </CardTitle>
       <CardDescription className="text-sm">

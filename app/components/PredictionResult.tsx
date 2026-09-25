@@ -1,6 +1,6 @@
 import { format } from "date-fns";
-import { Badge } from "@/app/components/ui/badge";
-import { cn } from "@/app/lib/utils";
+import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 import type { AIPrediction } from "@/app/lib/gemini";
 import { averageH2HOdds, impliedProbabilities, type OddsEvent } from "@/app/lib/odds";
 

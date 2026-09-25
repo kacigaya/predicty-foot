@@ -57,8 +57,8 @@ Crests in these screenshots come from TheSportsDB and Wikimedia.
 ## Tech stack
 
 - Framework: Next.js 16 (Turbopack, App Router, server actions)
-- UI: React 19, Tailwind CSS 4, Radix primitives (dialog, tabs), Lucide icons
-- Styling: clsx, tailwind-merge, class-variance-authority, tw-animate-css
+- UI: React 19, Tailwind CSS 4, Coss UI on Base UI, Lucide icons
+- Styling: clsx, tailwind-merge, class-variance-authority
 - Data: The Odds API (fixtures and h2h odds), TheSportsDB (crests)
 - AI: `@google/generative-ai` with `gemini-3.1-flash-lite-preview`
 - Language: TypeScript
@@ -112,16 +112,17 @@ There is no test suite. The build runs the TypeScript check.
 ```
 app/
   page.tsx              # Home: hero and fixture board
-  layout.tsx            # Fonts, metadata defaults, navbar and footer
+  layout.tsx            # Fonts, metadata, pre-paint theme script, navbar, footer
   site.ts               # Canonical origin, site name, description
   actions/              # Server actions: getOdds, generatePrediction
   api/odds/             # JSON odds endpoint, rate limited
   api/team-logo/        # Crest lookup with alias and static tables
   components/           # Board, cards, prediction dialog and result
-  components/ui/        # Button, badge, dialog, tabs, skeleton
   lib/                  # Odds client and maths, Gemini client, leagues, rate limit
   matches/[id]/         # Match detail page and prediction panel
-components/             # Navbar and footer
+components/             # Navbar, footer, theme toggle
+  ui/                   # Coss UI primitives on Base UI
+lib/utils.ts            # cn() class merger
 proxy.ts                # Per-request CSP nonce
 public/                 # Icon and README screenshots
 Dockerfile              # Bun build, Node standalone runner
@@ -130,7 +131,7 @@ Dockerfile              # Bun build, Node standalone runner
 ## Security notes
 
 - `proxy.ts` sends a per-request CSP. Scripts use a nonce with `strict-dynamic`;
-  styles allow `unsafe-inline` because `next/image` and Radix set `style`
+  styles allow `unsafe-inline` because `next/image` and Base UI set `style`
   attributes, which cannot carry a nonce. `unsafe-eval` is added in development
   only.
 - Server actions and `/api/odds` validate the league key against the eight

@@ -2,7 +2,9 @@
 
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import { cn, teamInitials } from "@/app/lib/utils";
+import { cn } from "@/lib/utils";
+import { teamInitials } from "@/app/lib/utils";
+import { Skeleton } from "@/components/ui/skeleton";
 
 type LogoCacheEntry = { url: string | null; ts: number };
 type LogoResultState = { name: string; done: boolean; url: string | null };
@@ -145,14 +147,7 @@ export function TeamCrest({
 
   if (loading) {
     return (
-      <div
-        aria-hidden
-        className={cn(
-          dims,
-          "animate-pulse rounded-full bg-muted motion-reduce:animate-none",
-          className,
-        )}
-      />
+      <Skeleton aria-hidden className={cn(dims, "rounded-full", className)} />
     );
   }
 

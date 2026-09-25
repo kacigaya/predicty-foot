@@ -1,13 +1,14 @@
 import type { Metadata, Viewport } from "next";
 import { Inter, Geist_Mono } from "next/font/google";
+import { headers } from "next/headers";
 import { connection } from "next/server";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
-import { SITE_DESCRIPTION, SITE_NAME, SITE_URL } from "@/app/site";
+import { SITE_DESCRIPTION, SITE_NAME, SITE_URL, THEME_STORAGE_KEY } from "@/app/site";
 import "./globals.css";
 
 const inter = Inter({
-  variable: "--font-sans",
+  variable: "--font-inter",
   subsets: ["latin"],
   // Italic carries the accent word of the wordmark.
   style: ["normal", "italic"],
@@ -15,7 +16,7 @@ const inter = Inter({
 });
 
 const geistMono = Geist_Mono({
-  variable: "--font-mono",
+  variable: "--font-geist-mono",
   subsets: ["latin"],
   display: "swap",
 });
@@ -55,14 +56,21 @@ export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   await connection();
+  const nonce = (await headers()).get("x-nonce") ?? undefined;
 
   return (
-    <html
-      lang="en"
-      suppressHydrationWarning
-      className={`${inter.variable} ${geistMono.variable} h-full antialiased dark`}
-    >
-      <body className="flex min-h-full flex-col bg-background text-foreground font-sans">
+    <html lang="en" suppressHydrationWarning className="h-full">
+      <head>
+        {/* Resolve the theme before first paint, otherwise dark users see a light flash. */}
+        <script
+          nonce={nonce}
+          suppressHydrationWarning
+          dangerouslySetInnerHTML={{
+            __html: `try{var s=localStorage.getItem(${JSON.stringify(THEME_STORAGE_KEY)});if(s?s==="dark":matchMedia("(prefers-color-scheme: dark)").matches)document.documentElement.classList.add("dark")}catch(e){}`,
+          }}
+        />
+      </head>
+      <body className={`${inter.variable} ${geistMono.variable} flex min-h-full flex-col`}>
         <a
           href="#main-content"
           className="fixed left-[max(1rem,env(safe-area-inset-left))] top-[max(1rem,env(safe-area-inset-top))] z-50 -translate-y-20 rounded-md bg-card px-3 py-2 text-sm font-medium shadow-sm ring-2 ring-ring transition-transform focus:translate-y-0 motion-reduce:transition-none"

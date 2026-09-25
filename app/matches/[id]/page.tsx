@@ -5,8 +5,8 @@ import { format } from "date-fns";
 import { ArrowLeft } from "lucide-react";
 import { TeamCrest } from "@/app/components/TeamCrest";
 import { OddsTable } from "@/app/components/OddsTable";
-import { Button } from "@/app/components/ui/button";
-import { Badge } from "@/app/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { MatchPredictionPanel } from "@/app/matches/[id]/MatchPredictionPanel";
 import {
   averageH2HOdds,
@@ -64,11 +64,14 @@ export default async function MatchPage(props: Props) {
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-10 sm:px-6">
-      <Button variant="ghost" size="sm" asChild className="mb-8 -ml-2 text-muted-foreground hover:text-foreground">
-        <Link href="/">
-          <ArrowLeft aria-hidden className="size-3.5" />
-          All fixtures
-        </Link>
+      <Button
+        variant="ghost"
+        size="sm"
+        render={<Link href="/" />}
+        className="mb-8 -ml-2 text-muted-foreground hover:text-foreground"
+      >
+        <ArrowLeft aria-hidden />
+        All fixtures
       </Button>
 
       <div className="border-b border-border pb-8">
