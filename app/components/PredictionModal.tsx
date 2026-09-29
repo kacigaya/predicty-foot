@@ -66,8 +66,8 @@ export function PredictionModal({
           </DialogDescription>
         </DialogHeader>
 
-        <DialogPanel className="pt-6">
-          <div className="grid grid-cols-[1fr_auto_1fr] items-start gap-4 border-b border-border pb-6">
+        <DialogPanel>
+          <div className="grid grid-cols-[1fr_auto_1fr] items-start gap-4 border-b border-border pt-5 pb-6">
             <TeamPanel name={event.home_team} odds={formatOdds(avg.home)} prob={implied.home} />
             <div className="flex flex-col items-center gap-1 self-center px-2">
               <span className="font-mono text-xs uppercase tracking-wider text-muted-foreground">Draw</span>

@@ -4,7 +4,7 @@ export function Hero() {
   return (
     <section className="mx-auto w-full max-w-6xl px-4 pt-10 pb-16 sm:px-6 sm:pt-12">
       <div className="flex flex-col items-start gap-3">
-        <Badge variant="outline">
+        <Badge variant="outline" className="h-auto whitespace-normal py-0.5">
           Multi-bookmaker odds · Gemini AI predictions
         </Badge>
         <h1 className="max-w-[22ch] text-balance font-heading text-4xl font-bold leading-[1.05] tracking-tight text-foreground sm:text-5xl">

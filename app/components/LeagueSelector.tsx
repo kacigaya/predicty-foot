@@ -16,7 +16,10 @@ export function LeagueSelector({
 }) {
   return (
     <Tabs value={value} onValueChange={onChange} className="w-full">
-      <TabsList aria-label="League">
+      <TabsList
+        aria-label="League"
+        className="scrollbar-hide max-w-full justify-start overflow-x-auto"
+      >
         {LEAGUES.map((l) => (
           <TabsTab key={l.key} value={l.key}>
             <span aria-hidden>{l.flag}</span>
