@@ -2,8 +2,6 @@
   <img src="public/icon.svg" alt="Predicty Foot logo" width="220">
 </p>
 
-<h1 align="center">Predicty Foot</h1>
-
 <p align="center">
    <strong>Bookmaker odds and AI match predictions for Europe's top football leagues.</strong><br>
    <em>Odds from The Odds API, averaged across bookmakers. Predictions from Google Gemini.</em>
