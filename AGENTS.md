@@ -55,6 +55,9 @@ Bun 1.4.0 in the Docker image (1.3.14 segfaults in `next build` there), Node 22.
   lets Base UI return focus to the button on close.
 - Probability bars are native `<meter>` elements styled in `globals.css`, so no inline
   `style` attributes are needed.
+- Privacy and cookie policies live at `/privacy` and `/cookies` under `app/(legal)`,
+  linked from the footer. Privacy contact: `contact@gaya.anonaddy.com`. Keep their
+  storage and provider descriptions current when data handling changes.
 
 ## Constraints worth keeping
 

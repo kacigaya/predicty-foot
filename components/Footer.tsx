@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 const linkClass =
   "rounded-sm text-xs text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
 
@@ -77,6 +79,10 @@ export function Footer() {
 
         <div className="mt-8 flex flex-wrap items-center justify-between gap-2 border-t border-border/60 pt-5 font-mono text-xs text-muted-foreground">
           <p>© {currentYear} Gaya Kaci</p>
+          <nav aria-label="Legal" className="flex flex-wrap gap-4">
+            <Link href="/privacy" className={linkClass}>Privacy policy</Link>
+            <Link href="/cookies" className={linkClass}>Cookies</Link>
+          </nav>
           <p>MIT License</p>
         </div>
       </div>
