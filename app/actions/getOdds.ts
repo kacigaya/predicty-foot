@@ -1,9 +1,7 @@
 "use server";
 
 import { fetchOdds, OddsApiError, type OddsEvent } from "@/app/lib/odds";
-import { LEAGUES } from "@/app/lib/leagues";
-
-const ALLOWED_SPORT_KEYS = new Set(LEAGUES.map((l) => l.key));
+import { isLeagueKey } from "@/app/lib/leagues";
 
 export type GetOddsResult =
   | { ok: true; events: OddsEvent[]; fetchedAt: string }
@@ -18,7 +16,7 @@ function publicMessage(err: OddsApiError): string {
 }
 
 export async function getOddsAction(sportKey: string): Promise<GetOddsResult> {
-  if (!ALLOWED_SPORT_KEYS.has(sportKey)) {
+  if (!isLeagueKey(sportKey)) {
     return { ok: false, error: "Unknown league.", status: 400 };
   }
   try {

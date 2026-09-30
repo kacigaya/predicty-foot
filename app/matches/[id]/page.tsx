@@ -15,9 +15,7 @@ import {
   impliedProbabilities,
   type OddsEvent,
 } from "@/app/lib/odds";
-import { LEAGUES, getLeague } from "@/app/lib/leagues";
-
-export const revalidate = 60;
+import { LEAGUES, getLeague, isLeagueKey } from "@/app/lib/leagues";
 
 type Props = {
   params: Promise<{ id: string }>;
@@ -30,7 +28,7 @@ async function loadMatch(props: Props) {
   const { id } = await props.params;
   const { sport } = await props.searchParams;
   // The hint only reorders the search; an unknown key is ignored, never fetched.
-  const keys = sport && LEAGUE_KEYS.includes(sport) ? [sport, ...LEAGUE_KEYS] : LEAGUE_KEYS;
+  const keys = sport && isLeagueKey(sport) ? [sport, ...LEAGUE_KEYS] : LEAGUE_KEYS;
   return findEventAcrossLeagues(keys, id);
 }
 

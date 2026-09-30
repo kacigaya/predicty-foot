@@ -131,19 +131,19 @@ Dockerfile              # Bun build, Node standalone runner
 - `proxy.ts` sends a per-request CSP. Scripts use a nonce with `strict-dynamic`;
   styles allow `unsafe-inline` because `next/image` and Base UI set `style`
   attributes, which cannot carry a nonce. `unsafe-eval` is added in development
-  only.
-- Server actions and `/api/odds` validate the league key against the eight
-  configured competitions before calling the provider, and event ids against a
+  only. Images, fonts and requests are limited to the site's own origin: provider
+  calls run on the server and crests go through `/_next/image`.
+- Server actions and `/api/odds` validate the league key with `isLeagueKey`
+  against the eight configured competitions before calling the provider, and event ids against a
   character allowlist.
 - Provider error bodies and the missing-key hint are logged server-side; the
   browser gets a generic message.
-- `/api/odds` and `/api/team-logo` are rate limited per client IP, 60 requests
-  a minute, in memory. The limiter keys on the first `X-Forwarded-For` entry,
+- `/api/odds` and `/api/team-logo` are rate limited per client IP, in memory:
+  60 and 600 requests a minute respectively. The limiter keys on the first `X-Forwarded-For` entry,
   so the reverse proxy in front of the app must overwrite that header rather
   than append to it.
 - Crest URLs are only accepted from `www.thesportsdb.com`, `r2.thesportsdb.com`
-  and `images.thesportsdb.com`, matching `images.remotePatterns` and the CSP
-  `img-src`. Local images are optimized only under `/crests/`.
+  and `images.thesportsdb.com`, matching `images.remotePatterns`. Local images are optimized only under `/crests/`.
 
 ## Deployment
 

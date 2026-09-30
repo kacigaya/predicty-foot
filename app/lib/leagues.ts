@@ -22,3 +22,9 @@ export const DEFAULT_LEAGUE_KEY = "soccer_epl";
 export function getLeague(key: string): League | undefined {
   return LEAGUES.find((l) => l.key === key);
 }
+
+// Allowlist check for league keys coming from the browser. Every caller that
+// forwards a key to the odds provider goes through this.
+export function isLeagueKey(key: string): boolean {
+  return LEAGUES.some((l) => l.key === key);
+}

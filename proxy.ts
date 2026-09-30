@@ -15,9 +15,11 @@ export function proxy(request: NextRequest) {
     // and next/image and Base UI (dialog, tabs indicator, scroll area) all set style attributes,
     // which cannot carry a nonce. Scripts keep the strict nonce policy.
     "style-src 'self' 'unsafe-inline'",
-    "img-src 'self' data: blob: https://www.thesportsdb.com https://r2.thesportsdb.com https://images.thesportsdb.com",
-    "font-src 'self' https://fonts.gstatic.com",
-    `connect-src 'self' https://api.the-odds-api.com https://www.thesportsdb.com https://generativelanguage.googleapis.com${isDev ? " ws: wss:" : ""}`,
+    // The browser only talks to this origin: provider calls run on the server,
+    // crests go through /_next/image, and next/font self-hosts the fonts.
+    "img-src 'self' data: blob:",
+    "font-src 'self'",
+    `connect-src 'self'${isDev ? " ws: wss:" : ""}`,
     "upgrade-insecure-requests",
   ]
     .join("; ")
