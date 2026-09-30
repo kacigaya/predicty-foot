@@ -208,7 +208,7 @@ export async function GET(req: NextRequest) {
     }
   }
 
-  const badge = (await resolveBadge(name)) ?? staticBadgeFor(name) ?? null;
+  const badge = await resolveBadge(name);
   cache.set(cacheKey, { url: badge, ts: now });
   pruneOldestCacheEntries();
 

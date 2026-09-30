@@ -2,9 +2,8 @@
 
 import { findEventAcrossLeagues, fetchEventById } from "@/app/lib/odds";
 import { generatePrediction, GeminiError, type AIPrediction } from "@/app/lib/gemini";
-import { LEAGUES } from "@/app/lib/leagues";
+import { isLeagueKey, LEAGUES } from "@/app/lib/leagues";
 
-const ALLOWED_SPORT_KEYS = new Set(LEAGUES.map((l) => l.key));
 const EVENT_ID_PATTERN = /^[a-zA-Z0-9:_-]{1,120}$/;
 
 export type PredictionResult =
@@ -20,7 +19,7 @@ export async function generatePredictionAction(
       return { ok: false, error: "Invalid event id." };
     }
 
-    if (sportKey && !ALLOWED_SPORT_KEYS.has(sportKey)) {
+    if (sportKey && !isLeagueKey(sportKey)) {
       return { ok: false, error: "Invalid sport key." };
     }
 

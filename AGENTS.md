@@ -65,7 +65,12 @@ Bun 1.4.0 in the Docker image (1.3.14 segfaults in `next build` there), Node 22.
   `style-src` deliberately has no nonce (it would disable `unsafe-inline`, and
   `next/image` and Base UI set `style` attributes).
 - `getOddsAction`, `generatePredictionAction` and `/api/odds` validate the league key
-  against `LEAGUES` before calling the provider. Keep that when adding leagues.
+  with `isLeagueKey` (`app/lib/leagues.ts`) before calling the provider. Keep that when
+  adding leagues or entry points.
+- The CSP allows only `'self'` for images, fonts and `connect-src`. The browser never
+  calls a provider directly, and crests go through `/_next/image`.
+- `normalizePrediction` in `app/lib/gemini.ts` type-checks every field of the Gemini
+  JSON; the model output is untrusted and non-strings crash React when rendered.
 - Provider error text is logged, never returned to the browser.
 - Crests for known clubs are PNGs in `public/crests`, mapped by `app/lib/crests.ts`
   (`CREST_SLUGS` name to slug, `CREST_SOURCES` slug to TheSportsDB badge). After editing
