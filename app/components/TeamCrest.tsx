@@ -14,7 +14,10 @@ const inFlightRequests = new Map<string, Promise<string | null>>();
 
 const POSITIVE_TTL_MS = 7 * 24 * 60 * 60 * 1000; // 7 days (matches server)
 const NEGATIVE_TTL_MS = 60 * 1000; // 1 min
-const STORAGE_KEY = "predicty_foot_crests_v1";
+// Bump when crest sources change so browsers drop URLs cached for up to 7 days,
+// both in localStorage and in the HTTP cache of /api/team-logo.
+const CRESTS_VERSION = 2;
+const STORAGE_KEY = `predicty_foot_crests_v${CRESTS_VERSION}`;
 const MAX_STORAGE_ENTRIES = 250;
 
 function getFreshCachedLogo(name: string): { hit: boolean; url: string | null } {
@@ -75,7 +78,9 @@ async function fetchTeamLogo(name: string): Promise<string | null> {
 
   const promise = (async () => {
     try {
-      const res = await fetch(`/api/team-logo?name=${encodeURIComponent(name)}`);
+      const res = await fetch(
+        `/api/team-logo?name=${encodeURIComponent(name)}&v=${CRESTS_VERSION}`,
+      );
       if (!res.ok) throw new Error(`Team logo request failed: ${res.status}`);
       const data: { url: string | null } = await res.json();
       return data?.url ?? null;

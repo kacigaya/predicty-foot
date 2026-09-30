@@ -23,7 +23,7 @@ Live at [pfoot.gayakaci.duckdns.org](https://pfoot.gayakaci.duckdns.org/).
 - A Gemini prediction per fixture: predicted result and score, confidence, AI vs market probabilities with the edge on each outcome, reasoning, key factors, and one suggested bet
 - Full bookmaker table per match with the best price per outcome highlighted
 - Match detail page at `/matches/[id]` with the same prediction panel
-- Team crests resolved through TheSportsDB with a static override table, cached for a day
+- Team crests for league clubs bundled in `public/crests`; other teams fall back to a TheSportsDB search
 - Odds cached for five minutes in memory and revalidated every minute by Next.js, so a refresh rarely costs an API call
 - Per-route metadata, canonical URLs, and Open Graph tags
 - Dark theme only: near-black surfaces, one lime accent, Instrument Serif for headings, Geist for text, JetBrains Mono for numbers
@@ -141,9 +141,9 @@ Dockerfile              # Bun build, Node standalone runner
   a minute, in memory. The limiter keys on the first `X-Forwarded-For` entry,
   so the reverse proxy in front of the app must overwrite that header rather
   than append to it.
-- Crest URLs are only accepted from `thesportsdb.com`, `r2.thesportsdb.com`
-  and `upload.wikimedia.org`, matching `images.remotePatterns` and the CSP
-  `img-src`.
+- Crest URLs are only accepted from `www.thesportsdb.com`, `r2.thesportsdb.com`
+  and `images.thesportsdb.com`, matching `images.remotePatterns` and the CSP
+  `img-src`. Local images are optimized only under `/crests/`.
 
 ## Deployment
 

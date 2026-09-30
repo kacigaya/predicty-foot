@@ -27,6 +27,8 @@ const nextConfig: NextConfig = {
     ];
   },
   images: {
+    // Bundled crests only; remote badges are limited to TheSportsDB below.
+    localPatterns: [{ pathname: "/crests/**", search: "" }],
     remotePatterns: [
       {
         protocol: "https",
@@ -39,14 +41,6 @@ const nextConfig: NextConfig = {
       {
         protocol: "https",
         hostname: "images.thesportsdb.com",
-      },
-      {
-        protocol: "https",
-        hostname: "upload.wikimedia.org",
-      },
-      {
-        protocol: "https",
-        hostname: "thumb.wikimedia.org",
       },
     ],
   },

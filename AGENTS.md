@@ -64,6 +64,12 @@ Bun 1.4.0 in the Docker image (1.3.14 segfaults in `next build` there), Node 22.
 - `getOddsAction`, `generatePredictionAction` and `/api/odds` validate the league key
   against `LEAGUES` before calling the provider. Keep that when adding leagues.
 - Provider error text is logged, never returned to the browser.
+- Crests for known clubs are PNGs in `public/crests`, mapped by `app/lib/crests.ts`
+  (`CREST_SLUGS` name to slug, `CREST_SOURCES` slug to TheSportsDB badge). After editing
+  it, run `bun run crests` and commit the PNGs. TheSportsDB name search often returns
+  the wrong club (women's, youth, namesakes), so check each source by hand. Bump
+  `CRESTS_VERSION` in `TeamCrest` when crest URLs change, since browsers cache them
+  for 7 days.
 - `formatOdds` returns an en dash for missing values; prose never uses an em dash.
 
 <!-- BEGIN:nextjs-agent-rules -->
