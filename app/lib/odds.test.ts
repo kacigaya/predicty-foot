@@ -2,6 +2,7 @@ import { afterEach, describe, expect, setSystemTime, spyOn, test } from "bun:tes
 import {
   averageH2HOdds,
   fetchOdds,
+  findEventAcrossLeagues,
   formatOdds,
   impliedProbabilities,
   OddsApiError,
@@ -116,5 +117,32 @@ describe("fetchOdds", () => {
     await expect(fetchOdds("cache_c")).rejects.toBeInstanceOf(OddsApiError);
     expect(fetchSpy).toHaveBeenCalledTimes(2);
     fetchSpy.mockRestore();
+  });
+});
+
+describe("findEventAcrossLeagues", () => {
+  process.env.ODDS_API_KEY = "test-key";
+
+  test("skips a failing league and finds the event in another", async () => {
+    const fetchSpy = spyOn(globalThis, "fetch").mockImplementation((async (url: string) =>
+      url.includes("find_down")
+        ? new Response("down", { status: 503 })
+        : Response.json([event([[2, 3, 4]])])) as unknown as typeof fetch);
+    const errorSpy = spyOn(console, "error").mockImplementation(() => {});
+    const found = await findEventAcrossLeagues(["find_down", "find_up"], "e1");
+    expect(found?.sportKey).toBe("find_up");
+    expect(await findEventAcrossLeagues(["find_down", "find_up"], "missing")).toBeNull();
+    fetchSpy.mockRestore();
+    errorSpy.mockRestore();
+  });
+
+  test("throws when every league fails instead of reporting not found", async () => {
+    const fetchSpy = spyOn(globalThis, "fetch").mockImplementation(
+      (async () => new Response("down", { status: 503 })) as unknown as typeof fetch,
+    );
+    const errorSpy = spyOn(console, "error").mockImplementation(() => {});
+    await expect(findEventAcrossLeagues(["all_down_a", "all_down_b"], "e1")).rejects.toBeInstanceOf(OddsApiError);
+    fetchSpy.mockRestore();
+    errorSpy.mockRestore();
   });
 });

@@ -118,18 +118,26 @@ export async function fetchEventById(
   return events.find((e) => e.id === eventId) ?? null;
 }
 
+// Null when the event is in none of the leagues that answered. Throws when no
+// league answered at all, so an outage is not reported as a missing match.
 export async function findEventAcrossLeagues(
   sportKeys: string[],
   eventId: string
 ): Promise<{ event: OddsEvent; sportKey: string } | null> {
-  for (const key of sportKeys) {
+  const keys = [...new Set(sportKeys)];
+  let lastError: unknown;
+  let answered = 0;
+  for (const key of keys) {
     try {
       const event = await fetchEventById(key, eventId);
+      answered += 1;
       if (event) return { event, sportKey: key };
-    } catch {
-      // swallow and try next league
+    } catch (err) {
+      console.error(`[findEventAcrossLeagues] ${key}:`, err);
+      lastError = err;
     }
   }
+  if (answered === 0 && keys.length > 0) throw lastError;
   return null;
 }
 
