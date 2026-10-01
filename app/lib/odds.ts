@@ -1,3 +1,5 @@
+import { unstable_rethrow } from "next/navigation";
+
 const API_BASE = "https://api.the-odds-api.com/v4";
 
 export type Outcome = {
@@ -133,6 +135,7 @@ export async function findEventAcrossLeagues(
       answered += 1;
       if (event) return { event, sportKey: key };
     } catch (err) {
+      unstable_rethrow(err);
       console.error(`[findEventAcrossLeagues] ${key}:`, err);
       lastError = err;
     }

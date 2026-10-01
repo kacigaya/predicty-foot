@@ -1,5 +1,6 @@
 "use server";
 
+import { unstable_rethrow } from "next/navigation";
 import { fetchOdds, OddsApiError, type OddsEvent } from "@/app/lib/odds";
 import { isLeagueKey } from "@/app/lib/leagues";
 
@@ -23,6 +24,9 @@ export async function getOddsAction(sportKey: string): Promise<GetOddsResult> {
     const { events, fetchedAt } = await fetchOdds(sportKey);
     return { ok: true, events, fetchedAt };
   } catch (err) {
+    // Next signals dynamic rendering by throwing; its message carries the
+    // request URL, API key included, so it must never reach the log below.
+    unstable_rethrow(err);
     console.error("[getOddsAction]", err);
     if (err instanceof OddsApiError) {
       return { ok: false, error: publicMessage(err), status: err.status };

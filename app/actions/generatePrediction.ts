@@ -1,6 +1,7 @@
 "use server";
 
 import { headers } from "next/headers";
+import { unstable_rethrow } from "next/navigation";
 import { findEventAcrossLeagues, fetchEventById } from "@/app/lib/odds";
 import { generatePrediction, GeminiError, type AIPrediction } from "@/app/lib/gemini";
 import { isLeagueKey, LEAGUES } from "@/app/lib/leagues";
@@ -87,6 +88,7 @@ export async function generatePredictionAction(
     }
     return { ok: true, prediction };
   } catch (err) {
+    unstable_rethrow(err);
     console.error("[generatePredictionAction]", err);
     if (err instanceof GeminiError) {
       return { ok: false, error: "Prediction service unavailable." };
