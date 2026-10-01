@@ -58,7 +58,7 @@ Crests in these screenshots come from TheSportsDB and Wikimedia.
 - UI: React 19, Tailwind CSS 4, Coss UI on Base UI, Lucide icons
 - Styling: clsx, tailwind-merge, class-variance-authority
 - Data: The Odds API (fixtures and h2h odds), TheSportsDB (crests)
-- AI: `@google/generative-ai` with `gemini-3.1-flash-lite-preview`
+- AI: `@google/genai` with `gemini-3.1-flash-lite`
 - Language: TypeScript
 - Runtime: Bun 1.4 for install and build, Node 22 in the production image
 

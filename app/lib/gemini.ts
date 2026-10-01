@@ -1,4 +1,4 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import { GoogleGenAI, ThinkingLevel, Type, type Schema } from "@google/genai";
 import type { OddsEvent } from "./odds";
 import { averageH2HOdds, impliedProbabilities } from "./odds";
 
@@ -22,6 +22,56 @@ export type AIPrediction = {
 
 export class GeminiError extends Error {}
 
+// Overall bound for one prediction, retries included. The SDK defaults to five
+// attempts with up to 60 s backoff, far longer than anyone waits on a button.
+const REQUEST_TIMEOUT_MS = 25_000;
+
+// Enforced by the API, so the reply is JSON of this shape. Field values are
+// still checked in normalizePrediction.
+const RESPONSE_SCHEMA: Schema = {
+  type: Type.OBJECT,
+  properties: {
+    winner: { type: Type.STRING, enum: ["home", "draw", "away"] },
+    winnerTeam: { type: Type.STRING },
+    score: {
+      type: Type.OBJECT,
+      properties: { home: { type: Type.INTEGER }, away: { type: Type.INTEGER } },
+      required: ["home", "away"],
+    },
+    confidence: { type: Type.NUMBER },
+    aiProbabilities: {
+      type: Type.OBJECT,
+      properties: {
+        home: { type: Type.NUMBER },
+        draw: { type: Type.NUMBER },
+        away: { type: Type.NUMBER },
+      },
+      required: ["home", "draw", "away"],
+    },
+    reasoning: { type: Type.STRING },
+    keyFactors: { type: Type.ARRAY, items: { type: Type.STRING } },
+    suggestedBet: {
+      type: Type.OBJECT,
+      properties: {
+        market: { type: Type.STRING },
+        pick: { type: Type.STRING },
+        rationale: { type: Type.STRING },
+      },
+      required: ["market", "pick", "rationale"],
+    },
+  },
+  required: [
+    "winner",
+    "winnerTeam",
+    "score",
+    "confidence",
+    "aiProbabilities",
+    "reasoning",
+    "keyFactors",
+    "suggestedBet",
+  ],
+};
+
 function assertKey(): string {
   const key = process.env.GEMINI_API_KEY;
   if (!key) {
@@ -44,8 +94,10 @@ function summarizeBookmakers(event: OddsEvent): string {
 }
 
 export async function generatePrediction(event: OddsEvent): Promise<AIPrediction> {
-  const apiKey = assertKey();
-  const client = new GoogleGenerativeAI(apiKey);
+  const client = new GoogleGenAI({
+    apiKey: assertKey(),
+    httpOptions: { retryOptions: { attempts: 2 } },
+  });
 
   const avg = averageH2HOdds(event);
   const implied = impliedProbabilities(avg);
@@ -89,23 +141,28 @@ Return ONLY JSON matching this schema:
 }
 aiProbabilities must sum to 1.0 (±0.02).`;
 
-  const model = client.getGenerativeModel({
-    model: GEMINI_MODEL,
-    generationConfig: {
-      responseMimeType: "application/json",
-      temperature: 0.7,
-      maxOutputTokens: 1024,
-    },
-  });
-
-  let text: string;
+  let text: string | undefined;
   try {
-    const result = await model.generateContent(prompt);
-    text = result.response.text();
+    const response = await client.models.generateContent({
+      model: GEMINI_MODEL,
+      contents: prompt,
+      config: {
+        responseMimeType: "application/json",
+        responseSchema: RESPONSE_SCHEMA,
+        temperature: 0.7,
+        // Thinking tokens count against maxOutputTokens; at the old 1024 cap
+        // the JSON could be cut off. Low thinking plus headroom avoids that.
+        thinkingConfig: { thinkingLevel: ThinkingLevel.LOW },
+        maxOutputTokens: 4096,
+        abortSignal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+      },
+    });
+    text = response.text;
   } catch (err) {
-    throw new GeminiError(
-      err instanceof Error ? err.message : "Gemini request failed"
-    );
+    throw new GeminiError(err instanceof Error ? err.message : "Gemini request failed");
+  }
+  if (!text) {
+    throw new GeminiError("Gemini returned an empty response.");
   }
 
   let parsed: unknown;
