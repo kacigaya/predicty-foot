@@ -1,6 +1,5 @@
 "use client";
 
-import { format } from "date-fns";
 import {
   Dialog,
   DialogDescription,
@@ -12,6 +11,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
+import { LocalTime } from "@/app/components/LocalTime";
 import { TeamCrest } from "@/app/components/TeamCrest";
 import { OddsTable } from "@/app/components/OddsTable";
 import { PredictionResult } from "@/app/components/PredictionResult";
@@ -49,7 +49,7 @@ export function PredictionModal({
             {event.home_team} vs {event.away_team}
           </DialogTitle>
           <DialogDescription className="order-first font-mono text-xs">
-            {event.sport_title} · {format(new Date(event.commence_time), "EEE d MMM yyyy, HH:mm")}
+            {event.sport_title} · <LocalTime iso={event.commence_time} format="kickoffLong" />
           </DialogDescription>
         </DialogHeader>
 

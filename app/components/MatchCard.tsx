@@ -2,7 +2,7 @@
 
 import { useMemo } from "react";
 import Link from "next/link";
-import { format } from "date-fns";
+import { LocalTime } from "@/app/components/LocalTime";
 import { TeamCrest } from "@/app/components/TeamCrest";
 import { PredictionModal } from "@/app/components/PredictionModal";
 import { Card } from "@/components/ui/card";
@@ -18,7 +18,6 @@ import type { Fixture } from "@/app/lib/crests";
 export function MatchCard({ event }: { event: Fixture }) {
   const avg = useMemo(() => averageH2HOdds(event), [event]);
   const implied = useMemo(() => impliedProbabilities(avg), [avg]);
-  const kickoff = new Date(event.commence_time);
 
   const favored =
     implied.home >= implied.draw && implied.home >= implied.away
@@ -32,12 +31,11 @@ export function MatchCard({ event }: { event: Fixture }) {
       render={<article />}
       className="flex flex-1 flex-col p-5 transition-[border-color,box-shadow] hover:border-foreground/25 hover:shadow-xs"
     >
-      <time
-        dateTime={event.commence_time}
+      <LocalTime
+        iso={event.commence_time}
+        format="kickoff"
         className="mb-3 font-mono text-xs text-muted-foreground tabular-nums"
-      >
-        {format(kickoff, "EEE d MMM, HH:mm")}
-      </time>
+      />
 
       <div className="mb-4 space-y-2.5">
         <TeamRow name={event.home_team} crest={event.homeCrest} favored={favored === "home"} />

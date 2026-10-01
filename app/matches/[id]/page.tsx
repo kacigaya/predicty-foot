@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { format } from "date-fns";
 import { ArrowLeft } from "lucide-react";
+import { LocalTime } from "@/app/components/LocalTime";
 import { TeamCrest } from "@/app/components/TeamCrest";
 import { OddsTable } from "@/app/components/OddsTable";
 import { Button } from "@/components/ui/button";
@@ -17,6 +17,7 @@ import {
 } from "@/app/lib/odds";
 import { LEAGUES, getLeague, isLeagueKey } from "@/app/lib/leagues";
 import { crestFor } from "@/app/lib/crests";
+import { formatTime } from "@/app/lib/time";
 
 type Props = {
   params: Promise<{ id: string }>;
@@ -38,7 +39,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
   if (!found) return { title: "Match not found", robots: { index: false } };
   const { event, sportKey } = found;
   const title = `${event.home_team} vs ${event.away_team}`;
-  const description = `${event.sport_title} odds and Gemini prediction for ${title}, kick-off ${format(new Date(event.commence_time), "EEE d MMM yyyy, HH:mm")} UTC.`;
+  const description = `${event.sport_title} odds and Gemini prediction for ${title}, kick-off ${formatTime(event.commence_time, "kickoffLong", "UTC")} UTC.`;
   const path = `/matches/${encodeURIComponent(event.id)}?sport=${encodeURIComponent(sportKey)}`;
   return {
     title,
@@ -59,7 +60,6 @@ export default async function MatchPage(props: Props) {
   const league = getLeague(sportKey);
   const avg = averageH2HOdds(event);
   const implied = impliedProbabilities(avg);
-  const kickoff = new Date(event.commence_time);
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-10 sm:px-6">
@@ -78,9 +78,11 @@ export default async function MatchPage(props: Props) {
           <Badge variant="outline">
             {league?.name ?? event.sport_title}
           </Badge>
-          <time dateTime={event.commence_time} className="font-mono text-xs tabular-nums text-muted-foreground">
-            {format(kickoff, "EEE d MMM yyyy, HH:mm")}
-          </time>
+          <LocalTime
+            iso={event.commence_time}
+            format="kickoffLong"
+            className="font-mono text-xs tabular-nums text-muted-foreground"
+          />
         </div>
 
         <h1 className="sr-only">
