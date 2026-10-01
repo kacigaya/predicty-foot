@@ -56,27 +56,17 @@ function assertApiKey(): string {
   return key;
 }
 
-const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
-const MAX_CACHE_ENTRIES = 32;
-const oddsCache = new Map<string, { data: OddsEvent[]; ts: number }>();
+export type OddsSnapshot = { events: OddsEvent[]; fetchedAt: string };
 
-function pruneOddsCache(): void {
-  if (oddsCache.size <= MAX_CACHE_ENTRIES) return;
-  const entries = [...oddsCache.entries()].sort((a, b) => a[1].ts - b[1].ts);
-  for (const [key] of entries.slice(0, oddsCache.size - MAX_CACHE_ENTRIES)) {
-    oddsCache.delete(key);
-  }
-}
+// The only odds cache. Each call costs 3 provider credits (one market, three
+// regions), so a league is fetched at most once per TTL, and concurrent
+// callers share the request in flight. fetchedAt is when the provider
+// answered, which is what "Updated …" in the UI reports.
+const CACHE_TTL_MS = 5 * 60 * 1000;
+const oddsCache = new Map<string, { snapshot: OddsSnapshot; ts: number }>();
+const inFlight = new Map<string, Promise<OddsSnapshot>>();
 
-export async function fetchOdds(
-  sportKey: string,
-  opts: { revalidate?: number } = {}
-): Promise<OddsEvent[]> {
-  const cached = oddsCache.get(sportKey);
-  if (cached && Date.now() - cached.ts < CACHE_TTL_MS) {
-    return cached.data;
-  }
-
+async function requestOdds(sportKey: string): Promise<OddsSnapshot> {
   const apiKey = assertApiKey();
   const params = new URLSearchParams({
     apiKey,
@@ -88,9 +78,7 @@ export async function fetchOdds(
 
   const url = `${API_BASE}/sports/${encodeURIComponent(sportKey)}/odds/?${params.toString()}`;
 
-  const res = await fetch(url, {
-    next: { revalidate: opts.revalidate ?? 60, tags: [`odds:${sportKey}`] },
-  });
+  const res = await fetch(url, { cache: "no-store", signal: AbortSignal.timeout(10_000) });
 
   if (!res.ok) {
     const body = await res.text().catch(() => "");
@@ -101,17 +89,32 @@ export async function fetchOdds(
   }
 
   const events = (await res.json()) as OddsEvent[];
-  oddsCache.set(sportKey, { data: events, ts: Date.now() });
-  pruneOddsCache();
-  return events;
+  const now = Date.now();
+  const snapshot = { events, fetchedAt: new Date(now).toISOString() };
+  oddsCache.set(sportKey, { snapshot, ts: now });
+  return snapshot;
+}
+
+// Callers validate sportKey with isLeagueKey, which also bounds the cache size.
+export function fetchOdds(sportKey: string): Promise<OddsSnapshot> {
+  const cached = oddsCache.get(sportKey);
+  if (cached && Date.now() - cached.ts < CACHE_TTL_MS) {
+    return Promise.resolve(cached.snapshot);
+  }
+
+  let request = inFlight.get(sportKey);
+  if (!request) {
+    request = requestOdds(sportKey).finally(() => inFlight.delete(sportKey));
+    inFlight.set(sportKey, request);
+  }
+  return request;
 }
 
 export async function fetchEventById(
   sportKey: string,
-  eventId: string,
-  opts: { revalidate?: number } = {}
+  eventId: string
 ): Promise<OddsEvent | null> {
-  const events = await fetchOdds(sportKey, opts);
+  const { events } = await fetchOdds(sportKey);
   return events.find((e) => e.id === eventId) ?? null;
 }
 

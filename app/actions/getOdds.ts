@@ -20,8 +20,8 @@ export async function getOddsAction(sportKey: string): Promise<GetOddsResult> {
     return { ok: false, error: "Unknown league.", status: 400 };
   }
   try {
-    const events = await fetchOdds(sportKey, { revalidate: 60 });
-    return { ok: true, events, fetchedAt: new Date().toISOString() };
+    const { events, fetchedAt } = await fetchOdds(sportKey);
+    return { ok: true, events, fetchedAt };
   } catch (err) {
     console.error("[getOddsAction]", err);
     if (err instanceof OddsApiError) {

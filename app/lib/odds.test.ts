@@ -1,5 +1,12 @@
-import { describe, expect, test } from "bun:test";
-import { averageH2HOdds, formatOdds, impliedProbabilities, type OddsEvent } from "./odds";
+import { afterEach, describe, expect, setSystemTime, spyOn, test } from "bun:test";
+import {
+  averageH2HOdds,
+  fetchOdds,
+  formatOdds,
+  impliedProbabilities,
+  OddsApiError,
+  type OddsEvent,
+} from "./odds";
 
 function event(prices: Array<[number, number, number]>): OddsEvent {
   return {
@@ -63,5 +70,51 @@ describe("formatOdds", () => {
     expect(formatOdds(2.456)).toBe("2.46");
     expect(formatOdds(null)).toBe("–");
     expect(formatOdds(Number.NaN)).toBe("–");
+  });
+});
+
+describe("fetchOdds", () => {
+  process.env.ODDS_API_KEY = "test-key";
+
+  afterEach(() => {
+    setSystemTime();
+  });
+
+  function mockProvider(response: () => Response) {
+    return spyOn(globalThis, "fetch").mockImplementation((async () => response()) as unknown as typeof fetch);
+  }
+
+  test("shares one provider request between concurrent callers and caches it", async () => {
+    setSystemTime(new Date("2026-10-01T10:00:00Z"));
+    const fetchSpy = mockProvider(() => Response.json([event([[2, 3, 4]])]));
+    const [a, b] = await Promise.all([fetchOdds("cache_a"), fetchOdds("cache_a")]);
+    const c = await fetchOdds("cache_a");
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
+    expect(a).toBe(b);
+    expect(c).toBe(a);
+    expect(a.fetchedAt).toBe("2026-10-01T10:00:00.000Z");
+    fetchSpy.mockRestore();
+  });
+
+  test("refetches after five minutes and reports the new fetch time", async () => {
+    setSystemTime(new Date("2026-10-01T10:00:00Z"));
+    const fetchSpy = mockProvider(() => Response.json([]));
+    await fetchOdds("cache_b");
+    setSystemTime(new Date("2026-10-01T10:04:59Z"));
+    await fetchOdds("cache_b");
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
+    setSystemTime(new Date("2026-10-01T10:05:01Z"));
+    const later = await fetchOdds("cache_b");
+    expect(fetchSpy).toHaveBeenCalledTimes(2);
+    expect(later.fetchedAt).toBe("2026-10-01T10:05:01.000Z");
+    fetchSpy.mockRestore();
+  });
+
+  test("does not cache provider errors", async () => {
+    const fetchSpy = mockProvider(() => new Response("quota", { status: 429 }));
+    await expect(fetchOdds("cache_c")).rejects.toBeInstanceOf(OddsApiError);
+    await expect(fetchOdds("cache_c")).rejects.toBeInstanceOf(OddsApiError);
+    expect(fetchSpy).toHaveBeenCalledTimes(2);
+    fetchSpy.mockRestore();
   });
 });

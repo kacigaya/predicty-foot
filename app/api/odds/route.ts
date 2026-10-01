@@ -24,9 +24,9 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const events = await fetchOdds(sportKey, { revalidate: 60 });
+    const { events, fetchedAt } = await fetchOdds(sportKey);
     return NextResponse.json(
-      { ok: true, sportKey, count: events.length, fetchedAt: new Date().toISOString(), events },
+      { ok: true, sportKey, count: events.length, fetchedAt, events },
       {
         headers: {
           "Cache-Control": "public, s-maxage=60, stale-while-revalidate=120",
