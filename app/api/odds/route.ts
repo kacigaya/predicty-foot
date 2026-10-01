@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { fetchOdds, OddsApiError } from "@/app/lib/odds";
 import { DEFAULT_LEAGUE_KEY, isLeagueKey } from "@/app/lib/leagues";
-import { createInMemoryRateLimiter } from "@/app/lib/rate-limit";
+import { createInMemoryRateLimiter, getClientIp } from "@/app/lib/rate-limit";
 
 const oddsRateLimiter = createInMemoryRateLimiter({
   windowMs: 60 * 1000,
@@ -9,7 +9,7 @@ const oddsRateLimiter = createInMemoryRateLimiter({
 });
 
 export async function GET(request: NextRequest) {
-  if (oddsRateLimiter.check(request)) {
+  if (oddsRateLimiter.check(getClientIp(request.headers))) {
     return NextResponse.json({ ok: false, error: "Too many requests." }, { status: 429 });
   }
 

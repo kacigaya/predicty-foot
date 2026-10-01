@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { CREST_SLUGS } from "@/app/lib/crests";
-import { createInMemoryRateLimiter } from "@/app/lib/rate-limit";
+import { createInMemoryRateLimiter, getClientIp } from "@/app/lib/rate-limit";
 
 type CacheEntry = { url: string | null; ts: number };
 
@@ -177,7 +177,7 @@ async function resolveBadge(name: string): Promise<string | null> {
 }
 
 export async function GET(req: NextRequest) {
-  if (teamLogoRateLimiter.check(req)) {
+  if (teamLogoRateLimiter.check(getClientIp(req.headers))) {
     return NextResponse.json(
       { url: null, error: "Too many requests." },
       { status: 429, headers: { "Cache-Control": NEGATIVE_CACHE_CONTROL } },
