@@ -1,6 +1,5 @@
 "use client";
 
-import { useState, useTransition } from "react";
 import { format } from "date-fns";
 import {
   Dialog,
@@ -16,8 +15,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { TeamCrest } from "@/app/components/TeamCrest";
 import { OddsTable } from "@/app/components/OddsTable";
 import { PredictionResult } from "@/app/components/PredictionResult";
-import { generatePredictionAction } from "@/app/actions/generatePrediction";
-import type { AIPrediction } from "@/app/lib/gemini";
+import { usePrediction } from "@/app/components/usePrediction";
 import {
   averageH2HOdds,
   formatOdds,
@@ -34,24 +32,13 @@ export function PredictionModal({
   event: OddsEvent;
   children: React.ReactElement;
 }) {
-  const [prediction, setPrediction] = useState<AIPrediction | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [isPending, startTransition] = useTransition();
+  const { prediction, error, isPending, generate, regenerate } = usePrediction(
+    event.id,
+    event.sport_key,
+  );
 
   const avg = averageH2HOdds(event);
   const implied = impliedProbabilities(avg);
-
-  const onGenerate = () => {
-    setError(null);
-    startTransition(async () => {
-      const result = await generatePredictionAction(event.id, event.sport_key);
-      if (!result.ok) {
-        setError(result.error);
-        return;
-      }
-      setPrediction(result.prediction);
-    });
-  };
 
   return (
     <Dialog>
@@ -105,7 +92,7 @@ export function PredictionModal({
               <>
                 <PredictionResult prediction={prediction} event={event} />
                 <div className="flex justify-end border-t border-border pt-4">
-                  <Button variant="outline" size="sm" onClick={onGenerate}>
+                  <Button variant="outline" size="sm" onClick={regenerate}>
                     Regenerate
                   </Button>
                 </div>
@@ -119,7 +106,7 @@ export function PredictionModal({
                   </span>{" "}
                   bookmakers and returns a likely score, win probabilities, and one suggested bet.
                 </p>
-                <Button onClick={onGenerate} size="lg" className="w-full">
+                <Button onClick={generate} size="lg" className="w-full">
                   Generate prediction
                 </Button>
               </>

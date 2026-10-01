@@ -1,11 +1,9 @@
 "use client";
 
-import { useState, useTransition } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { PredictionResult } from "@/app/components/PredictionResult";
-import { generatePredictionAction } from "@/app/actions/generatePrediction";
-import type { AIPrediction } from "@/app/lib/gemini";
+import { usePrediction } from "@/app/components/usePrediction";
 import type { OddsEvent } from "@/app/lib/odds";
 
 export function MatchPredictionPanel({
@@ -15,21 +13,10 @@ export function MatchPredictionPanel({
   sportKey: string;
   event: OddsEvent;
 }) {
-  const [prediction, setPrediction] = useState<AIPrediction | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [isPending, startTransition] = useTransition();
-
-  const onGenerate = () => {
-    setError(null);
-    startTransition(async () => {
-      const res = await generatePredictionAction(event.id, sportKey);
-      if (!res.ok) {
-        setError(res.error);
-        return;
-      }
-      setPrediction(res.prediction);
-    });
-  };
+  const { prediction, error, isPending, generate, regenerate } = usePrediction(
+    event.id,
+    sportKey,
+  );
 
   return (
     <Card
@@ -44,7 +31,7 @@ export function MatchPredictionPanel({
           Gemini prediction
         </h2>
         <Button
-          onClick={onGenerate}
+          onClick={prediction ? regenerate : generate}
           loading={isPending}
           size="sm"
           variant={prediction ? "outline" : "default"}
