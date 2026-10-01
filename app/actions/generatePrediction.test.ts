@@ -1,40 +1,60 @@
-import { beforeEach, describe, expect, mock, test } from "bun:test";
-import type { AIPrediction } from "@/app/lib/gemini";
+import { afterAll, beforeAll, beforeEach, describe, expect, mock, spyOn, test, type Mock } from "bun:test";
 import type { OddsEvent } from "@/app/lib/odds";
 
-const event: OddsEvent = {
-  id: "evt1",
+// Only the edges are faked: the Gemini SDK client, fetch for the odds feed and
+// next/headers. Mocking our own modules would leak into their own test files,
+// since Bun shares one module registry across files.
+process.env.ODDS_API_KEY = "test-key";
+process.env.GEMINI_API_KEY = "test-key";
+
+const IDS = ["evtB", "evtC", ...Array.from({ length: 10 }, (_, i) => `evtD${i}`)];
+const feed: OddsEvent[] = IDS.map((id) => ({
+  id,
   sport_key: "soccer_epl",
   sport_title: "EPL",
   commence_time: "2026-10-03T14:00:00Z",
   home_team: "Arsenal",
   away_team: "Chelsea",
   bookmakers: [],
-};
+}));
 
 let calls = 0;
 let clientIp = "203.0.113.1";
 
+
+const genai = await import("@google/genai");
+mock.module("@google/genai", () => ({
+  ...genai,
+  GoogleGenAI: class {
+    models = {
+      generateContent: async () => {
+        calls += 1;
+        await Bun.sleep(5);
+        return { text: JSON.stringify({ reasoning: `call-${calls}` }) };
+      },
+    };
+  },
+}));
 mock.module("next/headers", () => ({
   headers: async () => new Headers({ "x-forwarded-for": clientIp }),
-}));
-mock.module("@/app/lib/odds", () => ({
-  fetchEventById: async (_sport: string, id: string) => (id.startsWith("evt") ? { ...event, id } : null),
-  findEventAcrossLeagues: async () => null,
-}));
-mock.module("@/app/lib/gemini", () => ({
-  GeminiError: class GeminiError extends Error {},
-  generatePrediction: async (): Promise<AIPrediction> => {
-    calls += 1;
-    await Bun.sleep(5);
-    return { generatedAt: `call-${calls}` } as AIPrediction;
-  },
 }));
 
 const { generatePredictionAction } = await import("./generatePrediction");
 
+// Installed per file so the stub never answers another file's fetches.
+let fetchSpy: Mock<typeof fetch>;
+beforeAll(() => {
+  fetchSpy = spyOn(globalThis, "fetch").mockImplementation(
+    (async () => Response.json(feed)) as unknown as typeof fetch,
+  );
+});
+
 beforeEach(() => {
   calls = 0;
+});
+
+afterAll(() => {
+  fetchSpy.mockRestore();
 });
 
 describe("generatePredictionAction", () => {
@@ -53,7 +73,7 @@ describe("generatePredictionAction", () => {
     ]);
     const c = await generatePredictionAction("evtB", "soccer_epl");
     expect(calls).toBe(1);
-    expect([a, b, c].every((r) => r.ok && r.prediction.generatedAt === "call-1")).toBe(true);
+    expect([a, b, c].every((r) => r.ok && r.prediction.reasoning === "call-1")).toBe(true);
   });
 
   test("fresh requests bypass the cache and replace it", async () => {
@@ -62,8 +82,8 @@ describe("generatePredictionAction", () => {
     const fresh = await generatePredictionAction("evtC", "soccer_epl", { fresh: true });
     const after = await generatePredictionAction("evtC", "soccer_epl");
     expect(calls).toBe(2);
-    expect(fresh.ok && fresh.prediction.generatedAt).toBe("call-2");
-    expect(after.ok && after.prediction.generatedAt).toBe("call-2");
+    expect(fresh.ok && fresh.prediction.reasoning).toBe("call-2");
+    expect(after.ok && after.prediction.reasoning).toBe("call-2");
   });
 
   test("limits Gemini calls per client, not cached reads", async () => {
