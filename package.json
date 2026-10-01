@@ -7,6 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "test": "bun test",
     "brand": "bun scripts/brand.ts",
     "crests": "bun scripts/crests.ts"
   },
@@ -24,6 +25,7 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
+    "@types/bun": "^1.4.0",
     "@types/node": "^22",
     "@types/react": "^19",
     "@types/react-dom": "^19",

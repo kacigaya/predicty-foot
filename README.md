@@ -100,10 +100,13 @@ Open [http://localhost:3000](http://localhost:3000).
 ```bash
 bun run lint
 bunx tsc --noEmit
+bunx tsc --noEmit -p tsconfig.test.json
+bun test
 bun run build
 ```
 
-There is no test suite. The build runs the TypeScript check.
+Unit tests sit next to the code as `*.test.ts` and run with Bun's test runner. CI
+runs every command above on pull requests and on pushes to `main`.
 
 ### Project structure
 
