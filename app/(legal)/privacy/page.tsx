@@ -40,8 +40,8 @@ export default function PrivacyPage() {
         <h2>Information processed when you visit</h2>
         <p>
           Your browser sends technical information needed to serve the site, including
-          your IP address, requested URL, and browser headers. The odds API route and
-          prediction requests use your IP address for rate limiting,
+          your IP address, requested URL, and browser headers. Prediction requests use
+          your IP address for rate limiting,
           with counters held in server memory during one-minute windows. Expired
           entries are removed once per window, or when the server restarts.
         </p>

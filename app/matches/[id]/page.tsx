@@ -15,7 +15,7 @@ import {
   impliedProbabilities,
   type OddsEvent,
 } from "@/app/lib/odds";
-import { LEAGUES, getLeague, isLeagueKey } from "@/app/lib/leagues";
+import { LEAGUES, getLeague, isLeagueKey, leagueHref } from "@/app/lib/leagues";
 import { crestFor } from "@/app/lib/crests";
 import { formatTime } from "@/app/lib/time";
 
@@ -66,7 +66,7 @@ export default async function MatchPage(props: Props) {
       <Button
         variant="ghost"
         size="sm"
-        render={<Link href="/" />}
+        render={<Link href={`${leagueHref(sportKey)}#fixtures`} />}
         className="mb-8 -ml-2 text-muted-foreground hover:text-foreground"
       >
         <ArrowLeft aria-hidden />

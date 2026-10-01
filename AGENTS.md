@@ -1,7 +1,8 @@
 # predicty-foot
 
 Football odds and Gemini predictions. Next.js 16 App Router, React 19, Tailwind 4,
-Coss UI on Base UI, Bun. Server actions call The Odds API and Gemini; both keys
+Coss UI on Base UI, Bun. The home page renders a league's fixtures on the server
+(`/?league=`); predictions go through a server action. The Odds API and Gemini keys
 are runtime-only.
 
 ## Commands
@@ -69,9 +70,19 @@ which runs on Node; `tsconfig.test.json` checks them.
 - `proxy.ts` sets a per-request CSP. `script-src` uses a nonce with `strict-dynamic`;
   `style-src` deliberately has no nonce (it would disable `unsafe-inline`, and
   `next/image` and Base UI set `style` attributes).
-- `getOddsAction`, `generatePredictionAction` and `/api/odds` validate the league key
-  with `isLeagueKey` (`app/lib/leagues.ts`) before calling the provider. Keep that when
-  adding leagues or entry points.
+- `getFixtures`, the home page's `?league=` handling, the match page's `?sport=` hint
+  and `generatePredictionAction` validate the league key with `isLeagueKey`
+  (`app/lib/leagues.ts`) before calling the provider. Keep that when adding leagues or
+  entry points.
+- Don't fetch data through server actions: Next runs them one at a time per client,
+  so reads would wait behind a running prediction. Render on the server instead.
+- `fetchOdds` is the only odds cache (5 minutes per league, shared in-flight requests).
+  `generatePredictionAction` caches one prediction per fixture for 10 minutes and
+  allows 5 Gemini calls per IP a minute; `fresh: true` (Regenerate) skips the cache.
+- Every `catch` around provider calls starts with `unstable_rethrow(err)`. Next's
+  dynamic-rendering error carries the Odds API URL, key included.
+- Kickoff and update times go through `LocalTime`: UTC on the server, the visitor's
+  zone after hydration.
 - The CSP allows only `'self'` for images, fonts and `connect-src`. The browser never
   calls a provider directly, and crests go through `/_next/image`.
 - `normalizePrediction` in `app/lib/gemini.ts` type-checks every field of the Gemini

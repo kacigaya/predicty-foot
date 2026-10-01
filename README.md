@@ -24,7 +24,10 @@ Live at [pfoot.gayakaci.duckdns.org](https://pfoot.gayakaci.duckdns.org/).
 - Full bookmaker table per match with the best price per outcome highlighted
 - Match detail page at `/matches/[id]` with the same prediction panel
 - Team crests bundled in `public/crests` and resolved on the server; teams without one show their initials
-- Odds cached for five minutes in memory and revalidated every minute by Next.js, so a refresh rarely costs an API call
+- Odds cached for five minutes per league in memory, with concurrent requests sharing one provider call; the board shows when they were fetched
+- Predictions cached per fixture for ten minutes and rate limited per client
+- The selected league is in the URL (`/?league=`), so tabs can be shared and the back link returns to them
+- Kickoff times in the visitor's time zone
 - Per-route metadata, canonical URLs, and Open Graph tags
 - Dark theme only: near-black surfaces, one lime accent, Instrument Serif for headings, Geist for text, JetBrains Mono for numbers
 
@@ -115,10 +118,9 @@ app/
   page.tsx              # Home: hero and fixture board
   layout.tsx            # Fonts, metadata, pre-paint theme script, navbar, footer
   site.ts               # Canonical origin, site name, description
-  actions/              # Server actions: getOdds, generatePrediction
-  api/odds/             # JSON odds endpoint, rate limited
+  actions/              # Server action: generatePrediction
   components/           # Board, cards, prediction dialog and result
-  lib/                  # Odds client and maths, Gemini client, crests, leagues, rate limit
+  lib/                  # Odds client and maths, fixtures, Gemini client, crests, leagues, rate limit, time
   matches/[id]/         # Match detail page and prediction panel
 components/             # Navbar, footer, theme toggle
   ui/                   # Coss UI primitives on Base UI
@@ -135,13 +137,13 @@ Dockerfile              # Bun build, Node standalone runner
   attributes, which cannot carry a nonce. `unsafe-eval` is added in development
   only. Images, fonts and requests are limited to the site's own origin: provider
   calls run on the server and crests go through `/_next/image`.
-- Server actions and `/api/odds` validate the league key with `isLeagueKey`
-  against the eight configured competitions before calling the provider, and event ids against a
-  character allowlist.
+- The home page, the match page and the prediction action validate the league key
+  with `isLeagueKey` against the eight configured competitions before calling the
+  provider, and event ids against a character allowlist.
 - Provider error bodies and the missing-key hint are logged server-side; the
   browser gets a generic message.
-- `/api/odds` and prediction requests are rate limited per client IP, in memory:
-  60 requests and 5 Gemini calls a minute. The limiter keys on the first `X-Forwarded-For` entry,
+- Predictions are rate limited per client IP, in memory: 5 Gemini calls a minute;
+  cached answers do not count. The limiter keys on the first `X-Forwarded-For` entry,
   so the reverse proxy in front of the app must overwrite that header rather
   than append to it.
 - The image optimizer only serves bundled crests under `/crests/`; there are no

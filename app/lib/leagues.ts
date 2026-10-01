@@ -28,3 +28,8 @@ export function getLeague(key: string): League | undefined {
 export function isLeagueKey(key: string): boolean {
   return LEAGUES.some((l) => l.key === key);
 }
+
+// Home page URL showing a league's fixtures; the default league is plain "/".
+export function leagueHref(key: string): string {
+  return key === DEFAULT_LEAGUE_KEY ? "/" : `/?league=${encodeURIComponent(key)}`;
+}
