@@ -8,7 +8,7 @@
 </p>
 
 <p align="center">
-  <a href="https://nextjs.org"><img alt="Next.js 16.3.3" src="https://shieldcn.dev/badge/Next.js-16.3.3-171717.svg?variant=secondary&amp;logo=nextdotjs"></a>
+  <a href="https://nextjs.org"><img alt="Next.js 16.3.8" src="https://shieldcn.dev/badge/Next.js-16.3.8-171717.svg?variant=secondary&amp;logo=nextdotjs"></a>
   <a href="https://bun.sh"><img alt="Bun 1.4" src="https://shieldcn.dev/badge/Bun-1.4-fbf0df.svg?variant=secondary&amp;logo=bun&amp;logoColor=171717"></a>
   <a href="https://tailwindcss.com"><img alt="Tailwind CSS 4" src="https://shieldcn.dev/badge/Tailwind_CSS-4-06b6d4.svg?variant=secondary&amp;logo=tailwindcss"></a>
   <a href="https://github.com/kacigaya/predicty-foot/blob/main/LICENSE"><img alt="MIT License" src="https://shieldcn.dev/github/license/kacigaya/predicty-foot.svg?variant=secondary"></a>
@@ -29,7 +29,7 @@ Live at [pfoot.gayakaci.duckdns.org](https://pfoot.gayakaci.duckdns.org/).
 - The selected league is in the URL (`/?league=`), so tabs can be shared and the back link returns to them
 - Kickoff times in the visitor's time zone
 - Per-route metadata, canonical URLs, and Open Graph tags
-- Dark theme only: near-black surfaces, one lime accent, Instrument Serif for headings, Geist for text, JetBrains Mono for numbers
+- Light and dark themes that follow the OS until toggled (button or `d`), one lime accent, Inter for text and Geist Mono for numbers
 
 ## Screenshots
 
@@ -60,7 +60,7 @@ Crests in these screenshots come from TheSportsDB and Wikimedia.
 - Framework: Next.js 16 (Turbopack, App Router, server actions)
 - UI: React 19, Tailwind CSS 4, Coss UI on Base UI, Lucide icons
 - Styling: clsx, tailwind-merge, class-variance-authority
-- Data: The Odds API (fixtures and h2h odds); crests downloaded from TheSportsDB at build time by `bun run crests`
+- Data: The Odds API (fixtures and h2h odds); crests downloaded once from TheSportsDB by `bun run crests` and committed
 - AI: `@google/genai` with `gemini-3.1-flash-lite`
 - Language: TypeScript
 - Runtime: Bun 1.4 for install and build, Node 22 in the production image
