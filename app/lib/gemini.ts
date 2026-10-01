@@ -103,14 +103,15 @@ export async function generatePrediction(event: OddsEvent): Promise<AIPrediction
   const implied = impliedProbabilities(avg);
   const kickoff = new Date(event.commence_time);
 
-  const prompt = `You are a world-class football (soccer) analyst AI. Analyze the following fixture and produce a data-driven prediction.
+  // The model gets no news, lineups or results, only the odds below. Asking it
+  // to weigh form or injuries made it invent them, so the prompt forbids that.
+  const prompt = `You are a football (soccer) betting analyst. Read the bookmaker market for the fixture below and give a probabilistic reading of it.
 
 MATCH
 - Competition: ${event.sport_title}
 - Home team: ${event.home_team}
 - Away team: ${event.away_team}
 - Kick-off (UTC): ${kickoff.toISOString()}
-- Event ID: ${event.id}
 
 MARKET CONSENSUS (decimal, averaged across ${avg.bookmakerCount} bookmakers)
 - Home win: ${avg.home?.toFixed(2) ?? "n/a"} (implied ${(implied.home * 100).toFixed(1)}%)
@@ -120,25 +121,18 @@ MARKET CONSENSUS (decimal, averaged across ${avg.bookmakerCount} bookmakers)
 BOOKMAKER DETAIL
 ${summarizeBookmakers(event)}
 
-INSTRUCTIONS
-1. Weigh recent form, head-to-head history, home advantage, injuries, tactical matchups, and motivation.
-2. Compare your own probabilities to the market-implied ones and flag any genuine edge.
-3. Propose the most likely scoreline (realistic integers, not blowouts unless warranted).
-4. Recommend ONE concrete bet that offers value (e.g. "Home -0.5 AH", "BTTS Yes", "Over 2.5", or a straight 1X2 pick).
-5. Confidence is your probability (0-100) that your predicted outcome is correct.
-6. Reasoning must be 3-5 sentences, written for an informed bettor. No filler.
+WHAT YOU KNOW
+You have no live data: no recent results, injuries, suspensions, lineups or news. Do not state or imply any. You may use long-standing, general traits of the clubs (stature, typical home advantage, playing style) and must present them as general, not current.
 
-Return ONLY JSON matching this schema:
-{
-  "winner": "home" | "draw" | "away",
-  "winnerTeam": string,
-  "score": { "home": number, "away": number },
-  "confidence": number,
-  "aiProbabilities": { "home": number, "draw": number, "away": number },
-  "reasoning": string,
-  "keyFactors": string[],
-  "suggestedBet": { "market": string, "pick": string, "rationale": string }
-}
+INSTRUCTIONS
+1. Start from the market-implied probabilities and adjust them only where the market data itself (price spread between bookmakers, margin, draw pricing) or general knowledge justifies it.
+2. Compare your probabilities with the market-implied ones and say whether there is any edge. "No clear edge" is a valid answer.
+3. Give the most likely scoreline as realistic integers.
+4. Recommend ONE bet (e.g. "Home -0.5 AH", "BTTS Yes", "Over 2.5", or a straight 1X2 pick), or the least-bad option if nothing offers value.
+5. Confidence is your probability (0-100) that the predicted outcome happens.
+6. Reasoning is 3-5 sentences for an informed bettor, grounded in the numbers above.
+7. keyFactors are 3-5 short phrases drawn from the same evidence.
+
 aiProbabilities must sum to 1.0 (±0.02).`;
 
   let text: string | undefined;
