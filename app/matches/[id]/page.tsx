@@ -39,7 +39,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
   if (!found) return { title: "Match not found", robots: { index: false } };
   const { event, sportKey } = found;
   const title = `${event.home_team} vs ${event.away_team}`;
-  const description = `${event.sport_title} odds and Gemini prediction for ${title}, kick-off ${formatTime(event.commence_time, "kickoffLong", "UTC")} UTC.`;
+  const description = `${event.sport_title} odds and Gemini prediction for ${title}, kick-off ${formatTime(event.commence_time, "kickoffLong", true)} UTC.`;
   const path = `/matches/${encodeURIComponent(event.id)}?sport=${encodeURIComponent(sportKey)}`;
   return {
     title,

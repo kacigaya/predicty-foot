@@ -21,7 +21,7 @@ export function LocalTime({
   const isClient = useSyncExternalStore(subscribe, () => true, () => false);
   return (
     <time dateTime={iso} className={className}>
-      {isClient ? formatTime(iso, format) : `${formatTime(iso, format, "UTC")} UTC`}
+      {isClient ? formatTime(iso, format, false) : `${formatTime(iso, format, true)} UTC`}
     </time>
   );
 }
