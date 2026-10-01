@@ -20,8 +20,8 @@ import {
   averageH2HOdds,
   formatOdds,
   impliedProbabilities,
-  type OddsEvent,
 } from "@/app/lib/odds";
+import type { Fixture } from "@/app/lib/crests";
 
 // `children` is the trigger element. Rendering it through DialogTrigger (rather
 // than controlling `open` from outside) is what lets Base UI return focus to it on close.
@@ -29,7 +29,7 @@ export function PredictionModal({
   event,
   children,
 }: {
-  event: OddsEvent;
+  event: Fixture;
   children: React.ReactElement;
 }) {
   const { prediction, error, isPending, generate, regenerate } = usePrediction(
@@ -55,7 +55,7 @@ export function PredictionModal({
 
         <DialogPanel>
           <div className="grid grid-cols-[1fr_auto_1fr] items-start gap-4 border-b border-border pt-5 pb-6">
-            <TeamPanel name={event.home_team} odds={formatOdds(avg.home)} prob={implied.home} />
+            <TeamPanel name={event.home_team} crest={event.homeCrest} odds={formatOdds(avg.home)} prob={implied.home} />
             <div className="flex flex-col items-center gap-1 self-center px-2">
               <span className="font-mono text-xs uppercase tracking-wider text-muted-foreground">Draw</span>
               <span className="font-mono text-base sm:text-lg font-semibold tabular-nums text-foreground">
@@ -65,7 +65,7 @@ export function PredictionModal({
                 {(implied.draw * 100).toFixed(0)}%
               </span>
             </div>
-            <TeamPanel name={event.away_team} odds={formatOdds(avg.away)} prob={implied.away} />
+            <TeamPanel name={event.away_team} crest={event.awayCrest} odds={formatOdds(avg.away)} prob={implied.away} />
           </div>
 
           <div className="space-y-6 pt-6" aria-live="polite" aria-busy={isPending}>
@@ -125,10 +125,20 @@ export function PredictionModal({
   );
 }
 
-function TeamPanel({ name, odds, prob }: { name: string; odds: string; prob: number }) {
+function TeamPanel({
+  name,
+  crest,
+  odds,
+  prob,
+}: {
+  name: string;
+  crest: string | null;
+  odds: string;
+  prob: number;
+}) {
   return (
     <div className="flex flex-col items-center gap-2.5 text-center">
-      <TeamCrest name={name} size="lg" />
+      <TeamCrest name={name} src={crest} size="lg" />
       <p className="text-balance font-heading text-base font-semibold leading-tight text-foreground sm:text-lg">
         {name}
       </p>

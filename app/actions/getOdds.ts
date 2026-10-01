@@ -1,11 +1,12 @@
 "use server";
 
 import { unstable_rethrow } from "next/navigation";
-import { fetchOdds, OddsApiError, type OddsEvent } from "@/app/lib/odds";
+import { fetchOdds, OddsApiError } from "@/app/lib/odds";
+import { withCrests, type Fixture } from "@/app/lib/crests";
 import { isLeagueKey } from "@/app/lib/leagues";
 
 export type GetOddsResult =
-  | { ok: true; events: OddsEvent[]; fetchedAt: string }
+  | { ok: true; events: Fixture[]; fetchedAt: string }
   | { ok: false; error: string; status?: number };
 
 // Provider error bodies and the missing-key hint are logged, not shown: they
@@ -22,7 +23,7 @@ export async function getOddsAction(sportKey: string): Promise<GetOddsResult> {
   }
   try {
     const { events, fetchedAt } = await fetchOdds(sportKey);
-    return { ok: true, events, fetchedAt };
+    return { ok: true, events: events.map(withCrests), fetchedAt };
   } catch (err) {
     // Next signals dynamic rendering by throwing; its message carries the
     // request URL, API key included, so it must never reach the log below.

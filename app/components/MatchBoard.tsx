@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getOddsAction } from "@/app/actions/getOdds";
 import { DEFAULT_LEAGUE_KEY, getLeague } from "@/app/lib/leagues";
-import type { OddsEvent } from "@/app/lib/odds";
+import type { Fixture } from "@/app/lib/crests";
 
 const BATCH_SIZE = 6;
 
@@ -20,7 +20,7 @@ export function MatchBoard({
   initialError,
   initialFetchedAt,
 }: {
-  initialEvents: OddsEvent[];
+  initialEvents: Fixture[];
   initialError: string | null;
   initialFetchedAt: string;
 }) {

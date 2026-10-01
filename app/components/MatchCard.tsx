@@ -12,10 +12,10 @@ import {
   averageH2HOdds,
   formatOdds,
   impliedProbabilities,
-  type OddsEvent,
 } from "@/app/lib/odds";
+import type { Fixture } from "@/app/lib/crests";
 
-export function MatchCard({ event }: { event: OddsEvent }) {
+export function MatchCard({ event }: { event: Fixture }) {
   const avg = useMemo(() => averageH2HOdds(event), [event]);
   const implied = useMemo(() => impliedProbabilities(avg), [avg]);
   const kickoff = new Date(event.commence_time);
@@ -40,8 +40,8 @@ export function MatchCard({ event }: { event: OddsEvent }) {
       </time>
 
       <div className="mb-4 space-y-2.5">
-        <TeamRow name={event.home_team} favored={favored === "home"} />
-        <TeamRow name={event.away_team} favored={favored === "away"} />
+        <TeamRow name={event.home_team} crest={event.homeCrest} favored={favored === "home"} />
+        <TeamRow name={event.away_team} crest={event.awayCrest} favored={favored === "away"} />
       </div>
 
       <dl className="grid grid-cols-3 rounded-xl border border-border/70 bg-muted/30 p-1.5">
@@ -85,10 +85,10 @@ export function MatchCard({ event }: { event: OddsEvent }) {
   );
 }
 
-function TeamRow({ name, favored }: { name: string; favored: boolean }) {
+function TeamRow({ name, crest, favored }: { name: string; crest: string | null; favored: boolean }) {
   return (
     <div className="flex items-center gap-2.5">
-      <TeamCrest name={name} size="sm" />
+      <TeamCrest name={name} src={crest} size="sm" />
       <p
         className="flex-1 truncate text-sm font-medium text-foreground leading-none"
         title={name}

@@ -77,12 +77,15 @@ which runs on Node; `tsconfig.test.json` checks them.
 - `normalizePrediction` in `app/lib/gemini.ts` type-checks every field of the Gemini
   JSON; the model output is untrusted and non-strings crash React when rendered.
 - Provider error text is logged, never returned to the browser.
-- Crests for known clubs are PNGs in `public/crests`, mapped by `app/lib/crests.ts`
-  (`CREST_SLUGS` name to slug, `CREST_SOURCES` slug to TheSportsDB badge). After editing
-  it, run `bun run crests` and commit the PNGs. TheSportsDB name search often returns
-  the wrong club (women's, youth, namesakes), so check each source by hand. Bump
-  `CRESTS_VERSION` in `TeamCrest` when crest URLs change, since browsers cache them
-  for 7 days.
+- Crests are PNGs in `public/crests`, mapped by `app/lib/crests.ts` (`CREST_SLUGS`
+  normalized name to slug, `CREST_SOURCES` slug to TheSportsDB badge). `crestFor` resolves
+  them on the server (`withCrests` for whole events); `TeamCrest` takes the result as
+  `src` and shows initials when it is null. Nothing looks crests up at runtime.
+  When a new team appears in a feed, add it, run `bun run crests` and commit the PNGs.
+  TheSportsDB name search often returns the wrong club (women's, youth, B teams,
+  namesakes), so check league, country and gender for each source; the league roster
+  (`search_all_teams.php?l=`) is the fallback. `crests.test.ts` fails if a slug has no
+  source or PNG.
 - `formatOdds` returns an en dash for missing values; prose never uses an em dash.
 
 <!-- BEGIN:nextjs-agent-rules -->

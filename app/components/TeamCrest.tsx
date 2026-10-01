@@ -1,141 +1,20 @@
-"use client";
-
 import Image from "next/image";
-import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import { teamInitials } from "@/app/lib/utils";
-import { Skeleton } from "@/components/ui/skeleton";
 
-type LogoCacheEntry = { url: string | null; ts: number };
-type LogoResultState = { name: string; done: boolean; url: string | null };
-
-const logoCache = new Map<string, LogoCacheEntry>();
-const inFlightRequests = new Map<string, Promise<string | null>>();
-
-const POSITIVE_TTL_MS = 7 * 24 * 60 * 60 * 1000; // 7 days (matches server)
-const NEGATIVE_TTL_MS = 60 * 1000; // 1 min
-// Bump when crest sources change so browsers drop URLs cached for up to 7 days,
-// both in localStorage and in the HTTP cache of /api/team-logo.
-const CRESTS_VERSION = 2;
-const STORAGE_KEY = `predicty_foot_crests_v${CRESTS_VERSION}`;
-const MAX_STORAGE_ENTRIES = 250;
-
-function getFreshCachedLogo(name: string): { hit: boolean; url: string | null } {
-  const entry = logoCache.get(name);
-  if (!entry) return { hit: false, url: null };
-
-  const ttl = entry.url ? POSITIVE_TTL_MS : NEGATIVE_TTL_MS;
-  if (Date.now() - entry.ts >= ttl) return { hit: false, url: null };
-
-  return { hit: true, url: entry.url };
-}
-
-function getStoredLogo(name: string): LogoCacheEntry | null {
-  if (typeof window === "undefined") return null;
-  try {
-    const raw = window.localStorage.getItem(STORAGE_KEY);
-    if (!raw) return null;
-    const store = JSON.parse(raw);
-    const entry = store?.[name] as LogoCacheEntry | undefined;
-    if (!entry || typeof entry.ts !== "number") return null;
-
-    const ttl = entry.url ? POSITIVE_TTL_MS : NEGATIVE_TTL_MS;
-    if (Date.now() - entry.ts >= ttl) return null;
-    return entry;
-  } catch {
-    return null;
-  }
-}
-
-function saveLogoToStorage(name: string, entry: LogoCacheEntry): void {
-  if (typeof window === "undefined") return;
-  try {
-    const raw = window.localStorage.getItem(STORAGE_KEY);
-    const store: Record<string, LogoCacheEntry> = raw ? JSON.parse(raw) : {};
-    store[name] = entry;
-
-    const keys = Object.keys(store);
-    if (keys.length > MAX_STORAGE_ENTRIES) {
-      const sorted = keys.sort((a, b) => store[a].ts - store[b].ts);
-      for (const oldKey of sorted.slice(0, keys.length - MAX_STORAGE_ENTRIES)) {
-        delete store[oldKey];
-      }
-    }
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
-  } catch {
-    // Ignore storage write failures (quota or private mode)
-  }
-}
-
-async function fetchTeamLogo(name: string): Promise<string | null> {
-  const stored = getStoredLogo(name);
-  if (stored) {
-    return stored.url;
-  }
-
-  const existing = inFlightRequests.get(name);
-  if (existing) return existing;
-
-  const promise = (async () => {
-    try {
-      const res = await fetch(
-        `/api/team-logo?name=${encodeURIComponent(name)}&v=${CRESTS_VERSION}`,
-      );
-      if (!res.ok) throw new Error(`Team logo request failed: ${res.status}`);
-      const data: { url: string | null } = await res.json();
-      return data?.url ?? null;
-    } catch {
-      return null;
-    } finally {
-      inFlightRequests.delete(name);
-    }
-  })();
-
-  inFlightRequests.set(name, promise);
-  return promise;
-}
-
+// `src` comes from crestFor on the server; teams without a bundled crest show
+// their initials. No hooks, so it renders in server and client components.
 export function TeamCrest({
   name,
+  src,
   size = "md",
   className,
 }: {
   name: string;
+  src: string | null;
   size?: "sm" | "md" | "lg";
   className?: string;
 }) {
-  const cached = getFreshCachedLogo(name);
-  const [resolved, setResolved] = useState<LogoResultState | null>(null);
-  const current = resolved?.name === name ? resolved : null;
-  const logoUrl = cached.hit ? cached.url : current?.url ?? null;
-  const loading = !cached.hit && !current?.done;
-
-  useEffect(() => {
-    if (cached.hit || current?.done) return;
-
-    let cancelled = false;
-
-    fetchTeamLogo(name)
-      .then((url) => {
-        if (cancelled) return;
-        const entry: LogoCacheEntry = { url, ts: Date.now() };
-        logoCache.set(name, entry);
-        saveLogoToStorage(name, entry);
-        setResolved({ name, done: true, url });
-      })
-      .catch(() => {
-        if (cancelled) return;
-        const entry: LogoCacheEntry = { url: null, ts: Date.now() };
-        logoCache.set(name, entry);
-        saveLogoToStorage(name, entry);
-        setResolved({ name, done: true, url: null });
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [cached.hit, current?.done, name]);
-
   const dims = {
     sm: "size-7",
     md: "size-10",
@@ -148,28 +27,14 @@ export function TeamCrest({
     lg: 56,
   }[size];
 
-  const showLogo = Boolean(logoUrl);
-
-  if (loading) {
-    return (
-      <Skeleton aria-hidden className={cn(dims, "rounded-full", className)} />
-    );
-  }
-
-  if (showLogo && logoUrl) {
+  if (src) {
     return (
       <Image
-        src={logoUrl}
+        src={src}
         alt={`${name} crest`}
         width={pixelSize}
         height={pixelSize}
         className={cn(dims, "object-contain", className)}
-        onError={() => {
-          const entry: LogoCacheEntry = { url: null, ts: Date.now() };
-          logoCache.set(name, entry);
-          saveLogoToStorage(name, entry);
-          setResolved({ name, done: true, url: null });
-        }}
       />
     );
   }

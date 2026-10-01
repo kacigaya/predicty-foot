@@ -16,6 +16,7 @@ import {
   type OddsEvent,
 } from "@/app/lib/odds";
 import { LEAGUES, getLeague, isLeagueKey } from "@/app/lib/leagues";
+import { crestFor } from "@/app/lib/crests";
 
 type Props = {
   params: Promise<{ id: string }>;
@@ -114,7 +115,7 @@ export default async function MatchPage(props: Props) {
 function TeamSummary({ name, odds, prob }: { name: OddsEvent["home_team"]; odds: string; prob: number }) {
   return (
     <div className="flex flex-col items-center gap-3 text-center">
-      <TeamCrest name={name} size="lg" />
+      <TeamCrest name={name} src={crestFor(name)} size="lg" />
       <p className="text-balance font-heading text-xl font-bold leading-tight text-foreground sm:text-2xl">{name}</p>
       <div className="flex items-baseline gap-2">
         <span className="font-mono text-xl sm:text-2xl font-bold tabular-nums text-foreground">{odds}</span>

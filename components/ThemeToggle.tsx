@@ -33,6 +33,16 @@ export function ThemeToggle() {
   }, []);
 
   useEffect(() => {
+    // Crests used to be cached in localStorage; the cookie policy promises the
+    // old keys are deleted. Safe to drop once returning visitors have cycled.
+    try {
+      for (const key of Object.keys(localStorage)) {
+        if (key.startsWith("predicty_foot_crests_v")) localStorage.removeItem(key);
+      }
+    } catch {}
+  }, []);
+
+  useEffect(() => {
     // Follow the OS preference until the user picks a theme.
     const media = matchMedia("(prefers-color-scheme: dark)");
     function onSchemeChange() {

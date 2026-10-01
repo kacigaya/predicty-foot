@@ -40,8 +40,8 @@ export default function PrivacyPage() {
         <h2>Information processed when you visit</h2>
         <p>
           Your browser sends technical information needed to serve the site, including
-          your IP address, requested URL, and browser headers. The odds and team logo
-          API routes and prediction requests use your IP address for rate limiting,
+          your IP address, requested URL, and browser headers. The odds API route and
+          prediction requests use your IP address for rate limiting,
           with counters held in server memory during one-minute windows. Expired
           entries are removed once per window, or when the server restarts.
         </p>
@@ -56,10 +56,10 @@ export default function PrivacyPage() {
       <section>
         <h2>Storage on your device</h2>
         <p>
-          The app uses localStorage to remember your light or dark theme and cache
-          club crest lookups. These values are not used to identify you or track
-          activity across websites. See the <Link href="/cookies">cookie policy</Link>
-          {" "}for storage contents, cache lifetimes, and removal instructions.
+          The app uses localStorage to remember your light or dark theme. This value
+          is not used to identify you or track activity across websites. See the
+          {" "}<Link href="/cookies">cookie policy</Link> for its contents and removal
+          instructions.
         </p>
       </section>
 
@@ -75,9 +75,8 @@ export default function PrivacyPage() {
           Provider API keys stay on the server.
         </p>
         <p>
-          For clubs without a bundled crest, the server searches TheSportsDB using
-          the team name. Crest images are served through this site&apos;s image optimizer.
-          Fonts and bundled crests are served by this site.
+          Club crests and fonts ship with the site and are served from this domain;
+          no crest or font request goes to a third party.
         </p>
         <p>
           Providers process server requests under their own terms. Google&apos;s handling
