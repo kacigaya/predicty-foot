@@ -97,6 +97,10 @@ which runs on Node; `tsconfig.test.json` checks them.
   namesakes), so check league, country and gender for each source; the league roster
   (`search_all_teams.php?l=`) is the fallback. `crests.test.ts` fails if a slug has no
   source or PNG.
+- League logos are PNGs in `public/leagues`, built by `bun run leagues` (`scripts/leagues.ts`)
+  from TheSportsDB badges (Serie A from Wikimedia), cropped to the symbol. Marks published
+  in white get an inverted light-theme copy; `League.logoDark` holds the original and
+  `LeagueSelector` swaps them with `dark:`. Never hand-edit the PNGs.
 - `formatOdds` returns an en dash for missing values; prose never uses an em dash.
 
 <!-- BEGIN:nextjs-agent-rules -->

@@ -28,8 +28,11 @@ const nextConfig: NextConfig = {
     ];
   },
   images: {
-    // Bundled crests are the only images the optimizer serves.
-    localPatterns: [{ pathname: "/crests/**", search: "" }],
+    // Bundled crests and league logos are the only images the optimizer serves.
+    localPatterns: [
+      { pathname: "/crests/**", search: "" },
+      { pathname: "/leagues/**", search: "" },
+    ],
   },
 };
 

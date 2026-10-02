@@ -60,7 +60,7 @@ Crests in these screenshots come from TheSportsDB and Wikimedia.
 - Framework: Next.js 16 (Turbopack, App Router, server actions)
 - UI: React 19, Tailwind CSS 4, Coss UI on Base UI, Lucide icons
 - Styling: clsx, tailwind-merge, class-variance-authority
-- Data: The Odds API (fixtures and h2h odds); crests downloaded once from TheSportsDB by `bun run crests` and committed
+- Data: The Odds API (fixtures and h2h odds); crests and league logos downloaded once from TheSportsDB by `bun run crests` and `bun run leagues` and committed
 - AI: `@google/genai` with `gemini-3.1-flash-lite`
 - Language: TypeScript
 - Runtime: Bun 1.4 for install and build, Node 22 in the production image
@@ -146,8 +146,8 @@ Dockerfile              # Bun build, Node standalone runner
   cached answers do not count. The limiter keys on the first `X-Forwarded-For` entry,
   so the reverse proxy in front of the app must overwrite that header rather
   than append to it.
-- The image optimizer only serves bundled crests under `/crests/`; there are no
-  remote image hosts.
+- The image optimizer only serves bundled crests and league logos under `/crests/`
+  and `/leagues/`; there are no remote image hosts.
 
 ## Deployment
 
