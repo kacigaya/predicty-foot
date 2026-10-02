@@ -1,7 +1,5 @@
 "use client";
 
-import { useState, useTransition } from "react";
-import { format } from "date-fns";
 import {
   Dialog,
   DialogDescription,
@@ -13,17 +11,17 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
+import { LocalTime } from "@/app/components/LocalTime";
 import { TeamCrest } from "@/app/components/TeamCrest";
 import { OddsTable } from "@/app/components/OddsTable";
 import { PredictionResult } from "@/app/components/PredictionResult";
-import { generatePredictionAction } from "@/app/actions/generatePrediction";
-import type { AIPrediction } from "@/app/lib/gemini";
+import { usePrediction } from "@/app/components/usePrediction";
 import {
   averageH2HOdds,
   formatOdds,
   impliedProbabilities,
-  type OddsEvent,
 } from "@/app/lib/odds";
+import type { Fixture } from "@/app/lib/crests";
 
 // `children` is the trigger element. Rendering it through DialogTrigger (rather
 // than controlling `open` from outside) is what lets Base UI return focus to it on close.
@@ -31,27 +29,16 @@ export function PredictionModal({
   event,
   children,
 }: {
-  event: OddsEvent;
+  event: Fixture;
   children: React.ReactElement;
 }) {
-  const [prediction, setPrediction] = useState<AIPrediction | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [isPending, startTransition] = useTransition();
+  const { prediction, error, isPending, generate, regenerate } = usePrediction(
+    event.id,
+    event.sport_key,
+  );
 
   const avg = averageH2HOdds(event);
   const implied = impliedProbabilities(avg);
-
-  const onGenerate = () => {
-    setError(null);
-    startTransition(async () => {
-      const result = await generatePredictionAction(event.id, event.sport_key);
-      if (!result.ok) {
-        setError(result.error);
-        return;
-      }
-      setPrediction(result.prediction);
-    });
-  };
 
   return (
     <Dialog>
@@ -62,13 +49,13 @@ export function PredictionModal({
             {event.home_team} vs {event.away_team}
           </DialogTitle>
           <DialogDescription className="order-first font-mono text-xs">
-            {event.sport_title} · {format(new Date(event.commence_time), "EEE d MMM yyyy, HH:mm")}
+            {event.sport_title} · <LocalTime iso={event.commence_time} format="kickoffLong" />
           </DialogDescription>
         </DialogHeader>
 
         <DialogPanel>
           <div className="grid grid-cols-[1fr_auto_1fr] items-start gap-4 border-b border-border pt-5 pb-6">
-            <TeamPanel name={event.home_team} odds={formatOdds(avg.home)} prob={implied.home} />
+            <TeamPanel name={event.home_team} crest={event.homeCrest} odds={formatOdds(avg.home)} prob={implied.home} />
             <div className="flex flex-col items-center gap-1 self-center px-2">
               <span className="font-mono text-xs uppercase tracking-wider text-muted-foreground">Draw</span>
               <span className="font-mono text-base sm:text-lg font-semibold tabular-nums text-foreground">
@@ -78,7 +65,7 @@ export function PredictionModal({
                 {(implied.draw * 100).toFixed(0)}%
               </span>
             </div>
-            <TeamPanel name={event.away_team} odds={formatOdds(avg.away)} prob={implied.away} />
+            <TeamPanel name={event.away_team} crest={event.awayCrest} odds={formatOdds(avg.away)} prob={implied.away} />
           </div>
 
           <div className="space-y-6 pt-6" aria-live="polite" aria-busy={isPending}>
@@ -105,7 +92,7 @@ export function PredictionModal({
               <>
                 <PredictionResult prediction={prediction} event={event} />
                 <div className="flex justify-end border-t border-border pt-4">
-                  <Button variant="outline" size="sm" onClick={onGenerate}>
+                  <Button variant="outline" size="sm" onClick={regenerate}>
                     Regenerate
                   </Button>
                 </div>
@@ -119,7 +106,7 @@ export function PredictionModal({
                   </span>{" "}
                   bookmakers and returns a likely score, win probabilities, and one suggested bet.
                 </p>
-                <Button onClick={onGenerate} size="lg" className="w-full">
+                <Button onClick={generate} size="lg" className="w-full">
                   Generate prediction
                 </Button>
               </>
@@ -138,10 +125,20 @@ export function PredictionModal({
   );
 }
 
-function TeamPanel({ name, odds, prob }: { name: string; odds: string; prob: number }) {
+function TeamPanel({
+  name,
+  crest,
+  odds,
+  prob,
+}: {
+  name: string;
+  crest: string | null;
+  odds: string;
+  prob: number;
+}) {
   return (
     <div className="flex flex-col items-center gap-2.5 text-center">
-      <TeamCrest name={name} size="lg" />
+      <TeamCrest name={name} src={crest} size="lg" />
       <p className="text-balance font-heading text-base font-semibold leading-tight text-foreground sm:text-lg">
         {name}
       </p>

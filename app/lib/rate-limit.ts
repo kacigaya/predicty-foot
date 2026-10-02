@@ -1,16 +1,17 @@
-import type { NextRequest } from "next/server";
-
 type RateLimitEntry = {
   count: number;
   resetAt: number;
 };
 
 export type InMemoryRateLimiter = {
-  check: (req: NextRequest) => boolean;
+  // True when `key` is over the limit; counts this call either way.
+  check: (key: string) => boolean;
 };
 
-export function getClientIp(req: NextRequest): string {
-  const forwarded = req.headers.get("x-forwarded-for");
+// Caddy strips client-supplied X-Forwarded-For and Traefik appends the bridge
+// address, so the first entry is the real client (see ~/DOKPLOY.md).
+export function getClientIp(headers: Headers): string {
+  const forwarded = headers.get("x-forwarded-for");
   return forwarded?.split(",")[0]?.trim() || "unknown";
 }
 
@@ -22,27 +23,27 @@ export function createInMemoryRateLimiter({
   maxRequests: number;
 }): InMemoryRateLimiter {
   const store = new Map<string, RateLimitEntry>();
+  let nextSweep = 0;
 
   return {
-    check(req: NextRequest): boolean {
+    check(key: string): boolean {
       const now = Date.now();
 
-      for (const [key, entry] of store.entries()) {
-        if (entry.resetAt <= now) {
-          store.delete(key);
+      // Expired entries are dropped at most once per window, not on every call.
+      if (now >= nextSweep) {
+        for (const [k, entry] of store) {
+          if (entry.resetAt <= now) store.delete(k);
         }
+        nextSweep = now + windowMs;
       }
 
-      const ip = getClientIp(req);
-      const current = store.get(ip);
-
+      const current = store.get(key);
       if (!current || current.resetAt <= now) {
-        store.set(ip, { count: 1, resetAt: now + windowMs });
-        return false;
+        store.set(key, { count: 1, resetAt: now + windowMs });
+        return maxRequests < 1;
       }
 
       current.count += 1;
-      store.set(ip, current);
       return current.count > maxRequests;
     },
   };

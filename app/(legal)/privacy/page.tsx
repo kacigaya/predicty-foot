@@ -29,7 +29,7 @@ export default function PrivacyPage() {
     <>
       <header>
         <h1>Privacy policy</h1>
-        <p className="mt-3 font-mono text-xs">Last updated: <time dateTime="2026-09-30">30 September 2026</time></p>
+        <p className="mt-3 font-mono text-xs">Last updated: <time dateTime="2026-10-01">1 October 2026</time></p>
         <p className="mt-5">
           Predicty Foot is a football odds and prediction app maintained by Gaya Kaci.
           It has no user accounts, payment forms, analytics, or advertising trackers.
@@ -40,10 +40,10 @@ export default function PrivacyPage() {
         <h2>Information processed when you visit</h2>
         <p>
           Your browser sends technical information needed to serve the site, including
-          your IP address, requested URL, and browser headers. The odds and team logo
-          API routes use your IP address for rate limiting, with counters held in
-          server memory during one-minute windows. Expired entries are removed when
-          another request reaches the same limiter, or when the server restarts.
+          your IP address, requested URL, and browser headers. Prediction requests use
+          your IP address for rate limiting,
+          with counters held in server memory during one-minute windows. Expired
+          entries are removed once per window, or when the server restarts.
         </p>
         <p>
           The application logs service errors to help diagnose failures. Hosting and
@@ -56,10 +56,10 @@ export default function PrivacyPage() {
       <section>
         <h2>Storage on your device</h2>
         <p>
-          The app uses localStorage to remember your light or dark theme and cache
-          club crest lookups. These values are not used to identify you or track
-          activity across websites. See the <Link href="/cookies">cookie policy</Link>
-          {" "}for storage contents, cache lifetimes, and removal instructions.
+          The app uses localStorage to remember your light or dark theme. This value
+          is not used to identify you or track activity across websites. See the
+          {" "}<Link href="/cookies">cookie policy</Link> for its contents and removal
+          instructions.
         </p>
       </section>
 
@@ -70,12 +70,13 @@ export default function PrivacyPage() {
           request a prediction, it sends fixture details, team names, kickoff time,
           event ID, and bookmaker odds to Google Gemini. The prediction prompt does
           not include your IP address, browser headers, or localStorage values.
+          The server keeps each prediction in memory for up to 10 minutes and shows
+          it to anyone who opens the same fixture; it is not linked to you.
           Provider API keys stay on the server.
         </p>
         <p>
-          For clubs without a bundled crest, the server searches TheSportsDB using
-          the team name. Crest images are served through this site&apos;s image optimizer.
-          Fonts and bundled crests are served by this site.
+          Club crests and fonts ship with the site and are served from this domain;
+          no crest or font request goes to a third party.
         </p>
         <p>
           Providers process server requests under their own terms. Google&apos;s handling

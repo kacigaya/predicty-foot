@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { format } from "date-fns";
 import { ArrowLeft } from "lucide-react";
+import { LocalTime } from "@/app/components/LocalTime";
 import { TeamCrest } from "@/app/components/TeamCrest";
 import { OddsTable } from "@/app/components/OddsTable";
 import { Button } from "@/components/ui/button";
@@ -15,7 +15,9 @@ import {
   impliedProbabilities,
   type OddsEvent,
 } from "@/app/lib/odds";
-import { LEAGUES, getLeague, isLeagueKey } from "@/app/lib/leagues";
+import { LEAGUES, getLeague, isLeagueKey, leagueHref } from "@/app/lib/leagues";
+import { crestFor } from "@/app/lib/crests";
+import { formatTime } from "@/app/lib/time";
 
 type Props = {
   params: Promise<{ id: string }>;
@@ -37,7 +39,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
   if (!found) return { title: "Match not found", robots: { index: false } };
   const { event, sportKey } = found;
   const title = `${event.home_team} vs ${event.away_team}`;
-  const description = `${event.sport_title} odds and Gemini prediction for ${title}, kick-off ${format(new Date(event.commence_time), "EEE d MMM yyyy, HH:mm")} UTC.`;
+  const description = `${event.sport_title} odds and Gemini prediction for ${title}, kick-off ${formatTime(event.commence_time, "kickoffLong", true)} UTC.`;
   const path = `/matches/${encodeURIComponent(event.id)}?sport=${encodeURIComponent(sportKey)}`;
   return {
     title,
@@ -58,14 +60,13 @@ export default async function MatchPage(props: Props) {
   const league = getLeague(sportKey);
   const avg = averageH2HOdds(event);
   const implied = impliedProbabilities(avg);
-  const kickoff = new Date(event.commence_time);
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-10 sm:px-6">
       <Button
         variant="ghost"
         size="sm"
-        render={<Link href="/" />}
+        render={<Link href={`${leagueHref(sportKey)}#fixtures`} />}
         className="mb-8 -ml-2 text-muted-foreground hover:text-foreground"
       >
         <ArrowLeft aria-hidden />
@@ -77,9 +78,11 @@ export default async function MatchPage(props: Props) {
           <Badge variant="outline">
             {league?.name ?? event.sport_title}
           </Badge>
-          <time dateTime={event.commence_time} className="font-mono text-xs tabular-nums text-muted-foreground">
-            {format(kickoff, "EEE d MMM yyyy, HH:mm")}
-          </time>
+          <LocalTime
+            iso={event.commence_time}
+            format="kickoffLong"
+            className="font-mono text-xs tabular-nums text-muted-foreground"
+          />
         </div>
 
         <h1 className="sr-only">
@@ -114,7 +117,7 @@ export default async function MatchPage(props: Props) {
 function TeamSummary({ name, odds, prob }: { name: OddsEvent["home_team"]; odds: string; prob: number }) {
   return (
     <div className="flex flex-col items-center gap-3 text-center">
-      <TeamCrest name={name} size="lg" />
+      <TeamCrest name={name} src={crestFor(name)} size="lg" />
       <p className="text-balance font-heading text-xl font-bold leading-tight text-foreground sm:text-2xl">{name}</p>
       <div className="flex items-baseline gap-2">
         <span className="font-mono text-xl sm:text-2xl font-bold tabular-nums text-foreground">{odds}</span>

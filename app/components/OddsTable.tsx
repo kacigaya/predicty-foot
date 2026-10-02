@@ -1,5 +1,5 @@
-import { format } from "date-fns";
 import { cn } from "@/lib/utils";
+import { LocalTime } from "@/app/components/LocalTime";
 import { formatOdds, type OddsEvent } from "@/app/lib/odds";
 
 export function OddsTable({ event }: { event: OddsEvent }) {
@@ -47,7 +47,7 @@ export function OddsTable({ event }: { event: OddsEvent }) {
               <td className={cellClass(draw, best.draw)}>{formatOdds(draw)}</td>
               <td className={cellClass(away, best.away)}>{formatOdds(away)}</td>
               <td className="px-4 py-3 text-right font-mono text-xs tabular-nums text-muted-foreground">
-                <time dateTime={bm.last_update}>{format(new Date(bm.last_update), "HH:mm")}</time>
+                <LocalTime iso={bm.last_update} format="clock" />
               </td>
             </tr>
           ))}

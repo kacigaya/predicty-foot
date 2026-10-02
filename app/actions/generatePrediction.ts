@@ -1,46 +1,98 @@
 "use server";
 
+import { headers } from "next/headers";
+import { unstable_rethrow } from "next/navigation";
 import { findEventAcrossLeagues, fetchEventById } from "@/app/lib/odds";
 import { generatePrediction, GeminiError, type AIPrediction } from "@/app/lib/gemini";
 import { isLeagueKey, LEAGUES } from "@/app/lib/leagues";
+import { createInMemoryRateLimiter, getClientIp } from "@/app/lib/rate-limit";
 
 const EVENT_ID_PATTERN = /^[a-zA-Z0-9:_-]{1,120}$/;
+
+// One prediction per fixture is shared by every visitor for this long, so
+// opening a popular match costs a single Gemini call.
+const CACHE_TTL_MS = 10 * 60 * 1000;
+const MAX_CACHE_ENTRIES = 200;
+
+// Counts Gemini calls only; cached answers are free. Server actions are public
+// POST endpoints, so without this anyone could spend the Gemini quota.
+const geminiLimiter = createInMemoryRateLimiter({ windowMs: 60 * 1000, maxRequests: 5 });
+
+const cache = new Map<string, { prediction: AIPrediction; ts: number }>();
+const inFlight = new Map<string, Promise<AIPrediction | null>>();
 
 export type PredictionResult =
   | { ok: true; prediction: AIPrediction }
   | { ok: false; error: string };
 
+function remember(eventId: string, prediction: AIPrediction): void {
+  cache.delete(eventId);
+  cache.set(eventId, { prediction, ts: Date.now() });
+  // Maps iterate in insertion order, so the first key is the oldest.
+  for (const key of cache.keys()) {
+    if (cache.size <= MAX_CACHE_ENTRIES) break;
+    cache.delete(key);
+  }
+}
+
+// Null when the fixture is no longer in the odds feed.
+async function predict(eventId: string, sportKey?: string): Promise<AIPrediction | null> {
+  const event = sportKey
+    ? await fetchEventById(sportKey, eventId)
+    : (await findEventAcrossLeagues(LEAGUES.map((l) => l.key), eventId))?.event ?? null;
+  return event ? generatePrediction(event) : null;
+}
+
+// `fresh` skips the cache (the Regenerate button) and always counts against
+// the rate limit.
 export async function generatePredictionAction(
   eventId: string,
-  sportKey?: string
+  sportKey?: string,
+  options?: { fresh?: boolean },
 ): Promise<PredictionResult> {
   try {
-    if (!EVENT_ID_PATTERN.test(eventId)) {
+    if (typeof eventId !== "string" || !EVENT_ID_PATTERN.test(eventId)) {
       return { ok: false, error: "Invalid event id." };
     }
 
-    if (sportKey && !isLeagueKey(sportKey)) {
+    if (sportKey !== undefined && (typeof sportKey !== "string" || !isLeagueKey(sportKey))) {
       return { ok: false, error: "Invalid sport key." };
     }
 
-    const event = sportKey
-      ? await fetchEventById(sportKey, eventId)
-      : (await findEventAcrossLeagues(LEAGUES.map((l) => l.key), eventId))?.event ?? null;
+    const ip = getClientIp(await headers());
+    const fresh = options?.fresh === true;
 
-    if (!event) {
-      return { ok: false, error: "Match not found or no longer available." };
+    // No await from here until inFlight.set, or two concurrent requests for the
+    // same fixture would both miss the cache and both call Gemini.
+    const cached = cache.get(eventId);
+    if (!fresh && cached && Date.now() - cached.ts < CACHE_TTL_MS) {
+      return { ok: true, prediction: cached.prediction };
     }
 
-    const prediction = await generatePrediction(event);
+    let request = inFlight.get(eventId);
+    if (!request) {
+      if (geminiLimiter.check(ip)) {
+        return { ok: false, error: "Too many predictions. Try again in a minute." };
+      }
+      request = predict(eventId, sportKey);
+      inFlight.set(eventId, request);
+      request
+        .then((prediction) => prediction && remember(eventId, prediction))
+        .catch(() => {})
+        .finally(() => inFlight.delete(eventId));
+    }
+
+    const prediction = await request;
+    if (!prediction) {
+      return { ok: false, error: "Match not found or no longer available." };
+    }
     return { ok: true, prediction };
   } catch (err) {
+    unstable_rethrow(err);
+    console.error("[generatePredictionAction]", err);
     if (err instanceof GeminiError) {
       return { ok: false, error: "Prediction service unavailable." };
     }
-    console.error("[generatePredictionAction] Unexpected error:", err);
-    return {
-      ok: false,
-      error: "Failed to generate prediction.",
-    };
+    return { ok: false, error: "Failed to generate prediction." };
   }
 }

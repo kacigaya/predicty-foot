@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState, useTransition } from "react";
+import { useEffect, useOptimistic, useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { formatDistanceToNowStrict } from "date-fns";
 import { RefreshCw, AlertCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -9,30 +10,31 @@ import { MatchCard } from "@/app/components/MatchCard";
 import { Card, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { getOddsAction } from "@/app/actions/getOdds";
-import { DEFAULT_LEAGUE_KEY, getLeague } from "@/app/lib/leagues";
-import type { OddsEvent } from "@/app/lib/odds";
+import { getLeague, leagueHref } from "@/app/lib/leagues";
+import type { FixturesResult } from "@/app/lib/fixtures";
 
 const BATCH_SIZE = 6;
 
-export function MatchBoard({
-  initialEvents,
-  initialError,
-  initialFetchedAt,
-}: {
-  initialEvents: OddsEvent[];
-  initialError: string | null;
-  initialFetchedAt: string;
-}) {
-  const [league, setLeague] = useState(DEFAULT_LEAGUE_KEY);
-  const [events, setEvents] = useState(initialEvents);
-  const [error, setError] = useState(initialError);
-  const [fetchedAt, setFetchedAt] = useState(initialFetchedAt);
-  const [updatedLabel, setUpdatedLabel] = useState("just now");
+// The league lives in the URL (/?league=) and the server renders its fixtures.
+// Switching league is a navigation, which Next runs ahead of any pending server
+// action, so it never waits behind a prediction.
+export function MatchBoard({ league, result }: { league: string; result: FixturesResult }) {
+  const router = useRouter();
   const [isPending, startTransition] = useTransition();
-  const [visibleCount, setVisibleCount] = useState(BATCH_SIZE);
+  // The tab moves as soon as it is clicked; the URL catches up when the server answers.
+  const [selectedLeague, setSelectedLeague] = useOptimistic(league);
+  // Reset paging when the league changes without remounting, which would drop
+  // keyboard focus from the tab list.
+  const [paging, setPaging] = useState({ league, count: BATCH_SIZE });
+  const visibleCount = paging.league === league ? paging.count : BATCH_SIZE;
+  const [updatedLabel, setUpdatedLabel] = useState("just now");
+
+  const events = result.ok ? result.events : [];
+  const error = result.ok ? null : result.error;
+  const fetchedAt = result.ok ? result.fetchedAt : null;
 
   useEffect(() => {
+    if (!fetchedAt) return;
     const updateLabel = () => {
       setUpdatedLabel(
         formatDistanceToNowStrict(new Date(fetchedAt), { addSuffix: true }),
@@ -43,29 +45,22 @@ export function MatchBoard({
     return () => window.clearInterval(intervalId);
   }, [fetchedAt]);
 
-  const load = (key: string) => {
-    setVisibleCount(BATCH_SIZE);
-    startTransition(async () => {
-      const result = await getOddsAction(key);
-      if (!result.ok) {
-        setError(result.error);
-        setEvents([]);
-        return;
-      }
-      setError(null);
-      setEvents(result.events);
-      setFetchedAt(result.fetchedAt);
+  const changeLeague = (key: string) => {
+    startTransition(() => {
+      setSelectedLeague(key);
+      router.push(leagueHref(key), { scroll: false });
     });
   };
 
-  const changeLeague = (key: string) => {
-    setLeague(key);
-    load(key);
+  // Re-renders on the server; odds are cached for five minutes, so this shows
+  // newer data only once the cache has expired. The label says how old it is.
+  const refresh = () => {
+    startTransition(() => router.refresh());
   };
 
   const visibleEvents = events.slice(0, visibleCount);
   const hasMore = visibleCount < events.length;
-  const currentLeague = getLeague(league);
+  const currentLeague = getLeague(selectedLeague);
 
   return (
     <section
@@ -83,13 +78,15 @@ export function MatchBoard({
           </h2>
         </div>
         <div className="flex items-center gap-4">
-          <p className="font-mono text-xs text-muted-foreground tabular-nums">
-            Updated {updatedLabel}
-          </p>
+          {fetchedAt && (
+            <p className="font-mono text-xs text-muted-foreground tabular-nums">
+              Updated {updatedLabel}
+            </p>
+          )}
           <Button
             size="sm"
             variant="outline"
-            onClick={() => load(league)}
+            onClick={refresh}
             disabled={isPending}
           >
             <RefreshCw
@@ -101,15 +98,15 @@ export function MatchBoard({
         </div>
       </div>
 
-      <LeagueSelector value={league} onChange={changeLeague}>
-        {error ? (
-          <ErrorState message={error} onRetry={() => load(league)} />
-        ) : isPending ? (
+      <LeagueSelector value={selectedLeague} onChange={changeLeague}>
+        {isPending ? (
           <GridSkeleton />
+        ) : error ? (
+          <ErrorState message={error} onRetry={refresh} />
         ) : events.length === 0 ? (
           <EmptyState
             leagueName={currentLeague?.name ?? "this league"}
-            onRefresh={() => load(league)}
+            onRefresh={refresh}
           />
         ) : (
           <>
@@ -126,7 +123,7 @@ export function MatchBoard({
                 <Button
                   variant="outline"
                   size="default"
-                  onClick={() => setVisibleCount((n) => n + BATCH_SIZE)}
+                  onClick={() => setPaging({ league, count: visibleCount + BATCH_SIZE })}
                 >
                   Show {Math.min(BATCH_SIZE, events.length - visibleCount)} more
                 </Button>

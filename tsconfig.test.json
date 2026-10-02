@@ -1,0 +1,11 @@
+{
+  // Tests run under Bun; the app runs on Node. Bun's globals stay out of the
+  // main config so app code cannot use them by accident.
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "types": ["bun"],
+    "incremental": false
+  },
+  "include": ["next-env.d.ts", "**/*.test.ts"],
+  "exclude": ["node_modules"]
+}

@@ -28,22 +28,8 @@ const nextConfig: NextConfig = {
     ];
   },
   images: {
-    // Bundled crests only; remote badges are limited to TheSportsDB below.
+    // Bundled crests are the only images the optimizer serves.
     localPatterns: [{ pathname: "/crests/**", search: "" }],
-    remotePatterns: [
-      {
-        protocol: "https",
-        hostname: "www.thesportsdb.com",
-      },
-      {
-        protocol: "https",
-        hostname: "r2.thesportsdb.com",
-      },
-      {
-        protocol: "https",
-        hostname: "images.thesportsdb.com",
-      },
-    ],
   },
 };
 

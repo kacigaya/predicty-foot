@@ -1,7 +1,8 @@
 # predicty-foot
 
 Football odds and Gemini predictions. Next.js 16 App Router, React 19, Tailwind 4,
-Coss UI on Base UI, Bun. Server actions call The Odds API and Gemini; both keys
+Coss UI on Base UI, Bun. The home page renders a league's fixtures on the server
+(`/?league=`); predictions go through a server action. The Odds API and Gemini keys
 are runtime-only.
 
 ## Commands
@@ -11,10 +12,15 @@ bun install
 bun dev             # next dev on :3000
 bun run lint
 bunx tsc --noEmit
+bunx tsc --noEmit -p tsconfig.test.json
+bun test            # *.test.ts next to the code, Bun's runner
 bun run build       # standalone output in .next/standalone
 ```
 
-Bun 1.4.0 in the Docker image (1.3.14 segfaults in `next build` there), Node 22. No test suite; the build runs the type check.
+Bun 1.4.0 in the Docker image and CI (1.3.14 segfaults in `next build` there), Node 22.
+`.github/workflows/ci.yml` runs all of the above on PRs and pushes to `main`.
+Tests are excluded from `tsconfig.json` so Bun's globals never type-check in app code,
+which runs on Node; `tsconfig.test.json` checks them.
 
 ## Deployment
 
@@ -64,20 +70,33 @@ Bun 1.4.0 in the Docker image (1.3.14 segfaults in `next build` there), Node 22.
 - `proxy.ts` sets a per-request CSP. `script-src` uses a nonce with `strict-dynamic`;
   `style-src` deliberately has no nonce (it would disable `unsafe-inline`, and
   `next/image` and Base UI set `style` attributes).
-- `getOddsAction`, `generatePredictionAction` and `/api/odds` validate the league key
-  with `isLeagueKey` (`app/lib/leagues.ts`) before calling the provider. Keep that when
-  adding leagues or entry points.
+- `getFixtures`, the home page's `?league=` handling, the match page's `?sport=` hint
+  and `generatePredictionAction` validate the league key with `isLeagueKey`
+  (`app/lib/leagues.ts`) before calling the provider. Keep that when adding leagues or
+  entry points.
+- Don't fetch data through server actions: Next runs them one at a time per client,
+  so reads would wait behind a running prediction. Render on the server instead.
+- `fetchOdds` is the only odds cache (5 minutes per league, shared in-flight requests).
+  `generatePredictionAction` caches one prediction per fixture for 10 minutes and
+  allows 5 Gemini calls per IP a minute; `fresh: true` (Regenerate) skips the cache.
+- Every `catch` around provider calls starts with `unstable_rethrow(err)`. Next's
+  dynamic-rendering error carries the Odds API URL, key included.
+- Kickoff and update times go through `LocalTime`: UTC on the server, the visitor's
+  zone after hydration.
 - The CSP allows only `'self'` for images, fonts and `connect-src`. The browser never
   calls a provider directly, and crests go through `/_next/image`.
 - `normalizePrediction` in `app/lib/gemini.ts` type-checks every field of the Gemini
   JSON; the model output is untrusted and non-strings crash React when rendered.
 - Provider error text is logged, never returned to the browser.
-- Crests for known clubs are PNGs in `public/crests`, mapped by `app/lib/crests.ts`
-  (`CREST_SLUGS` name to slug, `CREST_SOURCES` slug to TheSportsDB badge). After editing
-  it, run `bun run crests` and commit the PNGs. TheSportsDB name search often returns
-  the wrong club (women's, youth, namesakes), so check each source by hand. Bump
-  `CRESTS_VERSION` in `TeamCrest` when crest URLs change, since browsers cache them
-  for 7 days.
+- Crests are PNGs in `public/crests`, mapped by `app/lib/crests.ts` (`CREST_SLUGS`
+  normalized name to slug, `CREST_SOURCES` slug to TheSportsDB badge). `crestFor` resolves
+  them on the server (`withCrests` for whole events); `TeamCrest` takes the result as
+  `src` and shows initials when it is null. Nothing looks crests up at runtime.
+  When a new team appears in a feed, add it, run `bun run crests` and commit the PNGs.
+  TheSportsDB name search often returns the wrong club (women's, youth, B teams,
+  namesakes), so check league, country and gender for each source; the league roster
+  (`search_all_teams.php?l=`) is the fallback. `crests.test.ts` fails if a slug has no
+  source or PNG.
 - `formatOdds` returns an en dash for missing values; prose never uses an em dash.
 
 <!-- BEGIN:nextjs-agent-rules -->

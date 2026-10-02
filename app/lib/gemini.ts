@@ -1,4 +1,4 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import { GoogleGenAI, ThinkingLevel, Type, type Schema } from "@google/genai";
 import type { OddsEvent } from "./odds";
 import { averageH2HOdds, impliedProbabilities } from "./odds";
 
@@ -22,6 +22,56 @@ export type AIPrediction = {
 
 export class GeminiError extends Error {}
 
+// Overall bound for one prediction, retries included. The SDK defaults to five
+// attempts with up to 60 s backoff, far longer than anyone waits on a button.
+const REQUEST_TIMEOUT_MS = 25_000;
+
+// Enforced by the API, so the reply is JSON of this shape. Field values are
+// still checked in normalizePrediction.
+const RESPONSE_SCHEMA: Schema = {
+  type: Type.OBJECT,
+  properties: {
+    winner: { type: Type.STRING, enum: ["home", "draw", "away"] },
+    winnerTeam: { type: Type.STRING },
+    score: {
+      type: Type.OBJECT,
+      properties: { home: { type: Type.INTEGER }, away: { type: Type.INTEGER } },
+      required: ["home", "away"],
+    },
+    confidence: { type: Type.NUMBER },
+    aiProbabilities: {
+      type: Type.OBJECT,
+      properties: {
+        home: { type: Type.NUMBER },
+        draw: { type: Type.NUMBER },
+        away: { type: Type.NUMBER },
+      },
+      required: ["home", "draw", "away"],
+    },
+    reasoning: { type: Type.STRING },
+    keyFactors: { type: Type.ARRAY, items: { type: Type.STRING } },
+    suggestedBet: {
+      type: Type.OBJECT,
+      properties: {
+        market: { type: Type.STRING },
+        pick: { type: Type.STRING },
+        rationale: { type: Type.STRING },
+      },
+      required: ["market", "pick", "rationale"],
+    },
+  },
+  required: [
+    "winner",
+    "winnerTeam",
+    "score",
+    "confidence",
+    "aiProbabilities",
+    "reasoning",
+    "keyFactors",
+    "suggestedBet",
+  ],
+};
+
 function assertKey(): string {
   const key = process.env.GEMINI_API_KEY;
   if (!key) {
@@ -44,21 +94,24 @@ function summarizeBookmakers(event: OddsEvent): string {
 }
 
 export async function generatePrediction(event: OddsEvent): Promise<AIPrediction> {
-  const apiKey = assertKey();
-  const client = new GoogleGenerativeAI(apiKey);
+  const client = new GoogleGenAI({
+    apiKey: assertKey(),
+    httpOptions: { retryOptions: { attempts: 2 } },
+  });
 
   const avg = averageH2HOdds(event);
   const implied = impliedProbabilities(avg);
   const kickoff = new Date(event.commence_time);
 
-  const prompt = `You are a world-class football (soccer) analyst AI. Analyze the following fixture and produce a data-driven prediction.
+  // The model gets no news, lineups or results, only the odds below. Asking it
+  // to weigh form or injuries made it invent them, so the prompt forbids that.
+  const prompt = `You are a football (soccer) betting analyst. Read the bookmaker market for the fixture below and give a probabilistic reading of it.
 
 MATCH
 - Competition: ${event.sport_title}
 - Home team: ${event.home_team}
 - Away team: ${event.away_team}
 - Kick-off (UTC): ${kickoff.toISOString()}
-- Event ID: ${event.id}
 
 MARKET CONSENSUS (decimal, averaged across ${avg.bookmakerCount} bookmakers)
 - Home win: ${avg.home?.toFixed(2) ?? "n/a"} (implied ${(implied.home * 100).toFixed(1)}%)
@@ -68,44 +121,42 @@ MARKET CONSENSUS (decimal, averaged across ${avg.bookmakerCount} bookmakers)
 BOOKMAKER DETAIL
 ${summarizeBookmakers(event)}
 
-INSTRUCTIONS
-1. Weigh recent form, head-to-head history, home advantage, injuries, tactical matchups, and motivation.
-2. Compare your own probabilities to the market-implied ones and flag any genuine edge.
-3. Propose the most likely scoreline (realistic integers, not blowouts unless warranted).
-4. Recommend ONE concrete bet that offers value (e.g. "Home -0.5 AH", "BTTS Yes", "Over 2.5", or a straight 1X2 pick).
-5. Confidence is your probability (0-100) that your predicted outcome is correct.
-6. Reasoning must be 3-5 sentences, written for an informed bettor. No filler.
+WHAT YOU KNOW
+You have no live data: no recent results, injuries, suspensions, lineups or news. Do not state or imply any. You may use long-standing, general traits of the clubs (stature, typical home advantage, playing style) and must present them as general, not current.
 
-Return ONLY JSON matching this schema:
-{
-  "winner": "home" | "draw" | "away",
-  "winnerTeam": string,
-  "score": { "home": number, "away": number },
-  "confidence": number,
-  "aiProbabilities": { "home": number, "draw": number, "away": number },
-  "reasoning": string,
-  "keyFactors": string[],
-  "suggestedBet": { "market": string, "pick": string, "rationale": string }
-}
+INSTRUCTIONS
+1. Start from the market-implied probabilities and adjust them only where the market data itself (price spread between bookmakers, margin, draw pricing) or general knowledge justifies it.
+2. Compare your probabilities with the market-implied ones and say whether there is any edge. "No clear edge" is a valid answer.
+3. Give the most likely scoreline as realistic integers.
+4. Recommend ONE bet (e.g. "Home -0.5 AH", "BTTS Yes", "Over 2.5", or a straight 1X2 pick), or the least-bad option if nothing offers value.
+5. Confidence is your probability (0-100) that the predicted outcome happens.
+6. Reasoning is 3-5 sentences for an informed bettor, grounded in the numbers above.
+7. keyFactors are 3-5 short phrases drawn from the same evidence.
+
 aiProbabilities must sum to 1.0 (±0.02).`;
 
-  const model = client.getGenerativeModel({
-    model: GEMINI_MODEL,
-    generationConfig: {
-      responseMimeType: "application/json",
-      temperature: 0.7,
-      maxOutputTokens: 1024,
-    },
-  });
-
-  let text: string;
+  let text: string | undefined;
   try {
-    const result = await model.generateContent(prompt);
-    text = result.response.text();
+    const response = await client.models.generateContent({
+      model: GEMINI_MODEL,
+      contents: prompt,
+      config: {
+        responseMimeType: "application/json",
+        responseSchema: RESPONSE_SCHEMA,
+        temperature: 0.7,
+        // Thinking tokens count against maxOutputTokens; at the old 1024 cap
+        // the JSON could be cut off. Low thinking plus headroom avoids that.
+        thinkingConfig: { thinkingLevel: ThinkingLevel.LOW },
+        maxOutputTokens: 4096,
+        abortSignal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+      },
+    });
+    text = response.text;
   } catch (err) {
-    throw new GeminiError(
-      err instanceof Error ? err.message : "Gemini request failed"
-    );
+    throw new GeminiError(err instanceof Error ? err.message : "Gemini request failed");
+  }
+  if (!text) {
+    throw new GeminiError("Gemini returned an empty response.");
   }
 
   let parsed: unknown;

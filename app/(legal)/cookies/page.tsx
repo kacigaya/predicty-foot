@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { SITE_NAME, THEME_STORAGE_KEY } from "@/app/site";
 
-const description = "Cookies and localStorage in Predicty Foot: theme preferences, club crest caching, and how to clear site data.";
+const description = "Cookies and localStorage in Predicty Foot: the theme preference and how to clear site data.";
 
 export const metadata: Metadata = {
   title: "Cookie policy",
@@ -29,10 +29,10 @@ export default function CookiesPage() {
     <>
       <header>
         <h1>Cookie policy</h1>
-        <p className="mt-3 font-mono text-xs">Last updated: <time dateTime="2026-09-30">30 September 2026</time></p>
+        <p className="mt-3 font-mono text-xs">Last updated: <time dateTime="2026-10-01">1 October 2026</time></p>
         <p className="mt-5">
           Predicty Foot does not set application cookies or use analytics or advertising
-          trackers. It uses localStorage for the features described below.
+          trackers. It uses localStorage for the one feature described below.
         </p>
       </header>
 
@@ -56,17 +56,13 @@ export default function CookiesPage() {
       </section>
 
       <section>
-        <h2>Club crest cache</h2>
+        <h2>Former crest cache</h2>
         <p>
-          Keys beginning with <code className="break-all font-mono text-xs">predicty_foot_crests_v</code>
-          {" "}store team names, crest URLs or failed lookup results, and cache timestamps.
-          This reduces repeated logo requests. The cache holds up to 250 entries.
-        </p>
-        <p>
-          Successful lookups are reused for up to seven days; failed lookups for one
-          minute. Expired entries are ignored, but stored values can remain until
-          replaced, evicted, or cleared in your browser. Images and other site resources
-          may also be held in your browser&apos;s normal HTTP cache.
+          Earlier versions cached club crest lookups under keys beginning with
+          {" "}<code className="break-all font-mono text-xs">predicty_foot_crests_v</code>. Crests
+          now ship with the site, so the app no longer reads or writes these keys and
+          deletes them on your next visit. Images and other site resources may still be
+          held in your browser&apos;s normal HTTP cache.
         </p>
       </section>
 
@@ -78,10 +74,9 @@ export default function CookiesPage() {
           to remove downloaded images and resources.
         </p>
         <p>
-          Clearing storage resets your theme to the system preference and causes crest
-          lookups to run again. Blocking storage still lets you use the app, but your
-          theme choice and crest cache will not persist between visits. These values
-          can be recreated when you use the corresponding features again.
+          Clearing storage resets your theme to the system preference. Blocking storage
+          still lets you use the app, but your theme choice will not persist between
+          visits.
         </p>
         <p>
           For server requests and service providers, read the <Link href="/privacy">privacy policy</Link>.

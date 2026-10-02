@@ -1,22 +1,23 @@
 import { Hero } from "@/app/components/Hero";
 import { MatchBoard } from "@/app/components/MatchBoard";
-import { getOddsAction } from "@/app/actions/getOdds";
-import { DEFAULT_LEAGUE_KEY } from "@/app/lib/leagues";
+import { getFixtures } from "@/app/lib/fixtures";
+import { DEFAULT_LEAGUE_KEY, isLeagueKey } from "@/app/lib/leagues";
 
-export default async function HomePage() {
-  const result = await getOddsAction(DEFAULT_LEAGUE_KEY);
-  const initialEvents = result.ok ? result.events : [];
-  const initialError = result.ok ? null : result.error;
-  const initialFetchedAt = result.ok ? result.fetchedAt : new Date().toISOString();
+type Props = {
+  searchParams: Promise<{ league?: string | string[] }>;
+};
+
+export default async function HomePage({ searchParams }: Props) {
+  const { league: requested } = await searchParams;
+  // Unknown or repeated ?league= values fall back to the default, never reach the provider.
+  const league =
+    typeof requested === "string" && isLeagueKey(requested) ? requested : DEFAULT_LEAGUE_KEY;
+  const result = await getFixtures(league);
 
   return (
     <>
       <Hero />
-      <MatchBoard
-        initialEvents={initialEvents}
-        initialError={initialError}
-        initialFetchedAt={initialFetchedAt}
-      />
+      <MatchBoard league={league} result={result} />
     </>
   );
 }
