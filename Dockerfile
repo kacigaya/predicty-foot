@@ -14,7 +14,7 @@ ENV NEXT_TELEMETRY_DISABLED=1
 # key is needed at build time. ODDS_API_KEY and GEMINI_API_KEY are runtime env.
 RUN bun run build
 
-FROM node:22-alpine AS runner
+FROM node:26-alpine AS runner
 WORKDIR /app
 ENV NODE_ENV=production \
     NEXT_TELEMETRY_DISABLED=1 \
