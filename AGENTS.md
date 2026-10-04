@@ -17,7 +17,7 @@ bun test            # *.test.ts next to the code, Bun's runner
 bun run build       # standalone output in .next/standalone
 ```
 
-Bun 1.4.0 in the Docker image and CI (1.3.14 segfaults in `next build` there), Node 22.
+Bun 1.4.2 in the Docker image and CI (1.3.14 segfaults in `next build` there), Node 26.
 `.github/workflows/ci.yml` runs all of the above on PRs and pushes to `main`.
 Tests are excluded from `tsconfig.json` so Bun's globals never type-check in app code,
 which runs on Node; `tsconfig.test.json` checks them.
