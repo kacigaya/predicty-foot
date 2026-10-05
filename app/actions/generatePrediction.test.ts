@@ -7,7 +7,7 @@ import type { OddsEvent } from "@/app/lib/odds";
 process.env.ODDS_API_KEY = "test-key";
 process.env.GEMINI_API_KEY = "test-key";
 
-const IDS = ["evtB", "evtC", ...Array.from({ length: 10 }, (_, i) => `evtD${i}`)];
+const IDS = ["evtB", "evtC", "evtE", ...Array.from({ length: 10 }, (_, i) => `evtD${i}`)];
 const feed: OddsEvent[] = IDS.map((id) => ({
   id,
   sport_key: "soccer_epl",
@@ -44,9 +44,11 @@ const { generatePredictionAction } = await import("./generatePrediction");
 // Installed per file so the stub never answers another file's fetches.
 let fetchSpy: Mock<typeof fetch>;
 beforeAll(() => {
-  fetchSpy = spyOn(globalThis, "fetch").mockImplementation(
-    (async () => Response.json(feed)) as unknown as typeof fetch,
-  );
+  fetchSpy = spyOn(globalThis, "fetch").mockImplementation((async (url: string) => {
+    if (!url.includes("/events/")) return Response.json(feed);
+    if (url.includes("evtE")) return new Response("down", { status: 503 });
+    return Response.json({ ...feed[0], bookmakers: [] });
+  }) as unknown as typeof fetch);
 });
 
 beforeEach(() => {
@@ -107,5 +109,14 @@ describe("generatePredictionAction", () => {
       error: "Match not found or no longer available.",
     });
     expect(calls).toBe(0);
+  });
+
+  test("still predicts when the extra markets fail", async () => {
+    clientIp = "203.0.113.7";
+    const errorSpy = spyOn(console, "error").mockImplementation(() => {});
+    const result = await generatePredictionAction("evtE", "soccer_epl");
+    errorSpy.mockRestore();
+    expect(result.ok && result.prediction.scorers).toEqual([]);
+    expect(calls).toBe(1);
   });
 });
