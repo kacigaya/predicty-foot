@@ -21,10 +21,13 @@ Live at [pfoot.gayakaci.duckdns.org](https://pfoot.gayakaci.duckdns.org/).
 - Upcoming fixtures for nine competitions: Premier League, La Liga, Bundesliga, Serie A, Ligue 1, Champions League, Europa League, Eredivisie, UEFA Nations League
 - Head-to-head odds averaged across every bookmaker The Odds API returns for the EU, UK and US regions, with implied win probabilities
 - A Gemini prediction per fixture: predicted result and score, confidence, AI vs market probabilities with the edge on each outcome, reasoning, key factors, and one suggested bet
+- Extra readings per prediction: half-time score and result, over 2.5 goals, both teams to score, corners and cards, each next to the market when US bookmakers price it
+- Likely scorers picked only from the bookmakers' anytime-scorer market, shown with their odds; hidden when no scorer odds are published
 - Full bookmaker table per match with the best price per outcome highlighted
 - Match detail page at `/matches/[id]` with the same prediction panel
 - Team crests bundled in `public/crests` and resolved on the server; teams without one show their initials
 - Odds cached for five minutes per league in memory, with concurrent requests sharing one provider call; the board shows when they were fetched
+- Each prediction makes one extra Odds API call for that fixture's scorer, goals, corners and cards markets (US region, 0 to 5 credits), cached for five minutes
 - Predictions cached per fixture for ten minutes and rate limited per client
 - The selected league is in the URL (`/?league=`), so tabs can be shared and the back link returns to them
 - Kickoff times in the visitor's time zone
