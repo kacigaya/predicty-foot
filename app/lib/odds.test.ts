@@ -1,11 +1,16 @@
 import { afterEach, describe, expect, setSystemTime, spyOn, test } from "bun:test";
 import {
   averageH2HOdds,
+  averageOutcomes,
+  marketProbability,
+  scorerOdds,
+  twoWayProbability,
   fetchOdds,
   findEventAcrossLeagues,
   formatOdds,
   impliedProbabilities,
   OddsApiError,
+  type Market,
   type OddsEvent,
 } from "./odds";
 
@@ -63,6 +68,72 @@ describe("impliedProbabilities", () => {
       draw: 0,
       away: 0,
     });
+  });
+});
+
+function markets(...books: Array<Array<Omit<Market, "last_update">>>): OddsEvent {
+  return {
+    ...event([]),
+    bookmakers: books.map((ms, i) => ({
+      key: `bm${i}`,
+      title: `Bookmaker ${i}`,
+      last_update: "2026-10-01T10:00:00Z",
+      markets: ms.map((m) => ({ ...m, last_update: "2026-10-01T10:00:00Z" })),
+    })),
+  };
+}
+
+describe("averageOutcomes", () => {
+  test("groups by name, player and line and skips invalid prices", () => {
+    const e = markets(
+      [{ key: "totals", outcomes: [{ name: "Over", point: 2.5, price: 1.8 }, { name: "Over", point: 3.5, price: 3 }] }],
+      [{ key: "totals", outcomes: [{ name: "Over", point: 2.5, price: 2 }, { name: "Under", point: 2.5, price: 0.5 }] }],
+    );
+    const avg = averageOutcomes(e, "totals");
+    expect(avg).toHaveLength(2);
+    expect(avg.find((o) => o.point === 2.5)?.price).toBeCloseTo(1.9);
+  });
+});
+
+describe("twoWayProbability", () => {
+  test("removes the margin from both sides", () => {
+    expect(twoWayProbability(1.9, 1.9)).toBeCloseTo(0.5);
+    expect(twoWayProbability(1.5, 2.5)).toBeCloseTo(0.625);
+    expect(twoWayProbability(undefined, 2)).toBeNull();
+  });
+});
+
+describe("marketProbability", () => {
+  test("reads one line and is null when a side is missing", () => {
+    const e = markets([
+      {
+        key: "totals",
+        outcomes: [
+          { name: "Over", point: 2.5, price: 1.5 },
+          { name: "Under", point: 2.5, price: 2.5 },
+          { name: "Over", point: 3.5, price: 2.2 },
+        ],
+      },
+      { key: "btts", outcomes: [{ name: "Yes", price: 1.8 }] },
+    ]);
+    expect(marketProbability(e, "totals", "Over", "Under", 2.5)).toBeCloseTo(0.625);
+    expect(marketProbability(e, "totals", "Over", "Under", 3.5)).toBeNull();
+    expect(marketProbability(e, "btts", "Yes", "No")).toBeNull();
+    expect(marketProbability(null, "btts", "Yes", "No")).toBeNull();
+  });
+});
+
+describe("scorerOdds", () => {
+  test("lists Yes outcomes by shortest average price", () => {
+    const e = markets(
+      [{ key: "player_goal_scorer_anytime", outcomes: [{ name: "Yes", description: "Saka", price: 2.6 }, { name: "Yes", description: "Palmer", price: 3 }] }],
+      [{ key: "player_goal_scorer_anytime", outcomes: [{ name: "Yes", description: "Saka", price: 2.4 }, { name: "No", description: "Saka", price: 1.4 }, { name: "Yes", description: " ", price: 2 }] }],
+    );
+    expect(scorerOdds(e)).toEqual([
+      { player: "Saka", price: 2.5 },
+      { player: "Palmer", price: 3 },
+    ]);
+    expect(scorerOdds(null)).toEqual([]);
   });
 });
 

@@ -6,6 +6,8 @@ export type Outcome = {
   name: string;
   price: number;
   point?: number;
+  // Player name on player prop markets, where `name` is "Yes" or "Over".
+  description?: string;
 };
 
 export type Market = {
@@ -186,6 +188,77 @@ export function impliedProbabilities(o: AveragedOdds) {
     draw: raw.draw / sum,
     away: raw.away / sum,
   };
+}
+
+// Fixed lines for the extra markets, so the model never picks a line and the
+// market price can be looked up at the same one.
+export const GOALS_LINE = 2.5;
+export const CORNERS_LINE = 9.5;
+export const CARDS_LINE = 4.5;
+
+export type AveragedOutcome = {
+  name: string;
+  description?: string;
+  point?: number;
+  price: number;
+};
+
+// Average price of each distinct outcome of one market across bookmakers.
+export function averageOutcomes(event: OddsEvent, marketKey: string): AveragedOutcome[] {
+  const groups = new Map<string, { outcome: Outcome; total: number; count: number }>();
+  for (const bm of event.bookmakers) {
+    const market = bm.markets.find((m) => m.key === marketKey);
+    if (!market) continue;
+    for (const o of market.outcomes) {
+      if (!Number.isFinite(o.price) || o.price <= 1) continue;
+      const key = `${o.name}|${o.description ?? ""}|${o.point ?? ""}`;
+      const group = groups.get(key) ?? { outcome: o, total: 0, count: 0 };
+      group.total += o.price;
+      group.count += 1;
+      groups.set(key, group);
+    }
+  }
+  return [...groups.values()].map(({ outcome, total, count }) => ({
+    name: outcome.name,
+    description: outcome.description,
+    point: outcome.point,
+    price: total / count,
+  }));
+}
+
+// Probability of the first side of a two-way market with the margin removed.
+export function twoWayProbability(price: number | undefined, other: number | undefined): number | null {
+  if (!price || !other) return null;
+  const a = 1 / price;
+  return a / (a + 1 / other);
+}
+
+// Margin-free probability of "Over" (or "Yes") for one market and line, or
+// null when the books do not price both sides.
+export function marketProbability(
+  event: OddsEvent | null,
+  marketKey: string,
+  yes: string,
+  no: string,
+  point?: number,
+): number | null {
+  if (!event) return null;
+  const outcomes = averageOutcomes(event, marketKey).filter((o) => o.point === point);
+  return twoWayProbability(
+    outcomes.find((o) => o.name === yes)?.price,
+    outcomes.find((o) => o.name === no)?.price,
+  );
+}
+
+export type ScorerOdds = { player: string; price: number };
+
+// Anytime goalscorer prices, shortest first. Player names come from the
+// bookmakers, so they are current squad members of one of the two teams.
+export function scorerOdds(event: OddsEvent | null): ScorerOdds[] {
+  if (!event) return [];
+  return averageOutcomes(event, "player_goal_scorer_anytime")
+    .flatMap((o) => (o.name === "Yes" && o.description?.trim() ? [{ player: o.description.trim(), price: o.price }] : []))
+    .sort((a, b) => a.price - b.price);
 }
 
 export function formatOdds(value: number | null | undefined): string {
