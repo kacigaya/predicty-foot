@@ -76,7 +76,14 @@ which runs on Node; `tsconfig.test.json` checks them.
   entry points.
 - Don't fetch data through server actions: Next runs them one at a time per client,
   so reads would wait behind a running prediction. Render on the server instead.
-- `fetchOdds` is the only odds cache (5 minutes per league, shared in-flight requests).
+- `fetchOdds` caches the league feed (5 minutes per league, shared in-flight requests).
+  `fetchEventMarkets` caches one fixture's extra markets the same way (5 minutes per
+  event, capped at 200). It hits the event-odds endpoint with `regions=us` (player props
+  are US-only); cost is one credit per market returned, so unpriced markets are free.
+  A failure there is logged and the prediction runs without the extra markets.
+- Scorer names come only from the `player_goal_scorer_anytime` market: `normalizePrediction`
+  drops any name the books do not price and takes odds from the market, never the model.
+  Market probabilities on the prediction are computed server-side, margin removed.
   `generatePredictionAction` caches one prediction per fixture for 10 minutes and
   allows 5 Gemini calls per IP a minute; `fresh: true` (Regenerate) skips the cache.
 - Every `catch` around provider calls starts with `unstable_rethrow(err)`. Next's

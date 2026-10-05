@@ -6,6 +6,8 @@ export type Outcome = {
   name: string;
   price: number;
   point?: number;
+  // Player name on player prop markets, where `name` is "Yes" or "Over".
+  description?: string;
 };
 
 export type Market = {
@@ -112,6 +114,76 @@ export function fetchOdds(sportKey: string): Promise<OddsSnapshot> {
   return request;
 }
 
+// Extra markets for one fixture, read from the event-odds endpoint. It costs
+// one credit per market returned per region, and asking for a market the
+// books have not priced is free. Player props are US-only, hence one region.
+const EVENT_MARKETS = [
+  "player_goal_scorer_anytime",
+  "totals",
+  "btts",
+  "alternate_totals_corners",
+  "alternate_totals_cards",
+].join(",");
+const MAX_EVENT_ENTRIES = 200;
+const eventCache = new Map<string, { event: OddsEvent | null; ts: number }>();
+const eventInFlight = new Map<string, Promise<OddsEvent | null>>();
+
+function isOddsEvent(value: unknown): value is OddsEvent {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    Array.isArray((value as { bookmakers?: unknown }).bookmakers)
+  );
+}
+
+async function requestEventMarkets(sportKey: string, eventId: string): Promise<OddsEvent | null> {
+  const params = new URLSearchParams({
+    apiKey: assertApiKey(),
+    regions: "us",
+    markets: EVENT_MARKETS,
+    oddsFormat: "decimal",
+    dateFormat: "iso",
+  });
+  const url = `${API_BASE}/sports/${encodeURIComponent(sportKey)}/events/${encodeURIComponent(eventId)}/odds?${params.toString()}`;
+
+  const res = await fetch(url, { cache: "no-store", signal: AbortSignal.timeout(10_000) });
+  if (res.status === 404) return null;
+  if (!res.ok) {
+    const body = await res.text().catch(() => "");
+    throw new OddsApiError(
+      `Odds API error (${res.status}): ${body || res.statusText}`,
+      res.status
+    );
+  }
+
+  const body: unknown = await res.json();
+  const event = isOddsEvent(body) ? body : null;
+  eventCache.delete(eventId);
+  eventCache.set(eventId, { event, ts: Date.now() });
+  // Maps iterate in insertion order, so the first key is the oldest.
+  for (const key of eventCache.keys()) {
+    if (eventCache.size <= MAX_EVENT_ENTRIES) break;
+    eventCache.delete(key);
+  }
+  return event;
+}
+
+// Same TTL and in-flight sharing as fetchOdds, so Regenerate does not spend
+// credits again. Null when the fixture is gone or the reply is malformed.
+export function fetchEventMarkets(sportKey: string, eventId: string): Promise<OddsEvent | null> {
+  const cached = eventCache.get(eventId);
+  if (cached && Date.now() - cached.ts < CACHE_TTL_MS) {
+    return Promise.resolve(cached.event);
+  }
+
+  let request = eventInFlight.get(eventId);
+  if (!request) {
+    request = requestEventMarkets(sportKey, eventId).finally(() => eventInFlight.delete(eventId));
+    eventInFlight.set(eventId, request);
+  }
+  return request;
+}
+
 export async function fetchEventById(
   sportKey: string,
   eventId: string
@@ -186,6 +258,77 @@ export function impliedProbabilities(o: AveragedOdds) {
     draw: raw.draw / sum,
     away: raw.away / sum,
   };
+}
+
+// Fixed lines for the extra markets, so the model never picks a line and the
+// market price can be looked up at the same one.
+export const GOALS_LINE = 2.5;
+export const CORNERS_LINE = 9.5;
+export const CARDS_LINE = 4.5;
+
+export type AveragedOutcome = {
+  name: string;
+  description?: string;
+  point?: number;
+  price: number;
+};
+
+// Average price of each distinct outcome of one market across bookmakers.
+export function averageOutcomes(event: OddsEvent, marketKey: string): AveragedOutcome[] {
+  const groups = new Map<string, { outcome: Outcome; total: number; count: number }>();
+  for (const bm of event.bookmakers) {
+    const market = bm.markets.find((m) => m.key === marketKey);
+    if (!market) continue;
+    for (const o of market.outcomes) {
+      if (!Number.isFinite(o.price) || o.price <= 1) continue;
+      const key = `${o.name}|${o.description ?? ""}|${o.point ?? ""}`;
+      const group = groups.get(key) ?? { outcome: o, total: 0, count: 0 };
+      group.total += o.price;
+      group.count += 1;
+      groups.set(key, group);
+    }
+  }
+  return [...groups.values()].map(({ outcome, total, count }) => ({
+    name: outcome.name,
+    description: outcome.description,
+    point: outcome.point,
+    price: total / count,
+  }));
+}
+
+// Probability of the first side of a two-way market with the margin removed.
+export function twoWayProbability(price: number | undefined, other: number | undefined): number | null {
+  if (!price || !other) return null;
+  const a = 1 / price;
+  return a / (a + 1 / other);
+}
+
+// Margin-free probability of "Over" (or "Yes") for one market and line, or
+// null when the books do not price both sides.
+export function marketProbability(
+  event: OddsEvent | null,
+  marketKey: string,
+  yes: string,
+  no: string,
+  point?: number,
+): number | null {
+  if (!event) return null;
+  const outcomes = averageOutcomes(event, marketKey).filter((o) => o.point === point);
+  return twoWayProbability(
+    outcomes.find((o) => o.name === yes)?.price,
+    outcomes.find((o) => o.name === no)?.price,
+  );
+}
+
+export type ScorerOdds = { player: string; price: number };
+
+// Anytime goalscorer prices, shortest first. Player names come from the
+// bookmakers, so they are current squad members of one of the two teams.
+export function scorerOdds(event: OddsEvent | null): ScorerOdds[] {
+  if (!event) return [];
+  return averageOutcomes(event, "player_goal_scorer_anytime")
+    .flatMap((o) => (o.name === "Yes" && o.description?.trim() ? [{ player: o.description.trim(), price: o.price }] : []))
+    .sort((a, b) => a.price - b.price);
 }
 
 export function formatOdds(value: number | null | undefined): string {

@@ -29,7 +29,7 @@ export default function PrivacyPage() {
     <>
       <header>
         <h1>Privacy policy</h1>
-        <p className="mt-3 font-mono text-xs">Last updated: <time dateTime="2026-10-01">1 October 2026</time></p>
+        <p className="mt-3 font-mono text-xs">Last updated: <time dateTime="2026-10-05">5 October 2026</time></p>
         <p className="mt-5">
           Predicty Foot is a football odds and prediction app maintained by Gaya Kaci.
           It has no user accounts, payment forms, analytics, or advertising trackers.
@@ -67,8 +67,10 @@ export default function PrivacyPage() {
         <h2>Football data and service providers</h2>
         <p>
           Our server requests fixture and bookmaker data from The Odds API. When you
-          request a prediction, it sends fixture details, team names, kickoff time,
-          event ID, and bookmaker odds to Google Gemini. The prediction prompt does
+          request a prediction, it also requests that fixture&apos;s goalscorer, goals,
+          corners, and cards markets, then sends fixture details, team names, kickoff
+          time, event ID, bookmaker odds, and the player names from those markets to
+          Google Gemini. The prediction prompt does
           not include your IP address, browser headers, or localStorage values.
           The server keeps each prediction in memory for up to 10 minutes and shows
           it to anyone who opens the same fixture; it is not linked to you.

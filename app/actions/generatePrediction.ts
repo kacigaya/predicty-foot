@@ -2,7 +2,7 @@
 
 import { headers } from "next/headers";
 import { unstable_rethrow } from "next/navigation";
-import { findEventAcrossLeagues, fetchEventById } from "@/app/lib/odds";
+import { findEventAcrossLeagues, fetchEventById, fetchEventMarkets, type OddsEvent } from "@/app/lib/odds";
 import { generatePrediction, GeminiError, type AIPrediction } from "@/app/lib/gemini";
 import { isLeagueKey, LEAGUES } from "@/app/lib/leagues";
 import { createInMemoryRateLimiter, getClientIp } from "@/app/lib/rate-limit";
@@ -35,12 +35,25 @@ function remember(eventId: string, prediction: AIPrediction): void {
   }
 }
 
+// The extra markets are optional: without them the prediction still runs,
+// with no scorers and no market comparison for the extra fields.
+async function eventMarkets(sportKey: string, eventId: string): Promise<OddsEvent | null> {
+  try {
+    return await fetchEventMarkets(sportKey, eventId);
+  } catch (err) {
+    unstable_rethrow(err);
+    console.error("[generatePredictionAction] event markets:", err);
+    return null;
+  }
+}
+
 // Null when the fixture is no longer in the odds feed.
 async function predict(eventId: string, sportKey?: string): Promise<AIPrediction | null> {
-  const event = sportKey
-    ? await fetchEventById(sportKey, eventId)
-    : (await findEventAcrossLeagues(LEAGUES.map((l) => l.key), eventId))?.event ?? null;
-  return event ? generatePrediction(event) : null;
+  const found = sportKey
+    ? { event: await fetchEventById(sportKey, eventId), sportKey }
+    : await findEventAcrossLeagues(LEAGUES.map((l) => l.key), eventId);
+  if (!found?.event) return null;
+  return generatePrediction(found.event, await eventMarkets(found.sportKey, eventId));
 }
 
 // `fresh` skips the cache (the Regenerate button) and always counts against
