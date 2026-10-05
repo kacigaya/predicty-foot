@@ -114,6 +114,76 @@ export function fetchOdds(sportKey: string): Promise<OddsSnapshot> {
   return request;
 }
 
+// Extra markets for one fixture, read from the event-odds endpoint. It costs
+// one credit per market returned per region, and asking for a market the
+// books have not priced is free. Player props are US-only, hence one region.
+const EVENT_MARKETS = [
+  "player_goal_scorer_anytime",
+  "totals",
+  "btts",
+  "alternate_totals_corners",
+  "alternate_totals_cards",
+].join(",");
+const MAX_EVENT_ENTRIES = 200;
+const eventCache = new Map<string, { event: OddsEvent | null; ts: number }>();
+const eventInFlight = new Map<string, Promise<OddsEvent | null>>();
+
+function isOddsEvent(value: unknown): value is OddsEvent {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    Array.isArray((value as { bookmakers?: unknown }).bookmakers)
+  );
+}
+
+async function requestEventMarkets(sportKey: string, eventId: string): Promise<OddsEvent | null> {
+  const params = new URLSearchParams({
+    apiKey: assertApiKey(),
+    regions: "us",
+    markets: EVENT_MARKETS,
+    oddsFormat: "decimal",
+    dateFormat: "iso",
+  });
+  const url = `${API_BASE}/sports/${encodeURIComponent(sportKey)}/events/${encodeURIComponent(eventId)}/odds?${params.toString()}`;
+
+  const res = await fetch(url, { cache: "no-store", signal: AbortSignal.timeout(10_000) });
+  if (res.status === 404) return null;
+  if (!res.ok) {
+    const body = await res.text().catch(() => "");
+    throw new OddsApiError(
+      `Odds API error (${res.status}): ${body || res.statusText}`,
+      res.status
+    );
+  }
+
+  const body: unknown = await res.json();
+  const event = isOddsEvent(body) ? body : null;
+  eventCache.delete(eventId);
+  eventCache.set(eventId, { event, ts: Date.now() });
+  // Maps iterate in insertion order, so the first key is the oldest.
+  for (const key of eventCache.keys()) {
+    if (eventCache.size <= MAX_EVENT_ENTRIES) break;
+    eventCache.delete(key);
+  }
+  return event;
+}
+
+// Same TTL and in-flight sharing as fetchOdds, so Regenerate does not spend
+// credits again. Null when the fixture is gone or the reply is malformed.
+export function fetchEventMarkets(sportKey: string, eventId: string): Promise<OddsEvent | null> {
+  const cached = eventCache.get(eventId);
+  if (cached && Date.now() - cached.ts < CACHE_TTL_MS) {
+    return Promise.resolve(cached.event);
+  }
+
+  let request = eventInFlight.get(eventId);
+  if (!request) {
+    request = requestEventMarkets(sportKey, eventId).finally(() => eventInFlight.delete(eventId));
+    eventInFlight.set(eventId, request);
+  }
+  return request;
+}
+
 export async function fetchEventById(
   sportKey: string,
   eventId: string

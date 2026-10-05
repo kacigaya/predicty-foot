@@ -2,6 +2,7 @@ import { afterEach, describe, expect, setSystemTime, spyOn, test } from "bun:tes
 import {
   averageH2HOdds,
   averageOutcomes,
+  fetchEventMarkets,
   marketProbability,
   scorerOdds,
   twoWayProbability,
@@ -215,5 +216,51 @@ describe("findEventAcrossLeagues", () => {
     await expect(findEventAcrossLeagues(["all_down_a", "all_down_b"], "e1")).rejects.toBeInstanceOf(OddsApiError);
     fetchSpy.mockRestore();
     errorSpy.mockRestore();
+  });
+});
+
+describe("fetchEventMarkets", () => {
+  process.env.ODDS_API_KEY = "test-key";
+
+  afterEach(() => {
+    setSystemTime();
+  });
+
+  test("asks one region for the extra markets, shares and caches the request", async () => {
+    setSystemTime(new Date("2026-10-01T10:00:00Z"));
+    const fetchSpy = spyOn(globalThis, "fetch").mockImplementation(
+      (async () => Response.json(event([[2, 3, 4]]))) as unknown as typeof fetch,
+    );
+    const [a, b] = await Promise.all([fetchEventMarkets("soccer_epl", "em_a"), fetchEventMarkets("soccer_epl", "em_a")]);
+    await fetchEventMarkets("soccer_epl", "em_a");
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
+    expect(a).toBe(b);
+    expect(a?.bookmakers).toHaveLength(1);
+    const url = new URL(String(fetchSpy.mock.calls[0][0]));
+    expect(url.pathname).toBe("/v4/sports/soccer_epl/events/em_a/odds");
+    expect(url.searchParams.get("regions")).toBe("us");
+    expect(url.searchParams.get("markets")).toContain("player_goal_scorer_anytime");
+    setSystemTime(new Date("2026-10-01T10:05:01Z"));
+    await fetchEventMarkets("soccer_epl", "em_a");
+    expect(fetchSpy).toHaveBeenCalledTimes(2);
+    fetchSpy.mockRestore();
+  });
+
+  test("is null for a missing fixture or a malformed reply", async () => {
+    const fetchSpy = spyOn(globalThis, "fetch").mockImplementation((async (url: string) =>
+      url.includes("em_gone") ? new Response("", { status: 404 }) : Response.json([1, 2])) as unknown as typeof fetch);
+    expect(await fetchEventMarkets("soccer_epl", "em_gone")).toBeNull();
+    expect(await fetchEventMarkets("soccer_epl", "em_bad")).toBeNull();
+    fetchSpy.mockRestore();
+  });
+
+  test("throws provider errors without caching them", async () => {
+    const fetchSpy = spyOn(globalThis, "fetch").mockImplementation(
+      (async () => new Response("quota", { status: 429 })) as unknown as typeof fetch,
+    );
+    await expect(fetchEventMarkets("soccer_epl", "em_err")).rejects.toBeInstanceOf(OddsApiError);
+    await expect(fetchEventMarkets("soccer_epl", "em_err")).rejects.toBeInstanceOf(OddsApiError);
+    expect(fetchSpy).toHaveBeenCalledTimes(2);
+    fetchSpy.mockRestore();
   });
 });
