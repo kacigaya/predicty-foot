@@ -40,6 +40,7 @@ const SOURCES: Record<string, Source> = {
   "champions-league": { url: `${BADGE}/facv1u1742998896.png/small`, top: 0.52, white: true },
   "europa-league": { url: `${BADGE}/mlsr7d1718774547.png/small`, top: 0.55, white: true },
   eredivisie: { url: `${BADGE}/5cdsu21725984946.png/small`, top: 0.8, white: true },
+  "nations-league": { url: `${BADGE}/cwsp321698386224.png/small`, top: 0.62 },
 };
 
 async function download(url: string): Promise<Buffer> {

@@ -18,7 +18,7 @@ Live at [pfoot.gayakaci.duckdns.org](https://pfoot.gayakaci.duckdns.org/).
 
 ## Features
 
-- Upcoming fixtures for eight competitions: Premier League, La Liga, Bundesliga, Serie A, Ligue 1, Champions League, Europa League, Eredivisie
+- Upcoming fixtures for nine competitions: Premier League, La Liga, Bundesliga, Serie A, Ligue 1, Champions League, Europa League, Eredivisie, UEFA Nations League
 - Head-to-head odds averaged across every bookmaker The Odds API returns for the EU, UK and US regions, with implied win probabilities
 - A Gemini prediction per fixture: predicted result and score, confidence, AI vs market probabilities with the edge on each outcome, reasoning, key factors, and one suggested bet
 - Full bookmaker table per match with the best price per outcome highlighted
@@ -138,7 +138,7 @@ Dockerfile              # Bun build, Node standalone runner
   only. Images, fonts and requests are limited to the site's own origin: provider
   calls run on the server and crests go through `/_next/image`.
 - The home page, the match page and the prediction action validate the league key
-  with `isLeagueKey` against the eight configured competitions before calling the
+  with `isLeagueKey` against the nine configured competitions before calling the
   provider, and event ids against a character allowlist.
 - Provider error bodies and the missing-key hint are logged server-side; the
   browser gets a generic message.

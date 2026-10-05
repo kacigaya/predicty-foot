@@ -18,6 +18,7 @@ export const LEAGUES: League[] = [
   { key: "soccer_uefa_champs_league", name: "Champions League", shortName: "UCL", country: "Europe", logo: "/leagues/champions-league.png", logoDark: "/leagues/champions-league-dark.png" },
   { key: "soccer_uefa_europa_league", name: "Europa League", shortName: "UEL", country: "Europe", logo: "/leagues/europa-league.png", logoDark: "/leagues/europa-league-dark.png" },
   { key: "soccer_netherlands_eredivisie", name: "Eredivisie", shortName: "Ere", country: "Netherlands", logo: "/leagues/eredivisie.png", logoDark: "/leagues/eredivisie-dark.png" },
+  { key: "soccer_uefa_nations_league", name: "Nations League", shortName: "UNL", country: "Europe", logo: "/leagues/nations-league.png" },
 ];
 
 export const DEFAULT_LEAGUE_KEY = "soccer_epl";

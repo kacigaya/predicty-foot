@@ -122,7 +122,7 @@ BOOKMAKER DETAIL
 ${summarizeBookmakers(event)}
 
 WHAT YOU KNOW
-You have no live data: no recent results, injuries, suspensions, lineups or news. Do not state or imply any. You may use long-standing, general traits of the clubs (stature, typical home advantage, playing style) and must present them as general, not current.
+You have no live data: no recent results, injuries, suspensions, lineups or news. Do not state or imply any. You may use long-standing, general traits of the teams (stature, typical home advantage, playing style) and must present them as general, not current.
 
 INSTRUCTIONS
 1. Start from the market-implied probabilities and adjust them only where the market data itself (price spread between bookmakers, margin, draw pricing) or general knowledge justifies it.

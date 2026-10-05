@@ -25,6 +25,8 @@ describe("crestFor", () => {
     ["1. FC Köln", "koln"],
     ["Bodø/Glimt", "bodo-glimt"],
     ["Salzburg", "red-bull-salzburg"],
+    ["Bosnia & Herzegovina", "bosnia-and-herzegovina"],
+    ["Czech Republic", "czech-republic"],
   ])("%s resolves to %s", (name, slug) => {
     expect(crestFor(name)).toBe(`/crests/${slug}.png`);
   });

@@ -244,6 +244,69 @@ export const CREST_SLUGS: Record<string, string> = {
   "olympiakos piraeus": "olympiacos",
   "pfc levski sofia": "levski-sofia",
   "ofi crete": "ofi",
+
+  // UEFA national teams (Nations League). Senior men's sides from TheSportsDB;
+  // Russia is suspended from UEFA competitions.
+  albania: "albania",
+  andorra: "andorra",
+  armenia: "armenia",
+  austria: "austria",
+  azerbaijan: "azerbaijan",
+  belarus: "belarus",
+  belgium: "belgium",
+  "bosnia and herzegovina": "bosnia-and-herzegovina",
+  "bosnia herzegovina": "bosnia-and-herzegovina",
+  bosnia: "bosnia-and-herzegovina",
+  bulgaria: "bulgaria",
+  croatia: "croatia",
+  cyprus: "cyprus",
+  "czech republic": "czech-republic",
+  czechia: "czech-republic",
+  denmark: "denmark",
+  england: "england",
+  estonia: "estonia",
+  "faroe islands": "faroe-islands",
+  finland: "finland",
+  france: "france",
+  georgia: "georgia",
+  germany: "germany",
+  gibraltar: "gibraltar",
+  greece: "greece",
+  hungary: "hungary",
+  iceland: "iceland",
+  israel: "israel",
+  italy: "italy",
+  kazakhstan: "kazakhstan",
+  kosovo: "kosovo",
+  latvia: "latvia",
+  liechtenstein: "liechtenstein",
+  lithuania: "lithuania",
+  luxembourg: "luxembourg",
+  malta: "malta",
+  moldova: "moldova",
+  montenegro: "montenegro",
+  netherlands: "netherlands",
+  "north macedonia": "north-macedonia",
+  macedonia: "north-macedonia",
+  "northern ireland": "northern-ireland",
+  norway: "norway",
+  poland: "poland",
+  portugal: "portugal",
+  "republic of ireland": "republic-of-ireland",
+  ireland: "republic-of-ireland",
+  romania: "romania",
+  "san marino": "san-marino",
+  scotland: "scotland",
+  serbia: "serbia",
+  slovakia: "slovakia",
+  slovenia: "slovenia",
+  spain: "spain",
+  sweden: "sweden",
+  switzerland: "switzerland",
+  turkey: "turkey",
+  turkiye: "turkey",
+  ukraine: "ukraine",
+  wales: "wales",
 };
 
 // Crest slug to TheSportsDB badge, fetched at 200px through its `/small` variant.
@@ -580,6 +643,114 @@ export const CREST_SOURCES: Record<string, string> = {
     "https://r2.thesportsdb.com/images/media/team/badge/9krgx71781149189.png",
   ofi:
     "https://r2.thesportsdb.com/images/media/team/badge/02xrl91602773672.png",
+  albania:
+    "https://r2.thesportsdb.com/images/media/team/badge/vonacg1717365654.png",
+  andorra:
+    "https://r2.thesportsdb.com/images/media/team/badge/l5qspn1552847356.png",
+  armenia:
+    "https://r2.thesportsdb.com/images/media/team/badge/8gcur81705941637.png",
+  austria:
+    "https://r2.thesportsdb.com/images/media/team/badge/874p631628721400.png",
+  azerbaijan:
+    "https://r2.thesportsdb.com/images/media/team/badge/kr6lkz1552856315.png",
+  belarus:
+    "https://r2.thesportsdb.com/images/media/team/badge/bz4o2m1552857077.png",
+  belgium:
+    "https://r2.thesportsdb.com/images/media/team/badge/8xlvxv1592062265.png",
+  "bosnia-and-herzegovina":
+    "https://r2.thesportsdb.com/images/media/team/badge/wtqqst1455463120.png",
+  bulgaria:
+    "https://r2.thesportsdb.com/images/media/team/badge/0bee7p1552858893.png",
+  croatia:
+    "https://r2.thesportsdb.com/images/media/team/badge/84cfeg1789271106.png",
+  cyprus:
+    "https://r2.thesportsdb.com/images/media/team/badge/g3slx61589798705.png",
+  "czech-republic":
+    "https://r2.thesportsdb.com/images/media/team/badge/1o0cx31654205806.png",
+  denmark:
+    "https://r2.thesportsdb.com/images/media/team/badge/e13arj1717365623.png",
+  england:
+    "https://r2.thesportsdb.com/images/media/team/badge/vf5ttc1726166739.png",
+  estonia:
+    "https://r2.thesportsdb.com/images/media/team/badge/n43zxi1730303815.png",
+  "faroe-islands":
+    "https://r2.thesportsdb.com/images/media/team/badge/pjs0io1552936544.png",
+  finland:
+    "https://r2.thesportsdb.com/images/media/team/badge/wgvfd21730303889.png",
+  france:
+    "https://r2.thesportsdb.com/images/media/team/badge/ejx5za1788198941.png",
+  georgia:
+    "https://r2.thesportsdb.com/images/media/team/badge/bhwotj1654205067.png",
+  germany:
+    "https://r2.thesportsdb.com/images/media/team/badge/1xysi51726167152.png",
+  gibraltar:
+    "https://r2.thesportsdb.com/images/media/team/badge/l5eevk1655237355.png",
+  greece:
+    "https://r2.thesportsdb.com/images/media/team/badge/xtxtts1455465601.png",
+  hungary:
+    "https://r2.thesportsdb.com/images/media/team/badge/ihaoit1717365719.png",
+  iceland:
+    "https://r2.thesportsdb.com/images/media/team/badge/xc6kuy1742982312.png",
+  israel:
+    "https://r2.thesportsdb.com/images/media/team/badge/me4lfd1515700405.png",
+  italy:
+    "https://r2.thesportsdb.com/images/media/team/badge/fxijcp1726167035.png",
+  kazakhstan:
+    "https://r2.thesportsdb.com/images/media/team/badge/h3wfj01552944956.png",
+  kosovo:
+    "https://r2.thesportsdb.com/images/media/team/badge/i3wq751730304457.png",
+  latvia:
+    "https://r2.thesportsdb.com/images/media/team/badge/3zoyfk1692679699.png",
+  liechtenstein:
+    "https://r2.thesportsdb.com/images/media/team/badge/4o0nlh1591970494.png",
+  lithuania:
+    "https://r2.thesportsdb.com/images/media/team/badge/ukapsd1689197167.png",
+  luxembourg:
+    "https://r2.thesportsdb.com/images/media/team/badge/nsakoo1713725395.png",
+  malta:
+    "https://r2.thesportsdb.com/images/media/team/badge/w3knbf1790356155.png",
+  moldova:
+    "https://r2.thesportsdb.com/images/media/team/badge/dcxqck1591972290.png",
+  montenegro:
+    "https://r2.thesportsdb.com/images/media/team/badge/dywswx1552859263.png",
+  netherlands:
+    "https://r2.thesportsdb.com/images/media/team/badge/1p0hr41593787110.png",
+  "north-macedonia":
+    "https://r2.thesportsdb.com/images/media/team/badge/v6xfhn1552943846.png",
+  "northern-ireland":
+    "https://r2.thesportsdb.com/images/media/team/badge/pratdm1515531815.png",
+  norway:
+    "https://r2.thesportsdb.com/images/media/team/badge/gyfn811591973155.png",
+  poland:
+    "https://r2.thesportsdb.com/images/media/team/badge/ttvrxy1455466076.png",
+  portugal:
+    "https://r2.thesportsdb.com/images/media/team/badge/swqvpy1455466083.png",
+  "republic-of-ireland":
+    "https://r2.thesportsdb.com/images/media/team/badge/3vq2cl1679073105.png",
+  romania:
+    "https://r2.thesportsdb.com/images/media/team/badge/w903wb1689198300.png",
+  "san-marino":
+    "https://r2.thesportsdb.com/images/media/team/badge/vfvy3j1626192199.png",
+  scotland:
+    "https://r2.thesportsdb.com/images/media/team/badge/3691i11552945146.png",
+  serbia:
+    "https://r2.thesportsdb.com/images/media/team/badge/oxvynb1689195538.png",
+  slovakia:
+    "https://r2.thesportsdb.com/images/media/team/badge/njbw8n1717365638.png",
+  slovenia:
+    "https://r2.thesportsdb.com/images/media/team/badge/s7k1x51552909864.png",
+  spain:
+    "https://r2.thesportsdb.com/images/media/team/badge/ncgqyr1726166942.png",
+  sweden:
+    "https://r2.thesportsdb.com/images/media/team/badge/h5adzg1591981772.png",
+  switzerland:
+    "https://r2.thesportsdb.com/images/media/team/badge/mb7yqe1717365808.png",
+  turkey:
+    "https://r2.thesportsdb.com/images/media/team/badge/70c4oo1591982459.png",
+  ukraine:
+    "https://r2.thesportsdb.com/images/media/team/badge/k36g2e1591982718.png",
+  wales:
+    "https://r2.thesportsdb.com/images/media/team/badge/pdayn21591983222.png",
 };
 
 // Odds API spellings that differ from the CREST_SLUGS keys.
