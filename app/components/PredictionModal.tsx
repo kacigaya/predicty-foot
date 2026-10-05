@@ -104,7 +104,7 @@ export function PredictionModal({
                   <span className="font-mono tabular-nums text-foreground font-medium">
                     {event.bookmakers.length}
                   </span>{" "}
-                  bookmakers and returns a likely score, win probabilities, and one suggested bet.
+                  bookmakers and returns a likely score, win, goals and half-time probabilities, likely scorers, corners and cards, and one suggested bet.
                 </p>
                 <Button onClick={generate} size="lg" className="w-full">
                   Generate prediction
