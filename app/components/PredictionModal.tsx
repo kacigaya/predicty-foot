@@ -57,7 +57,7 @@ export function PredictionModal({
           <div className="grid grid-cols-[1fr_auto_1fr] items-start gap-4 border-b border-border pt-5 pb-6">
             <TeamPanel name={event.home_team} crest={event.homeCrest} odds={formatOdds(avg.home)} prob={implied.home} />
             <div className="flex flex-col items-center gap-1 self-center px-2">
-              <span className="font-mono text-xs uppercase tracking-wider text-muted-foreground">Draw</span>
+              <span className="font-mono text-xs text-muted-foreground">Draw</span>
               <span className="font-mono text-base sm:text-lg font-semibold tabular-nums text-foreground">
                 {formatOdds(avg.draw)}
               </span>
@@ -74,7 +74,7 @@ export function PredictionModal({
                 role="alert"
                 className="rounded-xl border border-destructive/30 bg-destructive/10 p-4"
               >
-                <p className="mb-1 font-mono text-xs uppercase text-destructive font-medium">
+                <p className="mb-1 font-mono text-xs font-medium text-destructive-foreground">
                   Prediction failed
                 </p>
                 <p className="text-pretty text-sm text-foreground/90">{error}</p>
@@ -84,7 +84,7 @@ export function PredictionModal({
             {isPending ? (
               <div role="status" className="flex items-center justify-center gap-3 py-10">
                 <Spinner aria-hidden role={undefined} className="size-4 text-muted-foreground" />
-                <span className="font-mono text-xs uppercase tracking-wider text-muted-foreground">
+                <span className="font-mono text-xs text-muted-foreground">
                   Analysing {event.bookmakers.length} bookmakers
                 </span>
               </div>
@@ -113,7 +113,7 @@ export function PredictionModal({
             )}
 
             <div className="border-t border-border pt-6">
-              <p className="mb-3 font-mono text-xs uppercase tracking-wider text-muted-foreground">
+              <p className="mb-3 font-mono text-xs text-muted-foreground">
                 All bookmakers
               </p>
               <OddsTable event={event} />

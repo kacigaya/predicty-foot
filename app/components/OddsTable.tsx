@@ -5,7 +5,7 @@ import { formatOdds, type OddsEvent } from "@/app/lib/odds";
 export function OddsTable({ event }: { event: OddsEvent }) {
   if (event.bookmakers.length === 0) {
     return (
-      <p className="rounded-xl border border-border bg-card p-6 text-center font-mono text-xs uppercase text-muted-foreground">
+      <p className="rounded-xl border border-border bg-card p-6 text-center font-mono text-xs text-muted-foreground">
         No bookmaker odds available.
       </p>
     );

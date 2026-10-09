@@ -1,20 +1,14 @@
-import { Badge } from "@/components/ui/badge";
-
+// Kept short so the first row of fixtures, the actual product, shows above the fold.
 export function Hero() {
   return (
-    <section className="mx-auto w-full max-w-6xl px-4 pt-10 pb-16 sm:px-6 sm:pt-12">
-      <div className="flex flex-col items-start gap-3">
-        <Badge variant="outline" className="h-auto whitespace-normal py-0.5">
-          Multi-bookmaker odds · Gemini AI predictions
-        </Badge>
-        <h1 className="max-w-[22ch] text-balance font-heading text-4xl font-bold leading-[1.05] tracking-tight text-foreground sm:text-5xl">
-          Bookmaker odds and AI predictions for European football.
-        </h1>
-        <p className="mt-1 max-w-[52ch] text-pretty text-lg leading-relaxed text-muted-foreground">
-          Head-to-head odds averaged across major bookmakers with Gemini AI match readings:
-          projected scorelines, win probabilities, and market edge analysis.
-        </p>
-      </div>
+    <section className="mx-auto w-full max-w-6xl px-4 pt-10 pb-10 sm:px-6">
+      <h1 className="text-balance font-heading text-3xl font-bold leading-tight tracking-tight text-foreground sm:text-4xl">
+        European football odds and Gemini predictions
+      </h1>
+      <p className="mt-3 max-w-[68ch] text-pretty text-base leading-relaxed text-muted-foreground sm:text-lg">
+        Head-to-head odds averaged across bookmakers. Gemini reads them and predicts the score,
+        goals, scorers, corners and cards.
+      </p>
     </section>
   );
 }

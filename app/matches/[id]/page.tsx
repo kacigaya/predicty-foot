@@ -92,7 +92,7 @@ export default async function MatchPage(props: Props) {
         <div className="grid grid-cols-[1fr_auto_1fr] items-start gap-4 sm:gap-6">
           <TeamSummary name={event.home_team} odds={formatOdds(avg.home)} prob={implied.home} />
           <div className="flex flex-col items-center gap-1 self-center px-2">
-            <span className="font-mono text-xs uppercase tracking-wider text-muted-foreground">Draw</span>
+            <span className="font-mono text-xs text-muted-foreground">Draw</span>
             <span className="font-mono text-xl font-bold tabular-nums text-foreground">{formatOdds(avg.draw)}</span>
             <span className="font-mono text-xs tabular-nums text-muted-foreground">{(implied.draw * 100).toFixed(0)}%</span>
           </div>

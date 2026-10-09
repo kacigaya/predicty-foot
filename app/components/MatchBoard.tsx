@@ -70,7 +70,7 @@ export function MatchBoard({ league, result }: { league: string; result: Fixture
     >
       <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
         <div>
-          <p className="mb-1.5 font-mono text-xs uppercase tracking-wider text-muted-foreground">
+          <p className="mb-1.5 font-mono text-xs text-muted-foreground">
             {currentLeague?.name ?? "League"}
           </p>
           <h2 className="text-balance font-heading text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
@@ -186,7 +186,7 @@ function ErrorState({
     >
       <div className="flex items-center gap-2">
         <AlertCircle aria-hidden className="size-4 text-destructive" />
-        <p className="font-mono text-xs uppercase text-destructive font-medium">
+        <p className="font-mono text-xs font-medium text-destructive-foreground">
           Could not load odds
         </p>
       </div>

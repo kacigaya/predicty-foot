@@ -18,10 +18,10 @@ export function LeagueSelector({
 }) {
   return (
     <Tabs value={value} onValueChange={onChange} className="w-full">
-      <TabsList
-        aria-label="League"
-        className="scrollbar-hide max-w-full justify-start overflow-x-auto"
-      >
+      {/* A grid instead of a scrolling row: nine leagues never fit one line, and a
+          hidden scrollbar left the last ones cut off with nothing to say they were
+          there. Nine tabs fill 3x3, or 5 + 4 once full names have room. */}
+      <TabsList aria-label="League" className="grid w-full grid-cols-3 gap-y-0.5 lg:grid-cols-5">
         {LEAGUES.map((l) => (
           <TabsTab key={l.key} value={l.key}>
             {/* Decorative: the tab label already names the league. */}

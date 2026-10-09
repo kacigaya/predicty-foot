@@ -40,13 +40,13 @@ Live at [pfoot.gayakaci.duckdns.org](https://pfoot.gayakaci.duckdns.org/).
 
 ![Home page with the hero and the Premier League fixture grid](public/screenshots/home-desktop.jpg)
 
-Home: league tabs, then one card per fixture with averaged 1 X 2 odds and the market favourite marked.
+Home: league tabs, then one card per fixture with averaged 1 X 2 odds, the market favourite's price in bold.
 
-![Prediction dialog for Brentford vs Chelsea](public/screenshots/prediction-desktop.jpg)
+![Prediction dialog for Arsenal vs Leeds United](public/screenshots/prediction-desktop.jpg)
 
 Prediction dialog: confidence, predicted score, AI vs market probabilities with the edge per outcome, and the reasoning.
 
-![Match detail page for Brentford vs Chelsea](public/screenshots/match-desktop.jpg)
+![Match detail page for Arsenal vs Leeds United](public/screenshots/match-desktop.jpg)
 
 Match page: crests, averaged odds and implied probabilities, the prediction panel, and every bookmaker's prices.
 

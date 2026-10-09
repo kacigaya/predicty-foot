@@ -129,14 +129,6 @@
   }
 }
 
-.scrollbar-hide::-webkit-scrollbar {
-  display: none;
-}
-.scrollbar-hide {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
-
 /* Native meter styling for probabilities without inline styles (CSP compliant) */
 .meter {
   appearance: none;

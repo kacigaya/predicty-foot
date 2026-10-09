@@ -29,11 +29,10 @@ export function PredictionResult({
   return (
     <div className="space-y-6">
       <div className="rounded-xl border border-border bg-muted/20 p-5">
-        <div className="mb-3 flex flex-wrap items-center gap-2">
-          <Badge variant={confidenceTone}>{prediction.confidence}% confidence</Badge>
-          <Badge variant="outline">Gemini Reading</Badge>
-        </div>
-        <p className="font-mono text-xs uppercase tracking-wider text-muted-foreground">
+        <Badge variant={confidenceTone} className="mb-3">
+          {prediction.confidence}% confidence
+        </Badge>
+        <p className="font-mono text-xs text-muted-foreground">
           Predicted result
         </p>
         <p
@@ -46,7 +45,8 @@ export function PredictionResult({
         </p>
         <p
           className={cn(
-            "mt-2 font-mono tabular-nums font-bold text-foreground",
+            // The one place the brand accent appears in the product: the predicted score.
+            "mt-2 font-mono tabular-nums font-bold text-brand",
             compact ? "text-3xl" : "text-4xl",
           )}
         >
@@ -59,7 +59,7 @@ export function PredictionResult({
       </div>
 
       <div>
-        <p className="mb-2.5 font-mono text-xs uppercase tracking-wider text-muted-foreground">
+        <p className="mb-2.5 font-mono text-xs text-muted-foreground">
           Probabilities: AI vs market
         </p>
         <div className="grid gap-px rounded-xl border border-border bg-border sm:grid-cols-3 overflow-hidden">
@@ -85,7 +85,7 @@ export function PredictionResult({
       </div>
 
       <div>
-        <p className="mb-2.5 font-mono text-xs uppercase tracking-wider text-muted-foreground">
+        <p className="mb-2.5 font-mono text-xs text-muted-foreground">
           Half-time
         </p>
         <div className="flex flex-wrap items-center justify-between gap-4 rounded-xl border border-border bg-card p-4">
@@ -105,7 +105,7 @@ export function PredictionResult({
       </div>
 
       <div>
-        <p className="mb-2.5 font-mono text-xs uppercase tracking-wider text-muted-foreground">
+        <p className="mb-2.5 font-mono text-xs text-muted-foreground">
           Goals
         </p>
         <div className="grid gap-px overflow-hidden rounded-xl border border-border bg-border sm:grid-cols-2">
@@ -115,7 +115,7 @@ export function PredictionResult({
       </div>
 
       <div>
-        <p className="mb-2.5 font-mono text-xs uppercase tracking-wider text-muted-foreground">
+        <p className="mb-2.5 font-mono text-xs text-muted-foreground">
           Likely scorers
         </p>
         {prediction.scorers.length > 0 ? (
@@ -131,8 +131,8 @@ export function PredictionResult({
       </div>
 
       <div>
-        <p className="mb-2.5 font-mono text-xs uppercase tracking-wider text-muted-foreground">
-          Corners and cards <span className="normal-case">(low confidence)</span>
+        <p className="mb-2.5 font-mono text-xs text-muted-foreground">
+          Corners and cards (low confidence)
         </p>
         <div className="grid gap-px overflow-hidden rounded-xl border border-border bg-border sm:grid-cols-2">
           <MarketCell
@@ -149,7 +149,7 @@ export function PredictionResult({
       </div>
 
       <div>
-        <p className="mb-2 font-mono text-xs uppercase tracking-wider text-muted-foreground">
+        <p className="mb-2 font-mono text-xs text-muted-foreground">
           Reasoning
         </p>
         <p className="text-pretty text-sm leading-relaxed text-foreground/90">
@@ -159,7 +159,7 @@ export function PredictionResult({
 
       {prediction.keyFactors.length > 0 && (
         <div>
-          <p className="mb-2 font-mono text-xs uppercase tracking-wider text-muted-foreground">
+          <p className="mb-2 font-mono text-xs text-muted-foreground">
             Key factors
           </p>
           <ol className="divide-y divide-border rounded-xl border border-border bg-card overflow-hidden">
@@ -192,7 +192,7 @@ export function PredictionResult({
         )}
       </div>
 
-      <p className="font-mono text-[11px] uppercase tracking-wider tabular-nums text-muted-foreground">
+      <p className="font-mono text-xs tabular-nums text-muted-foreground">
         Generated at {format(new Date(prediction.generatedAt), "HH:mm:ss")}
       </p>
     </div>
@@ -206,7 +206,7 @@ function percent(value: number): string {
 function Stat({ label, value }: { label: string; value: string }) {
   return (
     <div className="text-right">
-      <dt className="uppercase text-muted-foreground">{label}</dt>
+      <dt className="text-muted-foreground">{label}</dt>
       <dd className="mt-0.5 font-semibold text-foreground">{value}</dd>
     </div>
   );
@@ -217,7 +217,7 @@ function MarketCell({ label, detail, pair }: { label: string; detail?: string; p
   return (
     <div className="bg-card p-4">
       <div className="flex items-center justify-between gap-2">
-        <span className="font-mono text-xs uppercase font-medium text-foreground">{label}</span>
+        <span className="font-mono text-xs font-medium text-foreground">{label}</span>
         {detail && <span className="font-mono text-xs tabular-nums text-muted-foreground">{detail}</span>}
       </div>
       <div className="mt-3 space-y-2">
@@ -285,15 +285,15 @@ function ProbCell({
   const edge = ai - market;
   const edgeTone =
     edge > 0.03
-      ? "text-success font-semibold"
+      ? "text-success-foreground font-semibold"
       : edge < -0.03
-      ? "text-destructive font-semibold"
+      ? "text-destructive-foreground font-semibold"
       : "text-muted-foreground";
 
   return (
     <div className="bg-card p-4">
       <div className="flex items-center justify-between gap-2">
-        <span className="font-mono text-xs uppercase font-medium text-foreground">{label}</span>
+        <span className="font-mono text-xs font-medium text-foreground">{label}</span>
         <span className={cn("font-mono text-xs tabular-nums", edgeTone)}>
           <span className="sr-only">AI edge over market </span>
           {edge > 0 ? "+" : ""}
@@ -323,7 +323,7 @@ function ProbBar({
   const pct = Math.max(0, Math.min(100, value * 100));
   return (
     <div className="flex items-center gap-2">
-      <span className="w-12 font-mono text-xs uppercase text-muted-foreground">{label}</span>
+      <span className="w-12 font-mono text-xs text-muted-foreground">{label}</span>
       {/* Native meter: no inline style attribute, which the CSP nonce would block. */}
       <meter
         aria-label={`${label} probability`}

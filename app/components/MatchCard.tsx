@@ -38,8 +38,8 @@ export function MatchCard({ event }: { event: Fixture }) {
       />
 
       <div className="mb-4 space-y-2.5">
-        <TeamRow name={event.home_team} crest={event.homeCrest} favored={favored === "home"} />
-        <TeamRow name={event.away_team} crest={event.awayCrest} favored={favored === "away"} />
+        <TeamRow name={event.home_team} crest={event.homeCrest} />
+        <TeamRow name={event.away_team} crest={event.awayCrest} />
       </div>
 
       <dl className="grid grid-cols-3 rounded-xl border border-border/70 bg-muted/30 p-1.5">
@@ -83,7 +83,7 @@ export function MatchCard({ event }: { event: Fixture }) {
   );
 }
 
-function TeamRow({ name, crest, favored }: { name: string; crest: string | null; favored: boolean }) {
+function TeamRow({ name, crest }: { name: string; crest: string | null }) {
   return (
     <div className="flex items-center gap-2.5">
       <TeamCrest name={name} src={crest} size="sm" />
@@ -93,14 +93,6 @@ function TeamRow({ name, crest, favored }: { name: string; crest: string | null;
       >
         {name}
       </p>
-      {favored && (
-        <span
-          className="size-1.5 shrink-0 rounded-full bg-primary"
-          title="Market favourite"
-        >
-          <span className="sr-only">Market favourite</span>
-        </span>
-      )}
     </div>
   );
 }
@@ -130,6 +122,8 @@ function OddCell({
         )}
       >
         {value}
+        {/* The bold price is the only favourite marker; say it for screen readers too. */}
+        {highlight && <span className="sr-only"> (market favourite)</span>}
       </dd>
     </div>
   );

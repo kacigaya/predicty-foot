@@ -1,7 +1,9 @@
 import Link from "next/link";
 
+// On touch screens the links grow to the 44px minimum tap height; the lists drop
+// their spacing there so the stack does not get taller than it needs to be.
 const linkClass =
-  "rounded-sm text-xs text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
+  "rounded-sm text-xs text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring pointer-coarse:inline-flex pointer-coarse:min-h-11 pointer-coarse:items-center";
 
 export function Footer() {
   const currentYear = new Date().getFullYear();
@@ -11,20 +13,21 @@ export function Footer() {
       <div className="mx-auto max-w-6xl px-4 sm:px-6">
         <div className="grid gap-8 sm:grid-cols-3">
           <div>
-            <p className="font-heading text-base font-semibold tracking-tight text-foreground">
-              Predicty <span className="text-brand">Foot</span>
+            <p className="font-heading text-base font-bold tracking-tight text-foreground" translate="no">
+              Predicty
+              <em className="-ml-[0.04em] italic text-brand">Foot</em>
             </p>
             <p className="mt-2 max-w-xs text-pretty text-xs leading-relaxed text-muted-foreground">
-              Averaged bookmaker odds combined with Gemini AI probabilistic match predictions.
+              Bookmaker odds averaged per fixture, with match predictions from Gemini.
             </p>
           </div>
 
           <div className="space-y-4">
             <div>
-              <p className="mb-2 font-mono text-[11px] uppercase tracking-wider text-muted-foreground">
+              <p className="mb-2 font-mono text-xs text-muted-foreground">
                 Data sources
               </p>
-              <ul className="space-y-1.5">
+              <ul className="space-y-1.5 pointer-coarse:space-y-0">
                 <li>
                   <a
                     href="https://the-odds-api.com"
@@ -49,10 +52,10 @@ export function Footer() {
             </div>
 
             <div>
-              <p className="mb-2 font-mono text-[11px] uppercase tracking-wider text-muted-foreground">
+              <p className="mb-2 font-mono text-xs text-muted-foreground">
                 Project
               </p>
-              <ul className="space-y-1.5">
+              <ul className="space-y-1.5 pointer-coarse:space-y-0">
                 <li>
                   <a
                     href="https://github.com/kacigaya/predicty-foot"
@@ -68,18 +71,18 @@ export function Footer() {
           </div>
 
           <div>
-            <p className="mb-2 font-mono text-[11px] uppercase tracking-wider text-muted-foreground">
+            <p className="mb-2 font-mono text-xs text-muted-foreground">
               Notice
             </p>
             <p className="text-pretty text-xs leading-relaxed text-muted-foreground">
-              For entertainment only. AI predictions are probabilistic estimations, never guarantees. Gamble responsibly.
+              For entertainment only. Predictions are estimates, never guarantees. Gamble responsibly.
             </p>
           </div>
         </div>
 
         <div className="mt-8 flex flex-wrap items-center justify-between gap-2 border-t border-border/60 pt-5 font-mono text-xs text-muted-foreground">
           <p>© {currentYear} Gaya Kaci</p>
-          <nav aria-label="Legal" className="flex flex-wrap gap-4">
+          <nav aria-label="Legal" className="flex flex-wrap gap-x-4">
             <Link href="/privacy" className={linkClass}>Privacy policy</Link>
             <Link href="/cookies" className={linkClass}>Cookies</Link>
           </nav>

@@ -19,7 +19,7 @@ export default function Error({
 
   return (
     <div role="alert" className="mx-auto flex max-w-lg flex-col items-start gap-5 px-4 py-24 sm:px-6">
-      <p className="font-mono text-xs uppercase tracking-wider text-muted-foreground">Error</p>
+      <p className="font-mono text-xs text-muted-foreground">Error</p>
       <h1 className="text-balance font-heading text-5xl font-bold leading-none tracking-tight text-foreground">
         Something went wrong
       </h1>

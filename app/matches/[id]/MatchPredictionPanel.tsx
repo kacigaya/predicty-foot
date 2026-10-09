@@ -41,14 +41,14 @@ export function MatchPredictionPanel({
       </div>
 
       {isPending && (
-        <p role="status" className="font-mono text-xs uppercase tracking-wider text-muted-foreground">
+        <p role="status" className="font-mono text-xs text-muted-foreground">
           Analysing {event.bookmakers.length} bookmakers
         </p>
       )}
 
       {error && !isPending && (
         <div role="alert" className="rounded-xl border border-destructive/30 bg-destructive/10 p-4">
-          <p className="mb-1 font-mono text-xs uppercase text-destructive font-medium">Prediction failed</p>
+          <p className="mb-1 font-mono text-xs font-medium text-destructive-foreground">Prediction failed</p>
           <p className="text-pretty text-sm text-foreground/90">{error}</p>
         </div>
       )}

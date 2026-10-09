@@ -53,7 +53,14 @@ which runs on Node; `tsconfig.test.json` checks them.
   `bun run brand` regenerates `app/favicon.ico`, `app/apple-icon.png` ("PF" monogram)
   and `public/og.png` from `scripts/brand.ts` (satori bundled with Next, Inter fetched
   from Google Fonts); never hand-edit the rasters.
-- Floating island navigation with `ThemeToggle`, `Badge`, and clean action buttons.
+- Floating island navigation: wordmark, `ThemeToggle`, Fixtures and GitHub. No badges;
+  every badge in the UI marks a real value (prediction confidence, the suggested bet,
+  the league on the match page).
+- `--brand` appears in the wordmark (navbar and footer) and on the predicted scoreline,
+  nowhere else. Section labels are Geist Mono in sentence case; uppercase tracked mono is
+  kept for the `1 X 2` odds labels and the bookmaker table header.
+- The league tabs are a grid (3 columns, 5 from `lg`) rather than a scrolling row, so
+  every league stays visible.
 - Cards use the signature Coss inset shadow highlights:
   `dark:before:shadow-[0_-1px_--theme(--color-white/6%)]`.
 - `PredictionResult` is shared by the fixture dialog and the match page.
