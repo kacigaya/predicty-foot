@@ -6,6 +6,7 @@ import { formatDistanceToNowStrict } from "date-fns";
 import { RefreshCw, AlertCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { LeagueSelector } from "@/app/components/LeagueSelector";
+import { CachedOddsNotice } from "@/app/components/CachedOddsNotice";
 import { MatchCard } from "@/app/components/MatchCard";
 import { Card, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -99,6 +100,7 @@ export function MatchBoard({ league, result }: { league: string; result: Fixture
       </div>
 
       <LeagueSelector value={selectedLeague} onChange={changeLeague}>
+        {!isPending && result.ok && result.stale && <CachedOddsNotice fetchedAt={result.fetchedAt} />}
         {isPending ? (
           <GridSkeleton />
         ) : error ? (

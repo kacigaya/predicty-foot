@@ -1,19 +1,34 @@
-import { afterEach, describe, expect, setSystemTime, spyOn, test } from "bun:test";
+import { afterAll, afterEach, beforeAll, describe, expect, setSystemTime, spyOn, test } from "bun:test";
 import {
   averageH2HOdds,
   averageOutcomes,
-  fetchEventMarkets,
   marketProbability,
   scorerOdds,
   twoWayProbability,
-  fetchOdds,
-  findEventAcrossLeagues,
   formatOdds,
   impliedProbabilities,
   OddsApiError,
   type Market,
   type OddsEvent,
 } from "./odds";
+
+import { mkdtemp, rm } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import path from "node:path";
+import { writeLastOdds } from "./odds-cache";
+import { fetchOdds, fetchEventMarkets, findEventAcrossLeagues } from "./odds-feed";
+
+let cacheDirectory: string;
+const originalCacheDirectory = process.env.ODDS_CACHE_DIR;
+beforeAll(async () => {
+  cacheDirectory = await mkdtemp(path.join(tmpdir(), "pfoot-odds-test-"));
+  process.env.ODDS_CACHE_DIR = cacheDirectory;
+});
+afterAll(async () => {
+  if (originalCacheDirectory === undefined) delete process.env.ODDS_CACHE_DIR;
+  else process.env.ODDS_CACHE_DIR = originalCacheDirectory;
+  if (cacheDirectory) await rm(cacheDirectory, { recursive: true, force: true });
+});
 
 function event(prices: Array<[number, number, number]>): OddsEvent {
   return {
@@ -154,7 +169,13 @@ describe("fetchOdds", () => {
   });
 
   function mockProvider(response: () => Response) {
-    return spyOn(globalThis, "fetch").mockImplementation((async () => response()) as unknown as typeof fetch);
+    return spyOn(globalThis, "fetch").mockImplementation((async (url: string) => {
+      const result = response();
+      if (!result.ok) return result;
+      const sportKey = new URL(url).pathname.split("/")[3];
+      const events: OddsEvent[] = await result.json();
+      return Response.json(events.map((event) => ({ ...event, sport_key: sportKey })));
+    }) as unknown as typeof fetch);
   }
 
   test("shares one provider request between concurrent callers and caches it", async () => {
@@ -183,6 +204,57 @@ describe("fetchOdds", () => {
     fetchSpy.mockRestore();
   });
 
+  test("falls back on quota failure, preserves the timestamp, filters kickoff and recovers", async () => {
+    setSystemTime(new Date("2026-10-01T10:00:00Z"));
+    const upcoming = { ...event([[2, 3, 4]]), sport_key: "fallback_memory" };
+    const started = { ...upcoming, id: "started", commence_time: "2026-10-01T10:04:00Z" };
+    const fetchSpy = mockProvider(() => Response.json([upcoming, started]));
+    const fresh = await fetchOdds("fallback_memory");
+    setSystemTime(new Date("2026-10-01T10:05:01Z"));
+    fetchSpy.mockImplementation((async () => new Response("quota", { status: 401 })) as unknown as typeof fetch);
+    const stale = await fetchOdds("fallback_memory");
+    expect(stale.stale).toBe(true);
+    expect(stale.fetchedAt).toBe(fresh.fetchedAt);
+    expect(stale.events.map((event) => event.id)).toEqual(["e1"]);
+    expect(stale.events[0].cachedAt).toBe(fresh.fetchedAt);
+    expect((await fetchOdds("fallback_memory")).stale).toBe(true);
+    expect(fetchSpy).toHaveBeenCalledTimes(2);
+    setSystemTime(new Date("2026-10-01T10:06:01Z"));
+    fetchSpy.mockImplementation((async () => Response.json([upcoming])) as unknown as typeof fetch);
+    const recovered = await fetchOdds("fallback_memory");
+    expect(recovered.stale).toBe(false);
+    expect(recovered.events[0].cachedAt).toBeUndefined();
+    expect(recovered.fetchedAt).not.toBe(fresh.fetchedAt);
+    fetchSpy.mockRestore();
+  });
+
+  test("uses a persisted snapshot on a cold process and rejects it at 24 hours", async () => {
+    setSystemTime(new Date("2026-10-01T10:05:01Z"));
+    const sportKey = "fallback_disk";
+    await writeLastOdds(sportKey, {
+      events: [{ ...event([[2, 3, 4]]), sport_key: sportKey }],
+      fetchedAt: "2026-10-01T10:00:00Z", stale: false,
+    });
+    const fetchSpy = mockProvider(() => new Response("down", { status: 503 }));
+    expect((await fetchOdds(sportKey)).stale).toBe(true);
+    setSystemTime(new Date("2026-10-02T10:00:00Z"));
+    await expect(fetchOdds(sportKey)).rejects.toBeInstanceOf(OddsApiError);
+    fetchSpy.mockRestore();
+  });
+
+  test("falls back on network errors and malformed replies without replacing the good feed", async () => {
+    setSystemTime(new Date("2026-10-01T10:00:00Z"));
+    const fetchSpy = mockProvider(() => Response.json([event([[2, 3, 4]])]));
+    await fetchOdds("fallback_network");
+    setSystemTime(new Date("2026-10-01T10:05:01Z"));
+    fetchSpy.mockImplementation((async () => { throw new Error("network"); }) as unknown as typeof fetch);
+    expect((await fetchOdds("fallback_network")).stale).toBe(true);
+    setSystemTime(new Date("2026-10-01T10:06:01Z"));
+    fetchSpy.mockImplementation((async () => Response.json([{ home_team: {} }])) as unknown as typeof fetch);
+    expect((await fetchOdds("fallback_network")).events[0].home_team).toBe("Arsenal");
+    fetchSpy.mockRestore();
+  });
+
   test("does not cache provider errors", async () => {
     const fetchSpy = mockProvider(() => new Response("quota", { status: 429 }));
     await expect(fetchOdds("cache_c")).rejects.toBeInstanceOf(OddsApiError);
@@ -199,7 +271,7 @@ describe("findEventAcrossLeagues", () => {
     const fetchSpy = spyOn(globalThis, "fetch").mockImplementation((async (url: string) =>
       url.includes("find_down")
         ? new Response("down", { status: 503 })
-        : Response.json([event([[2, 3, 4]])])) as unknown as typeof fetch);
+        : Response.json([{ ...event([[2, 3, 4]]), sport_key: "find_up" }])) as unknown as typeof fetch);
     const errorSpy = spyOn(console, "error").mockImplementation(() => {});
     const found = await findEventAcrossLeagues(["find_down", "find_up"], "e1");
     expect(found?.sportKey).toBe("find_up");

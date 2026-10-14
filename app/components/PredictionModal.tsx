@@ -12,6 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { LocalTime } from "@/app/components/LocalTime";
+import { CachedOddsNotice } from "@/app/components/CachedOddsNotice";
 import { TeamCrest } from "@/app/components/TeamCrest";
 import { OddsTable } from "@/app/components/OddsTable";
 import { PredictionResult } from "@/app/components/PredictionResult";
@@ -54,6 +55,7 @@ export function PredictionModal({
         </DialogHeader>
 
         <DialogPanel>
+          {event.cachedAt && <CachedOddsNotice fetchedAt={event.cachedAt} />}
           <div className="grid grid-cols-[1fr_auto_1fr] items-start gap-4 border-b border-border pt-5 pb-6">
             <TeamPanel name={event.home_team} crest={event.homeCrest} odds={formatOdds(avg.home)} prob={implied.home} />
             <div className="flex flex-col items-center gap-1 self-center px-2">

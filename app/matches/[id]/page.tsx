@@ -10,11 +10,12 @@ import { Badge } from "@/components/ui/badge";
 import { MatchPredictionPanel } from "@/app/matches/[id]/MatchPredictionPanel";
 import {
   averageH2HOdds,
-  findEventAcrossLeagues,
   formatOdds,
   impliedProbabilities,
   type OddsEvent,
 } from "@/app/lib/odds";
+import { findEventAcrossLeagues } from "@/app/lib/odds-feed";
+import { CachedOddsNotice } from "@/app/components/CachedOddsNotice";
 import { LEAGUES, getLeague, isLeagueKey, leagueHref } from "@/app/lib/leagues";
 import { crestFor } from "@/app/lib/crests";
 import { formatTime } from "@/app/lib/time";
@@ -72,6 +73,8 @@ export default async function MatchPage(props: Props) {
         <ArrowLeft aria-hidden />
         All fixtures
       </Button>
+
+      {event.cachedAt && <CachedOddsNotice fetchedAt={event.cachedAt} />}
 
       <div className="border-b border-border pb-8">
         <div className="mb-6 flex flex-wrap items-center justify-between gap-2">

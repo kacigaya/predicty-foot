@@ -83,7 +83,13 @@ which runs on Node; `tsconfig.test.json` checks them.
   entry points.
 - Don't fetch data through server actions: Next runs them one at a time per client,
   so reads would wait behind a running prediction. Render on the server instead.
-- `fetchOdds` caches the league feed (5 minutes per league, shared in-flight requests).
+- `fetchOdds` in `app/lib/odds-feed.ts` caches the league feed (5 minutes per league,
+  shared in-flight requests). It persists the last successful feed to `.cache/odds`
+  (`ODDS_CACHE_DIR` overrides it). Provider failures use snapshots younger than 24 hours,
+  excluding fixtures that have kicked off; the board, dialog and match page label them
+  as cached, retrying the provider once per minute per league and process. Docker creates `/app/.cache/odds` for UID/GID 1001. Mount a persistent
+  volume there to retain feeds across container replacements; no volume is configured
+  by this repository. Disk failures leave the in-memory fallback available.
   `fetchEventMarkets` caches one fixture's extra markets the same way (5 minutes per
   event, capped at 200). It hits the event-odds endpoint with `regions=us` (player props
   are US-only); cost is one credit per market returned, so unpriced markets are free.

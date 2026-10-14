@@ -27,6 +27,7 @@ Live at [pfoot.gayakaci.duckdns.org](https://pfoot.gayakaci.duckdns.org/).
 - Match detail page at `/matches/[id]` with the same prediction panel
 - Team crests bundled in `public/crests` and resolved on the server; teams without one show their initials
 - Odds cached for five minutes per league in memory, with concurrent requests sharing one provider call; the board shows when they were fetched
+- The last successful feed is saved to disk. Provider failures use it for up to 24 hours, excluding matches that have kicked off and labelling the odds as cached
 - Each prediction makes one extra Odds API call for that fixture's scorer, goals, corners and cards markets (US region, 0 to 5 credits), cached for five minutes
 - Predictions cached per fixture for ten minutes and rate limited per client
 - The selected league is in the URL (`/?league=`), so tabs can be shared and the back link returns to them
@@ -162,6 +163,15 @@ Production runs on Dokploy from the `Dockerfile` (`output: "standalone"` in
 `next.config.ts`; keep the two in sync). `ODDS_API_KEY` and `GEMINI_API_KEY`
 are runtime environment variables; nothing is needed at build time. Set
 `NEXT_PUBLIC_SITE_URL` at build time only if the canonical origin changes.
+
+The fallback cache uses `.cache/odds` by default. Set `ODDS_CACHE_DIR` to change
+its location. In Docker, mount a persistent volume at `/app/.cache/odds` to retain
+feeds across container replacements; it must be writable by UID/GID 1001. Without
+a volume, cached feeds survive process restarts only. The cache contains public
+fixture and odds data, no API keys or visitor data. It needs a successful provider
+response before it can cover an outage. During fallback, the provider is retried
+at most once per minute per league and process. Snapshots expire after 24 hours, and
+started fixtures are excluded because their status cannot be checked during an outage.
 
 ## Notice
 

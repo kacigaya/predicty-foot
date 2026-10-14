@@ -2,7 +2,8 @@
 
 import { headers } from "next/headers";
 import { unstable_rethrow } from "next/navigation";
-import { findEventAcrossLeagues, fetchEventById, fetchEventMarkets, type OddsEvent } from "@/app/lib/odds";
+import type { OddsEvent } from "@/app/lib/odds";
+import { findEventAcrossLeagues, fetchEventById, fetchEventMarkets } from "@/app/lib/odds-feed";
 import { generatePrediction, GeminiError, type AIPrediction } from "@/app/lib/gemini";
 import { isLeagueKey, LEAGUES } from "@/app/lib/leagues";
 import { createInMemoryRateLimiter, getClientIp } from "@/app/lib/rate-limit";
